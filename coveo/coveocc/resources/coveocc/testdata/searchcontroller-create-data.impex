@@ -1,0 +1,21 @@
+INSERT OAuthClientDetails; clientId[unique = true]; resourceIds; scope; authorizedGrantTypes; authorities; clientSecret; registeredRedirectUri
+;trusted_client;hybris;basic;authorization_code,refresh_token,password,client_credentials;ROLE_CUSTOMERGROUP;secret;http://localhost:9001/authorizationserver/oauth2_callback
+
+INSERT User; uid[unique=true]
+;trusted_client
+
+INSERT_UPDATE UserPriceGroup; code[unique=true]; name[lang=en]
+;userPriceGroup1;User Price Group A
+;userPriceGroup2;User Price Group B
+
+INSERT UserGroup;uid[unique=true]; locname[lang=en]; userPriceGroup(code,itemtype(code))
+;testGroup1;Example Group One; "userPriceGroup1:UserPriceGroup"
+;testGroup2;Example Group One; "userPriceGroup2:UserPriceGroup"
+
+INSERT Customer; uid[unique=true]; password; groups(uid); europe1PriceFactory_upg(code,itemtype(code))
+;test@email.com;password;testGroup1,testGroup2; "userPriceGroup1:UserPriceGroup"
+
+INSERT BaseSite; uid; coveoApiKey; coveoPlatformUrl
+;testbasesite; test-key; http://localhost:8200
+
+

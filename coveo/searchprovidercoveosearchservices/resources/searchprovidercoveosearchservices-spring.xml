@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2021 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <alias name="coveoSnIndexerContextFactory" alias="snIndexerContextFactory" />
+    <bean id="coveoSnIndexerContextFactory"
+          class="com.coveo.service.impl.CoveoSnIndexerContextFactory"
+          parent="defaultSnIndexerContextFactory">
+    </bean>
+
+    <bean id="coveosearchSnSearchProvider" class="com.coveo.service.impl.CoveoSearchSnSearchProvider"/>
+
+
+    <alias name="defaultCoveoSearchSnSearchProviderConfigurationLoadStrategy"
+           alias="coveosearchSnSearchProviderConfigurationLoadStrategy" />
+    <bean id="defaultCoveoSearchSnSearchProviderConfigurationLoadStrategy"
+          class="com.coveo.service.impl.CoveoSearchSnSearchProviderConfigurationLoadStrategy">
+        <property name="coveoSearchSnSearchProviderConfigurationConverter"
+                  ref="coveoSearchSnSearchProviderConfigurationConverter" />
+    </bean>
+
+    <bean id="coveosearchSnSearchProviderMapping" parent="snSearchProviderMapping">
+        <property name="itemType"
+                  value="com.coveo.model.CoveoSearchSnSearchProviderConfigurationModel" />
+        <property name="type"
+                  value="com.coveo.data.CoveoSearchSnSearchProviderConfiguration" />
+        <property name="loadStrategy" ref="coveosearchSnSearchProviderConfigurationLoadStrategy" />
+        <property name="searchProvider" ref="coveosearchSnSearchProvider" />
+    </bean>
+
+    <alias name="coveoSearchSnSearchProviderConfigurationPopulator"
+           alias="coveosearchSnSearchProviderConfigurationPopulator" />
+    <bean id="coveoSearchSnSearchProviderConfigurationPopulator"
+          class="com.coveo.service.populator.CoveoSearchSnSearchProviderConfigurationPopulator">
+    </bean>
+
+    <alias name="coveoSearchSnSearchProviderConfigurationConverter"
+           alias="coveoSearchSnSearchProviderConfigurationConverter" />
+    <bean id="coveoSearchSnSearchProviderConfigurationConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass"
+                  value="com.coveo.data.CoveoSearchSnSearchProviderConfiguration" />
+        <property name="populators">
+            <list>
+                <ref bean="snSearchProviderConfigurationPopulator" />
+                <ref bean="coveosearchSnSearchProviderConfigurationPopulator" />
+            </list>
+        </property>
+    </bean>
+			
+</beans>
