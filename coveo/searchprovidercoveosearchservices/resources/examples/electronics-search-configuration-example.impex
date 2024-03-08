@@ -1,0 +1,118 @@
+#######################################################
+# This Impex file is for demonstration purposes only.
+# It is not intended for production use. It builds
+# a multi-source coveo configuration that indexes products
+# and availability for the OOTB electronics store.
+#######################################################
+
+$destination_target = Default_Template
+#It is recommended to use a secure method of inserting the client secret into the ConsumedOAuthCredential in your production environment
+$secret = seacret-password
+$credential_id = coveo-creds
+$coveoSearchProviderConfiguration = coveo-search-provider-configuration
+$coveoIndexConfiguration = coveo-index-configuration
+$coveoProductIndexType = coveo-electronics-product
+$coveoAvailabilityIndexType = coveo-electronics-availability
+
+# Create the configuration for the Coveo Sources
+INSERT_UPDATE ConsumedOAuthCredential; id[unique = true, default = $credential_id]; clientId; clientSecret[default = $secret]
+                                     ;                                            ; coveo   ;
+
+INSERT_UPDATE ConsumedDestination; id[unique = true]             ; url                                                                                                 ; destinationTarget(id)[unique = true, default = $destination_target]; active; credential(id)[default = $credential_id]
+                                 ; electronics-availability-dest ; https://api.cloud.coveo.com/push/v1/organizations/{organisationId}/sources/{sourceId-1}/stream/open ;                                                                    ;       ;
+                                 ; electronics-zh-USD-US-dest    ; https://api.cloud.coveo.com/push/v1/organizations/{organisationId}/sources/{sourceId-2}/stream/open ;                                                                    ;       ;
+                                 ; electronics-en-USD-US-dest    ; https://api.cloud.coveo.com/push/v1/organizations/{organisationId}/sources/{sourceId-3}/stream/open ;                                                                    ;       ;
+                                 ; electronics-de-JPY-JP-dest    ; https://api.cloud.coveo.com/push/v1/organizations/{organisationId}/sources/{sourceId-4}/stream/open ;                                                                    ;       ;
+                                 ; electronics-ja-JPY-JP-dest    ; https://api.cloud.coveo.com/push/v1/organizations/{organisationId}/sources/{sourceId-5}/stream/open ;                                                                    ;       ;
+
+INSERT_UPDATE CoveoSource; &sourceId; id[unique = true]               ; name[unique = true]                   ; language(isocode); currency(isocode); country(isocode); objectType(code)  ; consumedDestination(id)
+                         ; source1  ; electronics-availability-source ; Electronics Availability Source       ;                  ;                  ;                 ; AVAILABILITY      ; electronics-availability-dest
+                         ; source2  ; electronics-zh-USD-US-source    ; Electronics Chinese Doller USA Source ; zh               ; USD              ; US              ; PRODUCTANDVARIANT ; electronics-zh-USD-US-dest
+                         ; source3  ; electronics-en-USD-US-source    ; Electronics English Doller USA Source ; en               ; USD              ; US              ; PRODUCTANDVARIANT ; electronics-en-USD-US-dest
+                         ; source4  ; electronics-de-JPY-JP-source    ; Electronics German Yen Japan Source   ; de               ; JPY              ; JP              ; PRODUCTANDVARIANT ; electronics-de-JPY-JP-dest
+                         ; source5  ; electronics-ja-JPY-JP-source    ; Electronics Japanese Yen Japan Source ; ja               ; JPY              ; JP              ; PRODUCTANDVARIANT ; electronics-ja-JPY-JP-dest
+
+# Create the configuration for the indexes you wish to push
+INSERT_UPDATE CoveoSearchSnSearchProviderConfiguration; id[unique = true]                 ; name                                ; coveoSource(&sourceId)
+                                                      ; $coveoSearchProviderConfiguration ; Coveo Search Provider Configuration ; source1,source2,source3,source4,source5
+
+INSERT_UPDATE CoveoSnIndexConfiguration; id[unique = true]        ; name              ; user(uid) ; languages(isocode); currencies(isocode); countries(isocode); searchProviderConfiguration(id)
+                                       ; $coveoIndexConfiguration ; Coveo Electronics ; anonymous ; ja,en,de,zh       ; JPY,USD            ; JP,US             ; $coveoSearchProviderConfiguration
+
+INSERT_UPDATE SnIndexType; indexConfiguration(id)   ; id[unique = true]           ; name                          ; itemComposedType(code); identityProvider   ; listeners                            ; catalogs(id)              ; stores(uid)
+                         ; $coveoIndexConfiguration ; $coveoProductIndexType      ; CoveoElectronics Product      ; Product               ; snIdentityProvider ; catalogVersionFilterSnSearchListener ; electronicsProductCatalog ; electronics
+                         ; $coveoIndexConfiguration ; $coveoAvailabilityIndexType ; CoveoElectronics Availability ; PointOfService        ; snIdentityProvider ;                                      ;                           ; electronics
+
+INSERT_UPDATE SnField; indexType(id)[unique = true]; id[unique = true]               ; name                    ; fieldType(code); valueProvider                                        ; valueProviderParameters[map-delimiter = |]
+                     ; $coveoProductIndexType      ; allCategories                   ; All Categories          ; STRING         ; productCategoryAttributeSnIndexerValueProvider       ;
+                     ; $coveoProductIndexType      ; code                            ; Code                    ; STRING         ; productAttributeSnIndexerValueProvider               ;
+                     ; $coveoProductIndexType      ; name                            ; Name                    ; TEXT           ; productAttributeSnIndexerValueProvider               ;
+                     ; $coveoProductIndexType      ; summary                         ; Summary                 ; TEXT           ; productAttributeSnIndexerValueProvider               ;
+                     ; $coveoProductIndexType      ; description                     ; Description             ; TEXT           ; productAttributeSnIndexerValueProvider               ;
+                     ; $coveoProductIndexType      ; manufacturerName                ; Manufacturer name       ; TEXT           ; productAttributeSnIndexerValueProvider               ;
+                     ; $coveoProductIndexType      ; manufacturerAID                 ; Manufacturer AID        ; STRING         ; productAttributeSnIndexerValueProvider               ;
+                     ; $coveoProductIndexType      ; ean                             ; EAN                     ; STRING         ; productAttributeSnIndexerValueProvider               ;
+                     ; $coveoProductIndexType      ; keywords                        ; Keywords                ; TEXT           ; productAttributeSnIndexerValueProvider               ; expression->keywords.keyword
+                     ; $coveoProductIndexType      ; url                             ; URL                     ; STRING         ; productUrlSnIndexerValueProvider                     ;
+                     ; $coveoProductIndexType      ; reviewAvgRating                 ; Avg. review rating      ; DOUBLE         ; productReviewAverageRatingSnIndexerValueProvider     ;
+                     ; $coveoProductIndexType      ; price                           ; Price                   ; DOUBLE         ; productPriceSnIndexerValueProvider                   ;
+                     ; $coveoProductIndexType      ; category                        ; Category                ; STRING         ; productCategoryAttributeSnIndexerValueProvider       ; rootCategory->categories|expression->code
+                     ; $coveoProductIndexType      ; categoryName                    ; Category                ; STRING         ; productCategoryAttributeSnIndexerValueProvider       ; rootCategory->categories|expression->name
+                     ; $coveoProductIndexType      ; brand                           ; Brand                   ; STRING         ; productCategoryAttributeSnIndexerValueProvider       ; rootCategory->brands|expression->code
+                     ; $coveoProductIndexType      ; brandName                       ; Brand                   ; STRING         ; productCategoryAttributeSnIndexerValueProvider       ; rootCategory->brands|expression->name
+                     ; $coveoProductIndexType      ; collection                      ; Collection              ; STRING         ; productCategoryAttributeSnIndexerValueProvider       ; rootCategory->collections|expression->code
+                     ; $coveoProductIndexType      ; collectionName                  ; Collection              ; STRING         ; productCategoryAttributeSnIndexerValueProvider       ; rootCategory->collections|expression->name
+                     ; $coveoProductIndexType      ; thumbnail                       ; Thumbnail               ; STRING         ; productImageAttributeSnIndexerValueProvider          ; mediaExpression->thumbnail|expression->URL
+                     ; $coveoProductIndexType      ; picture                         ; Picture                 ; STRING         ; productImageAttributeSnIndexerValueProvider          ; mediaExpression->picture|expression->URL
+                     ; $coveoProductIndexType      ; img-30Wx30H                     ; Image 30Wx30H           ; STRING         ; productImageAttributeSnIndexerValueProvider          ; mediaFormat->30Wx30H|expression->URL
+                     ; $coveoProductIndexType      ; img-65Wx65H                     ; Image 65Wx65H           ; STRING         ; productImageAttributeSnIndexerValueProvider          ; mediaFormat->65Wx65H|expression->URL
+                     ; $coveoProductIndexType      ; img-96Wx96H                     ; Image 96Wx96H           ; STRING         ; productImageAttributeSnIndexerValueProvider          ; mediaFormat->96Wx96H|expression->URL
+                     ; $coveoProductIndexType      ; img-300Wx300H                   ; Image 300Wx300H         ; STRING         ; productImageAttributeSnIndexerValueProvider          ; mediaFormat->300Wx300H|expression->URL
+                     ; $coveoProductIndexType      ; img-515Wx515H                   ; Image 515Wx515H         ; STRING         ; productImageAttributeSnIndexerValueProvider          ; mediaFormat->515Wx515H|expression->URL
+                     ; $coveoProductIndexType      ; feature-megapixels              ; Megapixels              ; DOUBLE         ; productClassificationAttributeSnIndexerValueProvider ; classificationAttribute->ElectronicsClassification/1.0/57.Megapixel, 63
+                     ; $coveoProductIndexType      ; feature-mounting                ; Mounting                ; STRING         ; productClassificationAttributeSnIndexerValueProvider ; classificationAttribute->ElectronicsClassification/1.0/634.Mounting, 1867
+                     ; $coveoProductIndexType      ; feature-color                   ; Color                   ; STRING         ; productClassificationAttributeSnIndexerValueProvider ; classificationAttribute->ElectronicsClassification/1.0/3856.Colour of product, 1766
+                     ; $coveoProductIndexType      ; feature-lens-type               ; Lens type               ; STRING         ; productClassificationAttributeSnIndexerValueProvider ; classificationAttribute->ElectronicsClassification/1.0/1094.Lens type, 472|split->true|splitRegex->\/
+                     ; $coveoProductIndexType      ; feature-resolution              ; Resolution              ; STRING         ; productClassificationAttributeSnIndexerValueProvider ; classificationAttribute->ElectronicsClassification/1.0/631.Resolution, 80
+                     ; $coveoProductIndexType      ; feature-size                    ; Size                    ; TEXT           ; productClassificationAttributeSnIndexerValueProvider ; classificationAttribute->ElectronicsClassification/1.0/622.Size, 1147
+                     ; $coveoProductIndexType      ; feature-video-memory-capacity   ; Video memory capacity   ; TEXT           ; productClassificationAttributeSnIndexerValueProvider ; classificationAttribute->ElectronicsClassification/1.0/622.Video memory capacity, 5167
+                     ; $coveoProductIndexType      ; feature-aperture-setting        ; Aperture setting        ; TEXT           ; productClassificationAttributeSnIndexerValueProvider ; classificationAttribute->ElectronicsClassification/1.0/622.Aperture setting, 5775
+                     ; $coveoProductIndexType      ; feature-picture-mode            ; Picture mode            ; TEXT           ; productClassificationAttributeSnIndexerValueProvider ; classificationAttribute->ElectronicsClassification/1.0/622.Picture mode, 2030
+                     ; $coveoProductIndexType      ; feature-compatible-memory-cards ; Compatible memory cards ; TEXT           ; productClassificationAttributeSnIndexerValueProvider ; classificationAttribute->ElectronicsClassification/1.0/42.Compatible memory cards, 730
+                     ; $coveoProductIndexType      ; feature-display                 ; Display                 ; TEXT           ; productClassificationAttributeSnIndexerValueProvider ; classificationAttribute->ElectronicsClassification/1.0/41.Display, 83
+                     ; $coveoProductIndexType      ; objectType                      ; Object Type             ; TEXT           ; coveoObjectTypeSnIndexerValueProvider                ;
+                     ; $coveoAvailabilityIndexType ; name                            ; Name                    ; TEXT           ; modelAttributeSnIndexerValueProvider                 ;
+                     ; $coveoAvailabilityIndexType ; description                     ; Description             ; TEXT           ; modelAttributeSnIndexerValueProvider                 ;
+                     ; $coveoAvailabilityIndexType ; latitude                        ; Latitude                ; TEXT           ; modelAttributeSnIndexerValueProvider                 ;
+                     ; $coveoAvailabilityIndexType ; longitude                       ; Longitude               ; TEXT           ; modelAttributeSnIndexerValueProvider                 ;
+# The following fields are used to inform the coveo indexer of the object type
+                     ; $coveoAvailabilityIndexType ; objectType                      ; Object Type             ; TEXT           ; coveoObjectTypeSnIndexerValueProvider                ;
+
+# Please note the spring ID value relates to a coveo indexer job. This is crutial for the coveo indexer to work
+INSERT_UPDATE ServicelayerJob; code[unique = true]          ; springid
+                             ; fullCoveoSnIndexerJob        ; fullCoveoSnIndexerJob
+                             ; incrementalCoveoSnIndexerJob ; incrementalCoveoSnIndexerJob
+
+INSERT FlexibleSearchSnIndexerItemSource; &indexerItemSourceID             ; query
+                                        ; $coveoProductIndexType-full      ; "SELECT {p:pk} FROM {Product AS p LEFT JOIN ArticleApprovalStatus AS a ON {p:approvalStatus} = {a:pk}} WHERE {a:code} = 'approved'"
+                                        ; $coveoAvailabilityIndexType-full ; "SELECT {ps:pk} FROM {PointOfService AS ps JOIN BaseStore AS bs ON {ps.baseStore}={bs:pk}} WHERE {bs:uid}='electronics'"
+
+INSERT_UPDATE FullSnIndexerCronJob; code[unique = true]                      ; job(code)             ; sessionLanguage(isocode); indexType(id)               ; indexerItemSource(&indexerItemSourceID); active
+                                  ; indexer-$coveoProductIndexType-full      ; fullCoveoSnIndexerJob ; en                      ; $coveoProductIndexType      ; $coveoProductIndexType-full            ; false
+                                  ; indexer-$coveoAvailabilityIndexType-full ; fullCoveoSnIndexerJob ; en                      ; $coveoAvailabilityIndexType ; $coveoAvailabilityIndexType-full       ; false
+
+INSERT_UPDATE Trigger; cronJob(code)[unique = true]             ; second; minute; hour; day; month; year; relative; active; maxAcceptableDelay
+                     ; indexer-$coveoProductIndexType-full      ; 0     ; 0     ; 3   ; -1 ; -1   ; -1  ; false   ; true  ; -1
+                     ; indexer-$coveoAvailabilityIndexType-full ; 0     ; 0     ; 3   ; -1 ; -1   ; -1  ; false   ; true  ; -1
+
+INSERT FlexibleSearchSnIndexerItemSource; &indexerItemSourceID                             ; query
+                                        ; $coveoProductIndexType-incremental-create-update ; "SELECT {p:pk} FROM {Product AS p LEFT JOIN ArticleApprovalStatus AS a ON {p:approvalStatus} = {a:pk}} WHERE {a:code} = 'approved' AND {p.modifiedtime} > ?startTime"
+
+INSERT SnIndexerItemSourceOperation; &indexerItemSourceOperationID                    ; documentOperationType(code); indexerItemSource(&indexerItemSourceID)
+                                   ; $coveoProductIndexType-incremental-create-update ; CREATE_UPDATE              ; $coveoProductIndexType-incremental-create-update
+
+INSERT_UPDATE IncrementalSnIndexerCronJob; code[unique = true]                        ; job(code)                    ; sessionLanguage(isocode); indexType(id)          ; indexerItemSourceOperations(&indexerItemSourceOperationID); active
+                                         ; indexer-$coveoProductIndexType-incremental ; incrementalCoveoSnIndexerJob ; en                      ; $coveoProductIndexType ; $coveoProductIndexType-incremental-create-update          ; false
+
+INSERT_UPDATE Trigger; cronJob(code)[unique = true]               ; active; cronExpression
+                     ; indexer-$coveoProductIndexType-incremental ; true  ; 0 0/5 * * * ?
