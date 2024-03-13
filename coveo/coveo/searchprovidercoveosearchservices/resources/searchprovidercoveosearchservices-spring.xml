@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2021 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- Indexer Configuration -->
+    <alias name="coveoSnIndexerContextFactory" alias="coveoSnIndexerContextFactory" />
+    <bean id="coveoSnIndexerContextFactory"
+          class="com.coveo.service.impl.CoveoSnIndexerContextFactory"
+          parent="defaultSnIndexerContextFactory">
+        <property name="snIndexConfigurationService" ref="coveoSnIndexConfigurationService" />
+        <property name="configurationService" ref="configurationService"/>
+    </bean>
+
+    <alias name="coveoSnIndexConfigurationService" alias="coveoSnIndexConfigurationService" />
+    <bean id="coveoSnIndexConfigurationService"
+          class="de.hybris.platform.searchservices.admin.service.impl.DefaultSnIndexConfigurationService">
+        <property name="snIndexConfigurationDao" ref="snIndexConfigurationDao" />
+        <property name="snIndexConfigurationConverter" ref="coveoSnIndexConfigurationConverter" />
+    </bean>
+
+    <alias name="coveosearchSnSearchProvider" alias="coveosearchSnSearchProvider" />
+    <bean id="coveosearchSnSearchProvider" class="com.coveo.service.impl.CoveoSearchSnSearchProvider">
+        <property name="configurationService" ref="configurationService" />
+    </bean>
+
+
+    <alias name="defaultCoveoSearchSnSearchProviderConfigurationLoadStrategy"
+           alias="coveosearchSnSearchProviderConfigurationLoadStrategy" />
+    <bean id="defaultCoveoSearchSnSearchProviderConfigurationLoadStrategy"
+          class="com.coveo.service.impl.CoveoSearchSnSearchProviderConfigurationLoadStrategy">
+        <property name="coveoSearchSnSearchProviderConfigurationConverter"
+                  ref="coveoSearchSnSearchProviderConfigurationConverter" />
+    </bean>
+
+    <alias name="coveosearchSnSearchProviderMapping" alias="coveosearchSnSearchProviderMapping" />
+    <bean id="coveosearchSnSearchProviderMapping" parent="snSearchProviderMapping">
+        <property name="itemType"
+                  value="com.coveo.model.CoveoSearchSnSearchProviderConfigurationModel" />
+        <property name="type"
+                  value="com.coveo.searchservices.data.CoveoSearchSnSearchProviderConfiguration" />
+        <property name="loadStrategy" ref="coveosearchSnSearchProviderConfigurationLoadStrategy" />
+        <property name="searchProvider" ref="coveosearchSnSearchProvider" />
+    </bean>
+
+    <!-- Cron Job Configuration -->
+    <alias name="coveoSnIndexerStrategy" alias="coveoSnIndexerStrategy" />
+    <bean id="coveoSnIndexerStrategy"
+          parent="defaultSnIndexerStrategy">
+        <property name="snIndexerContextFactory" ref="coveoSnIndexerContextFactory" />
+    </bean>
+
+    <alias name="coveoSnIndexerStrategyFactory" alias="coveoSnIndexerStrategyFactory" />
+    <bean id="coveoSnIndexerStrategyFactory"
+          class="de.hybris.platform.searchservices.indexer.service.impl.DefaultSnIndexerStrategyFactory">
+        <property name="defaultIndexerStrategy" ref="coveoSnIndexerStrategy" />
+    </bean>
+
+    <alias name="coveoSnIndexerService" alias="coveoSnIndexerService" />
+    <bean id="coveoSnIndexerService" parent="defaultSnIndexerService">
+        <property name="snIndexerStrategyFactory" ref="coveoSnIndexerStrategyFactory" />
+    </bean>
+
+    <alias name="fullCoveoSnIndexerJob" alias="fullCoveoSnIndexerJob" />
+    <bean id="fullCoveoSnIndexerJob" class="de.hybris.platform.searchservices.indexer.service.impl.FullSnIndexerJob"
+          parent="abstractSnIndexerJob">
+        <property name="snIndexerService" ref="coveoSnIndexerService" />
+    </bean>
+
+    <bean id="incrementalCoveoSnIndexerJob"
+          class="de.hybris.platform.searchservices.indexer.service.impl.IncrementalSnIndexerJob" parent="abstractSnIndexerJob">
+        <property name="snIndexerService" ref="coveoSnIndexerService" />
+    </bean>
+
+    <!-- Populators and Converters -->
+    <alias name="coveoSnCountryPopulator" alias="coveoSnCountryPopulator" />
+    <bean id="coveoSnCountryPopulator" class="com.coveo.service.populator.CoveoSnCountryPopulator">
+        <property name="i18NService" ref="i18NService"/>
+    </bean>
+
+    <alias name="coveoSnCountryConverter" alias="coveoSnCountryConverter" />
+    <bean id="coveoSnCountryConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.coveo.searchservices.admin.data.CoveoSnCountry" />
+        <property name="populators">
+            <list>
+                <ref bean="coveoSnCountryPopulator" />
+            </list>
+        </property>
+    </bean>
+
+    <alias name="coveoSourcePopulator" alias="coveoSourcePopulator" />
+    <bean id="coveoSourcePopulator" class="com.coveo.service.populator.CoveoSourcePopulator">
+        <property name="languageConverter" ref="snLanguageConverter"/>
+        <property name="currencyConverter" ref="snCurrencyConverter"/>
+        <property name="countryConverter" ref="coveoSnCountryConverter"/>
+
+    </bean>
+
+    <alias name="coveoSourceConverter" alias="coveoSourceConverter" />
+    <bean id="coveoSourceConverter" parent="abstractPopulatingConverter" >
+        <property name="targetClass" value="com.coveo.searchservices.data.CoveoSource" />
+        <property name="populators">
+            <list>
+                <ref bean="coveoSourcePopulator" />
+            </list>
+        </property>
+    </bean>
+
+    <alias name="coveoSearchSnSearchProviderConfigurationPopulator"
+           alias="coveoSearchSnSearchProviderConfigurationPopulator" />
+    <bean id="coveoSearchSnSearchProviderConfigurationPopulator"
+          class="com.coveo.service.populator.CoveoSearchSnSearchProviderConfigurationPopulator">
+        <property name="sourceConverter" ref="coveoSourceConverter"/>
+    </bean>
+
+    <alias name="coveoSearchSnSearchProviderConfigurationConverter"
+           alias="coveoSearchSnSearchProviderConfigurationConverter" />
+    <bean id="coveoSearchSnSearchProviderConfigurationConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass"
+                  value="com.coveo.searchservices.data.CoveoSearchSnSearchProviderConfiguration" />
+        <property name="populators">
+            <list>
+                <ref bean="snSearchProviderConfigurationPopulator" />
+                <ref bean="coveoSearchSnSearchProviderConfigurationPopulator" />
+            </list>
+        </property>
+    </bean>
+
+    <alias name="coveoSnIndexConfigurationPopulator" alias="coveoSnIndexConfigurationPopulator" />
+    <bean name="coveoSnIndexConfigurationPopulator" class="com.coveo.service.populator.CoveoSnIndexConfigurationPopulator">
+        <property name="coveoSnCountryConverter" ref="coveoSnCountryConverter"/>
+    </bean>
+
+    <alias name="coveoSnIndexConfigurationConverter" alias="coveoSnIndexConfigurationConverter" />
+    <bean id="coveoSnIndexConfigurationConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.coveo.searchservices.admin.data.CoveoSnIndexConfiguration" />
+        <property name="populators">
+            <list>
+                <ref bean="snIndexConfigurationPopulator" />
+                <ref bean="coveoSnIndexConfigurationPopulator" />
+            </list>
+        </property>
+    </bean>
+
+    <!-- Value Providers -->
+    <alias name="coveoObjectTypeSnIndexerValueProvider"
+           alias="coveoObjectTypeSnIndexerValueProvider" />
+    <bean id="coveoObjectTypeSnIndexerValueProvider"
+          class="com.coveo.indexer.service.impl.CoveoObjectTypeSnIndexerValueProvider"
+          parent="abstractSnIndexerValueProvider">
+        <property name="configurationService" ref="configurationService"/>
+    </bean>
+
+    <alias name="coveoSimpleClickableProductUriSnIndexerValueProvider" alias="coveoSimpleClickableProductUriSnIndexerValueProvider" />
+    <bean id="coveoSimpleClickableProductUriSnIndexerValueProvider"
+          class="com.coveo.indexer.service.impl.CoveoSimpleClickableProductUriSnIndexerValueProvider"
+          parent="productUrlSnIndexerValueProvider">
+        <property name="configurationService" ref="configurationService"/>
+    </bean>
+
+    <alias name="coveoDocumentIdSnIndexerValueProvider" alias="coveoDocumentIdSnIndexerValueProvider" />
+    <bean id="coveoDocumentIdSnIndexerValueProvider"
+           class="com.coveo.indexer.service.impl.CoveoDocumentIdSnIndexerValueProvider"
+           parent="modelAttributeSnIndexerValueProvider">
+    </bean>
+
+    <alias name="coveoWarehouseAvailableSkusSnIndexerProvider" alias="coveoWarehouseAvailableSkusSnIndexerProvider" />
+    <bean id="coveoWarehouseAvailableSkusSnIndexerProvider"
+          class="com.coveo.indexer.service.impl.CoveoWarehouseAvailableSkusSnIndexerProvider"
+          parent="abstractSnIndexerValueProvider">
+    </bean>
+
+</beans>
