@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+ Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<!--
+	ATTENTION: This is just an example file. You have to edit it according to your needs.
+-->
+
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="beans.xsd">
+
+	<bean class="com.coveo.SearchTokenWsDTO">
+		<property name="token" type="String"/>
+	</bean>
+
+	<bean class="com.coveo.SearchTokenUserId">
+		<property name="name" type="String"/>
+		<property name="type" type="String"/>
+		<property name="provider" type="String"/>
+	</bean>
+
+	<bean class="com.coveo.SearchTokenBody">
+		<property name="userIds" type="java.util.List&lt;com.coveo.SearchTokenUserId>"/>
+		<property name="searchHub" type="String"/>
+		<property name="validFor" type="long"/>
+	</bean>
+
+
+</beans>
