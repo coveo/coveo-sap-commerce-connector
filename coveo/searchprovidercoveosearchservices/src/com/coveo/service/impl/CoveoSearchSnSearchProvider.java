@@ -1,44 +1,53 @@
 package com.coveo.service.impl;
 
-
 import com.coveo.constants.SearchprovidercoveosearchservicesConstants;
-import com.coveo.data.CoveoSearchSnSearchProviderConfiguration;
-import com.coveo.pushapiclient.DocumentBuilder;
-import com.coveo.pushapiclient.StreamService;
+import com.coveo.searchservices.data.CoveoSearchSnSearchProviderConfiguration;
+import com.coveo.pushapiclient.exceptions.NoOpenFileContainerException;
 import com.coveo.pushapiclient.exceptions.NoOpenStreamException;
-import de.hybris.platform.searchservices.admin.data.SnLanguage;
+import com.coveo.stream.service.CoveoStreamServiceStrategy;
+import com.coveo.stream.service.impl.CoveoRebuildStreamService;
+import com.coveo.stream.service.impl.CoveoProductStreamServiceStrategy;
+import com.coveo.stream.service.impl.CoveoUpdateStreamService;
 import de.hybris.platform.searchservices.core.SnException;
 import de.hybris.platform.searchservices.core.service.SnContext;
-import de.hybris.platform.searchservices.document.data.*;
-import de.hybris.platform.searchservices.enums.SnDocumentOperationStatus;
+import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationRequest;
+import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationResponse;
+import de.hybris.platform.searchservices.document.data.SnDocumentBatchRequest;
+import de.hybris.platform.searchservices.document.data.SnDocumentBatchResponse;
 import de.hybris.platform.searchservices.enums.SnIndexerOperationStatus;
 import de.hybris.platform.searchservices.enums.SnIndexerOperationType;
 import de.hybris.platform.searchservices.index.data.SnIndex;
 import de.hybris.platform.searchservices.indexer.data.SnIndexerOperation;
 import de.hybris.platform.searchservices.search.data.SnSearchQuery;
 import de.hybris.platform.searchservices.search.data.SnSearchResult;
+import de.hybris.platform.searchservices.spi.data.SnExportConfiguration;
 import de.hybris.platform.searchservices.spi.service.impl.AbstractSnSearchProvider;
 import de.hybris.platform.searchservices.suggest.data.SnSuggestQuery;
 import de.hybris.platform.searchservices.suggest.data.SnSuggestResult;
+import de.hybris.platform.servicelayer.config.ConfigurationService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.CollectionUtils;
+import org.springframework.beans.factory.annotation.Required;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoSearchSnSearchProviderConfiguration> implements InitializingBean {
 
     private static final Logger LOG = Logger.getLogger(CoveoSearchSnSearchProvider.class);
 
-    StreamService streamService;
+    private CoveoStreamServiceStrategy streamServiceStrategy;
+
+    private ConfigurationService configurationService;
 
     @Override
     public void afterPropertiesSet() throws Exception {
     }
 
     @Override
-    public void exportConfiguration(de.hybris.platform.searchservices.spi.data.SnExportConfiguration exportConfiguration, List<Locale> locales) throws SnException {
+    public void exportConfiguration(SnExportConfiguration exportConfiguration, List<Locale> locales) throws SnException {
         //there is no need to export any configuration to Coveo at this stage
         //a placeholder to export synonyms dictionaries
     }
@@ -66,10 +75,27 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
         indexerOperation.setIndexTypeId(context.getIndexType().getId());
         indexerOperation.setOperationType(indexerOperationType);
         indexerOperation.setStatus(SnIndexerOperationStatus.RUNNING);
-        streamService = (StreamService) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_STREAM_SERVICE_KEY);
-        if (streamService == null) {
-            throw new SnException("error creating stream service");
+
+        String composedType = context.getIndexType().getItemComposedType();
+        String[] availabilityTypes = configurationService.getConfiguration().getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE).split(",");
+        if (availabilityTypes != null && Arrays.asList(availabilityTypes).contains(composedType)) {
+            if (indexerOperationType == SnIndexerOperationType.FULL) {
+                streamServiceStrategy = (CoveoStreamServiceStrategy) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_REBUILD_STREAM_SERVICES_KEY);
+            } else {
+                streamServiceStrategy = (CoveoStreamServiceStrategy) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_UPDATE_STREAM_SERVICES_KEY);
+            }
+        } else {
+            if (indexerOperationType == SnIndexerOperationType.FULL) {
+                streamServiceStrategy = (CoveoProductStreamServiceStrategy<CoveoRebuildStreamService>) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_REBUILD_STREAM_SERVICES_KEY);
+            } else {
+                streamServiceStrategy = (CoveoProductStreamServiceStrategy<CoveoUpdateStreamService>) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_UPDATE_STREAM_SERVICES_KEY);
+            }
         }
+
+        if (streamServiceStrategy == null) {
+            throw new SnException("error creating client service");
+        }
+        LOG.info("Using index operation type of " + indexerOperationType.getCode());
         return indexerOperation;
     }
 
@@ -87,11 +113,7 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
     @Override
     public void abortIndexerOperation(SnContext context, String indexerOperationId, String message) throws SnException {
         //TODO what should happen if the client abort the indexation before it ends ?
-        try {
-            streamService.close();
-        } catch (IOException | InterruptedException | NoOpenStreamException exception) {
-            throw new SnException(exception);
-        }
+        closeService(context);
     }
 
     @Override
@@ -100,49 +122,17 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
 
     @Override
     public SnDocumentBatchResponse executeDocumentBatch(SnContext context, String indexId, SnDocumentBatchRequest documentBatchRequest, String indexerOperationId) throws SnException {
-        List<SnDocumentBatchOperationResponse> responses = new ArrayList<SnDocumentBatchOperationResponse>();
         List<SnDocumentBatchOperationRequest> requests = documentBatchRequest.getRequests();
-        String language = getLanguage(context);
-        requests.stream().forEach(request -> {
-            responses.add(streamDocument(language, request));
-        });
-
+        if (LOG.isDebugEnabled()) LOG.debug("Document batch with size " + requests.size());
+        List<SnDocumentBatchOperationResponse> responses = streamServiceStrategy.pushDocuments(requests);
         SnDocumentBatchResponse documentBatchResponse = new SnDocumentBatchResponse();
         documentBatchResponse.setResponses(responses);
         return documentBatchResponse;
     }
 
-    private SnDocumentBatchOperationResponse streamDocument(String language, SnDocumentBatchOperationRequest request) {
-        SnDocumentBatchOperationResponse documentBatchOperationResponse = new SnDocumentBatchOperationResponse();
-        synchronized (streamService) {
-            try {
-                streamService.add(createCoveoDocument(request.getDocument(), language));
-                documentBatchOperationResponse.setId(request.getDocument().getId());
-                documentBatchOperationResponse.setStatus(SnDocumentOperationStatus.CREATED);
-            } catch (IOException | InterruptedException exception) {
-                documentBatchOperationResponse.setId(request.getDocument().getId());
-                documentBatchOperationResponse.setStatus(SnDocumentOperationStatus.FAILED);
-                LOG.error("failed to index " + request.getDocument().getId(), exception);
-            }
-        }
-        return documentBatchOperationResponse;
-    }
-
-    private String getLanguage(SnContext context) throws SnException {
-        List<SnLanguage> languages = context.getIndexConfiguration().getLanguages();
-        if (CollectionUtils.isEmpty(languages)) {
-            throw new SnException("No Language is specified in index configuration");
-        }
-        return languages.get(0).getId();
-    }
-
     @Override
     public void commit(SnContext context, String indexId) throws SnException {
-        try {
-            streamService.close();
-        } catch (IOException | InterruptedException | NoOpenStreamException exception) {
-            throw new SnException(exception);
-        }
+        closeService(context);
     }
 
     @Override
@@ -158,32 +148,17 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
         return null;
     }
 
-
-    protected static class ConverterContext {
-        private final Set<Locale> locales;
-
-        public ConverterContext(final List<Locale> locales) {
-            this.locales = Set.copyOf(locales);
-        }
-
-        public Set<Locale> getLocales() {
-            return locales;
+    private void closeService(SnContext context) throws SnException {
+        if (LOG.isDebugEnabled()) LOG.debug("Closing Service");
+        try {
+            streamServiceStrategy.closeServices();
+        } catch (IOException | InterruptedException| NoOpenStreamException | NoOpenFileContainerException exception) {
+            LOG.error("There was an issue closing one of the streams. We will continue to close the remaining streams", exception);
         }
     }
 
-    private DocumentBuilder createCoveoDocument(SnDocument document, String language) {
-        Locale locale = new Locale(language);
-        String name = ((HashMap<Locale, String>) document.getFields().get("name")).get(locale);
-        DocumentBuilder documentBuilder = new DocumentBuilder(getUri(document), name)
-                .withMetadata(document.getFields());
-
-        return documentBuilder;
+    @Required
+    public void setConfigurationService(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
     }
-
-    private static String getUri(SnDocument document) {
-        //TODO just to make the URI valid
-        return "https://sapcommerce/product/p/" + (String) document.getFields().get("code");
-    }
-
-
 }

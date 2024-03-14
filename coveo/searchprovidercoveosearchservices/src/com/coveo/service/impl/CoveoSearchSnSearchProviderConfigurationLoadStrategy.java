@@ -3,7 +3,7 @@
  */
 package com.coveo.service.impl;
 
-import com.coveo.data.CoveoSearchSnSearchProviderConfiguration;
+import com.coveo.searchservices.data.CoveoSearchSnSearchProviderConfiguration;
 import com.coveo.model.CoveoSearchSnSearchProviderConfigurationModel;
 import de.hybris.platform.searchservices.spi.service.SnSearchProviderConfigurationLoadStrategy;
 import de.hybris.platform.servicelayer.dto.converter.Converter;

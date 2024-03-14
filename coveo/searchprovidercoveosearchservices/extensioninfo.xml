@@ -10,6 +10,7 @@
         <requires-extension name="searchservices"/>
 
         <requires-extension name="apiregistryservices"/>
+        <requires-extension name="commerceservices"/>
 
         <coremodule generated="true" manager="com.coveo.jalo.SearchprovidercoveosearchservicesManager" packageroot="com.coveo"/>
 
