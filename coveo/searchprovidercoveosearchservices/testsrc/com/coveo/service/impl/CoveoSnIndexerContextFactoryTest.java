@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
 @UnitTest
 public class CoveoSnIndexerContextFactoryTest {
 
-    private static final String[] SUPPORTED_AVAILABILITY_TYPES_CODE = {"Warehouse", "Store", "WarehouseStore"};
+    private static final String SUPPORTED_AVAILABILITY_TYPES_CODE = "Warehouse,Store,WarehouseStore";
     private static final String PRODUCT_COMPOSED_TYPE = "Product";
     private static final String WAREHOUSE_COMPOSED_TYPE = "Warehouse";
 
@@ -58,7 +58,7 @@ public class CoveoSnIndexerContextFactoryTest {
     @Before
     public void setUp() {
         when(configurationService.getConfiguration()).thenReturn(configuration);
-        when(configuration.getStringArray(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn(SUPPORTED_AVAILABILITY_TYPES_CODE);
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn(SUPPORTED_AVAILABILITY_TYPES_CODE);
 
         context = new DefaultSnIndexerContext();
         CoveoSnIndexConfiguration indexConfiguration = new CoveoSnIndexConfiguration();

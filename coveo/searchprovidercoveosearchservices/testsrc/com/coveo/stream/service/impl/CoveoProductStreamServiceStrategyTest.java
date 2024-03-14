@@ -166,6 +166,22 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
+    public void testPushDocuments_MissingOneCode() throws IOException, InterruptedException {
+        List<SnDocumentBatchOperationRequest> documents = new ArrayList<>();
+        SnDocumentBatchOperationRequest documentA = new SnDocumentBatchOperationRequest();
+        documentA.setDocument(createDocumentFields("nameA", "codeA", CoveoObjectTypeSnIndexerValueProvider.PRODUCT_VARIANT_TYPE));
+        SnDocumentBatchOperationRequest documentB = new SnDocumentBatchOperationRequest();
+        documentB.setDocument(createDocumentFields("nameB", "", CoveoObjectTypeSnIndexerValueProvider.PRODUCT_OBJECT_TYPE));
+        documents.add(documentA);
+        documents.add(documentB);
+        coveoProductStreamServiceStrategy.pushDocuments(documents);
+        verify(coveoAbstractStreamServiceUS, times(1)).pushDocument(any());
+        verify(coveoAbstractStreamServiceFR, times(1)).pushDocument(any());
+        verify(coveoAbstractStreamServiceDE, times(1)).pushDocument(any());
+        verify(coveoAbstractStreamServiceAvailability, times(0)).pushDocument(any());
+    }
+
+    @Test
     public void testCloseServices() throws NoOpenStreamException, IOException, NoOpenFileContainerException, InterruptedException {
         coveoProductStreamServiceStrategy.closeServices();
         verify(coveoAbstractStreamServiceUS, times(1)).closeStream();
@@ -193,6 +209,11 @@ public class CoveoProductStreamServiceStrategyTest {
         objectTypeField.setId("objectType");
         objectTypeField.setLocalized(false);
         snDocument.setFieldValue(objectTypeField, objectType);
+        SnField coveoDocumentIdField = new SnField();
+        coveoDocumentIdField.setId("coveoDocumentId");
+        coveoDocumentIdField.setLocalized(false);
+        snDocument.setFieldValue(coveoDocumentIdField, code);
+
         return snDocument;
     }
 }

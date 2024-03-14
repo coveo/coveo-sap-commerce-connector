@@ -38,9 +38,9 @@ public class CoveoObjectTypeSnIndexerValueProviderTest {
     public void setUp() {
         when(configurationService.getConfiguration()).thenReturn(configuration);
 
-        when(configuration.getStringArray(SearchprovidercoveosearchservicesConstants.SUPPORTED_PRODUCT_TYPES_CODE)).thenReturn(new String[]{"Product", "ApparelProduct"});
-        when(configuration.getStringArray(SearchprovidercoveosearchservicesConstants.SUPPORTED_VARIANT_TYPES_CODE)).thenReturn(new String[]{"VariantProduct"});
-        when(configuration.getStringArray(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn(new String[]{"Warehouse"});
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_PRODUCT_TYPES_CODE)).thenReturn("Product,ApparelProduct");
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_VARIANT_TYPES_CODE)).thenReturn("VariantProduct");
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn("Warehouse");
     }
 
     @Test

@@ -116,11 +116,7 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
 
     @Override
     public void commit(SnContext context, String indexId) throws SnException {
-        try {
-            streamServiceStrategy.closeServices();
-        } catch (IOException | InterruptedException | NoOpenStreamException | NoOpenFileContainerException exception) {
-            throw new SnException(exception);
-        }
+        closeService(context);
     }
 
     @Override

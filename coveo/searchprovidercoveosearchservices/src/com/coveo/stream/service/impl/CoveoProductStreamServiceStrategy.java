@@ -8,6 +8,7 @@ import com.coveo.searchservices.data.CoveoCatalogObjectType;
 import com.coveo.searchservices.data.CoveoSource;
 import com.coveo.stream.service.CoveoStreamService;
 import com.coveo.stream.service.CoveoStreamServiceStrategy;
+import com.coveo.stream.service.utils.CoveoFieldValueResolverUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import de.hybris.platform.searchservices.admin.data.SnCurrency;
@@ -21,12 +22,14 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
+
+import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE;
+import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COVEO_URI_TYPE_INDEX_ATTRIBUTE;
 
 public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> implements CoveoStreamServiceStrategy {
 
@@ -84,7 +87,7 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
             LOG.debug("Adding SnDocument " + jsonDocument.toString());
         }
         synchronized (streamService) {
-            DocumentBuilder coveoDocument = createCoveoDocument(request.getDocument(), language.getId());
+            DocumentBuilder coveoDocument = createCoveoDocument(request.getDocument(), language.getId(), currency.getId());
             if (coveoDocument != null) {
                 try {
                     streamService.pushDocument(coveoDocument);
@@ -101,26 +104,36 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         return success;
     }
 
-    private DocumentBuilder createCoveoDocument(SnDocument document, String language) {
-        Locale locale = new Locale(language);
+    private DocumentBuilder createCoveoDocument(SnDocument document, String languageIsoCode, String currencyIsoCode) {
+        Locale locale = new Locale(languageIsoCode);
+        Currency currency = Currency.getInstance(currencyIsoCode);
         Map<String, Object> documentFields = document.getFields();
-        String documentName = null;
-        if (documentFields.containsKey("name")) {
-            if (isNameLocalised(documentFields, locale)) {
-                documentName = ((HashMap<Locale, String>) documentFields.get("name")).get(locale);
-            } else {
-                documentName = (String) documentFields.get("name");
-            }
+        String documentId = CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE, documentFields, locale, currency);
+        // If the value is still blank at this point we are unable to build the document
+        if (StringUtils.isBlank(documentId)) {
+            LOG.warn("SnDocument with id " + document.getId() + " does not have a " + COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE + " field, will not push this document");
+            return null;
         }
 
+        String documentName = CoveoFieldValueResolverUtils.resolveFieldValue("name", documentFields, locale, currency);
         // If the value is still blank at this point we are unable to build the document
         if (StringUtils.isBlank(documentName)) {
             LOG.warn("SnDocument with id " + document.getId() + " does not have a name field, will not push this document");
             return null;
         }
 
-        DocumentBuilder documentBuilder = new DocumentBuilder(getUri(document), documentName)
-                .withMetadata(document.getFields());
+        DocumentBuilder documentBuilder = new DocumentBuilder(documentId, documentName);
+        Map<String, Object> fields = document.getFields();
+        for (Map.Entry<String, Object> field : fields.entrySet()) {
+            documentBuilder.withMetadataValue(field.getKey(), CoveoFieldValueResolverUtils.resolveFieldValue(field.getValue(), locale, currency));
+        }
+
+        String coveoClickableUri = CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_URI_TYPE_INDEX_ATTRIBUTE, documentFields, locale, currency);
+
+        if (!StringUtils.isBlank(coveoClickableUri)) {
+            documentBuilder.withClickableUri(coveoClickableUri);
+        }
+
         if (LOG.isDebugEnabled()) {
             JsonObject jsonDocument = (new Gson()).toJsonTree(documentBuilder.getDocument()).getAsJsonObject();
             LOG.debug("Coveo Document " + jsonDocument.toString());
@@ -130,11 +143,6 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
 
     private static boolean isNameLocalised(Map<String, Object> documentFields, Locale locale) {
         return documentFields.get("name") instanceof HashMap<?, ?> && ((HashMap<Locale, String>) documentFields.get("name")).containsKey(locale);
-    }
-
-    private static String getUri(SnDocument document) {
-        //TODO just to make the URI valid
-        return "https://sapcommerce/product/p/" + document.getFields().get("code");
     }
 
     private T getStreamService(SnLanguage language, SnCurrency currency, CoveoSnCountry country) {

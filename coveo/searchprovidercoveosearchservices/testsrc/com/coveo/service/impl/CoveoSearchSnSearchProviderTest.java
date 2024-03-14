@@ -45,7 +45,7 @@ public class CoveoSearchSnSearchProviderTest {
 
     private static final String INDEX_TYPE_ID = "indexTypeId";
     private static final int DOCS_TO_INDEX = 2;
-    private static final String[] SUPPORTED_AVAILABILITY_TYPES_CODE = {"Warehouse", "Store", "WarehouseStore"};
+    private static final String SUPPORTED_AVAILABILITY_TYPES_CODE = "Warehouse,Store,WarehouseStore";
 
     @Mock
     private SnContext snContext;
@@ -70,7 +70,7 @@ public class CoveoSearchSnSearchProviderTest {
     @Before
     public void setUp() throws Exception {
         when(configurationService.getConfiguration()).thenReturn(configuration);
-        when(configuration.getStringArray(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn(SUPPORTED_AVAILABILITY_TYPES_CODE);
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn(SUPPORTED_AVAILABILITY_TYPES_CODE);
 
         when(snIndexType.getId()).thenReturn(INDEX_TYPE_ID);
         when(snContext.getIndexType()).thenReturn(snIndexType);

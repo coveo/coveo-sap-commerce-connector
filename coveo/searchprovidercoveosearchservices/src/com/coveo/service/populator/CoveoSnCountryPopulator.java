@@ -18,8 +18,6 @@ public class CoveoSnCountryPopulator implements Populator<CountryModel, CoveoSnC
 
     @Override
     public void populate(CountryModel countryModel, CoveoSnCountry coveoSnCountry) throws ConversionException {
-        final Set<Locale> supportedLocales = getI18NService().getSupportedLocales();
-
         coveoSnCountry.setId(countryModel.getIsocode());
         coveoSnCountry.setName(buildLocalizedName(countryModel));
     }
@@ -35,11 +33,6 @@ public class CoveoSnCountryPopulator implements Populator<CountryModel, CoveoSnC
         }
 
         return target;
-    }
-
-    public I18NService getI18NService()
-    {
-        return i18NService;
     }
 
     @Required

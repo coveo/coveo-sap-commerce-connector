@@ -11,6 +11,10 @@
 			<value code="PRODUCTANDVARIANT" />
 			<value code="AVAILABILITY" />
 		</enumtype>
+
+		<enumtype code="SnFieldType" autocreate="false" generate="false">
+			<value code="COVEOARRAY" />
+		</enumtype>
 	</enumtypes>
 
 	<relations>

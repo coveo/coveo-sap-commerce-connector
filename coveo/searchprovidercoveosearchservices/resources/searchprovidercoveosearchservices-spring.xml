@@ -157,4 +157,23 @@
           parent="abstractSnIndexerValueProvider">
         <property name="configurationService" ref="configurationService"/>
     </bean>
+
+    <alias name="coveoSimpleClickableProductUriSnIndexerValueProvider" alias="coveoSimpleClickableProductUriSnIndexerValueProvider" />
+    <bean id="coveoSimpleClickableProductUriSnIndexerValueProvider"
+          class="com.coveo.indexer.service.impl.CoveoSimpleClickableProductUriSnIndexerValueProvider"
+          parent="productUrlSnIndexerValueProvider">
+        <property name="configurationService" ref="configurationService"/>
+    </bean>
+
+    <alias name="coveoDocumentIdSnIndexerValueProvider" alias="coveoDocumentIdSnIndexerValueProvider" />
+    <bean id="coveoDocumentIdSnIndexerValueProvider"
+           class="com.coveo.indexer.service.impl.CoveoDocumentIdSnIndexerValueProvider"
+           parent="modelAttributeSnIndexerValueProvider">
+    </bean>
+
+    <alias name="coveoWarehouseAvailableSkusSnIndexerProvider" alias="coveoWarehouseAvailableSkusSnIndexerProvider" />
+    <bean id="coveoWarehouseAvailableSkusSnIndexerProvider"
+          class="com.coveo.indexer.service.impl.CoveoWarehouseAvailableSkusSnIndexerProvider"
+          parent="abstractSnIndexerValueProvider">
+    </bean>
 </beans>
