@@ -88,9 +88,6 @@ public class CoveoProductStreamServiceStrategyTest {
         when(snLanguageDe.getId()).thenReturn(LANG_DE);
         when(snCurrencyUsd.getId()).thenReturn(CURRENCY_USD);
         when(snCurrencyEur.getId()).thenReturn(CURRENCY_EUR);
-        when(coveoSnCountryUs.getId()).thenReturn(COUNTRY_US);
-        when(coveoSnCountryFr.getId()).thenReturn(COUNTRY_FR);
-        when(coveoSnCountryDe.getId()).thenReturn(COUNTRY_DE);
 
         when(coveoSourceUS.getLanguage()).thenReturn(snLanguageEn);
         when(coveoSourceUS.getCurrency()).thenReturn(snCurrencyUsd);

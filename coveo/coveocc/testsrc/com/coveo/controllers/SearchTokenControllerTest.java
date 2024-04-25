@@ -60,7 +60,7 @@ public class SearchTokenControllerTest extends ServicelayerTest
 	private static final String JWT_SECRET = "asdfSFS34wfsdfsdfSDSD32dfsddDDerQSNCK34SOWEK5354fdgdf4";
 	private static final Key HMAC_KEY = new SecretKeySpec(Base64.getDecoder().decode(JWT_SECRET), SignatureAlgorithm.HS256.getJcaName());
 	private static final String INVALID = "invalid";
-	private static final String TEST_BASE_SITE = "testbasesite";
+	private static final String TEST_BASE_SITE = "coveotestbasesite";
 	private static final String TEST_SEARCH_HUB = "searchHub";
 	private static final String JWT_ROLE = "role";
 	private static final String JWT_PROVIDER = "provider";

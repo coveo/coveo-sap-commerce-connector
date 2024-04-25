@@ -62,33 +62,33 @@ public class CoveoFieldValueResolverUtilsTest {
 
     @Test
     public void testResolveFieldValue() {
-        String value = CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_LOCALISED, documentFields);
+        String value = (String) CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_LOCALISED, documentFields);
         assertEquals(LOCALE_ENGLISH_VALUE, value);
     }
 
     @Test
     public void testTestResolveFieldValue() {
-        String englishValue = CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_LOCALISED, documentFields, LOCALE_ENGLISH, null);
+        String englishValue = (String) CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_LOCALISED, documentFields, LOCALE_ENGLISH, null);
         assertEquals(LOCALE_ENGLISH_VALUE, englishValue);
-        String frenchValue = CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_LOCALISED, documentFields, Locale.FRENCH, null);
+        String frenchValue = (String) CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_LOCALISED, documentFields, Locale.FRENCH, null);
         assertEquals(LOCALE_FRENCH_VALUE, frenchValue);
-        String nameValue = CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_NAME, documentFields, null, null);
+        String nameValue = (String) CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_NAME, documentFields, null, null);
         assertEquals(FIELD_NAME_VALUE, nameValue);
-        String noValue = CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_NONE, documentFields, null, null);
+        String noValue = (String) CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_NONE, documentFields, null, null);
         assertEquals("", noValue);
-        String usdValue = CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_PRICE, documentFields, null, Currency.getInstance(CURRENCY_USD));
-        assertEquals(CURRENCY_USD_VALUE.toString(), usdValue);
-        String eurValue = CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_PRICE, documentFields, null, Currency.getInstance(CURRENCY_EUR));
-        assertEquals(CURRENCY_EUR_VALUE.toString(), eurValue);
+        Double usdValue = (Double) CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_PRICE, documentFields, null, Currency.getInstance(CURRENCY_USD));
+        assertEquals(CURRENCY_USD_VALUE, usdValue);
+        Double eurValue = (Double) CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_PRICE, documentFields, null, Currency.getInstance(CURRENCY_EUR));
+        assertEquals(CURRENCY_EUR_VALUE, eurValue);
     }
 
     @Test
     public void testTestResolveFieldValue_FieldName() {
-        String englishValue = CoveoFieldValueResolverUtils.resolveFieldValue(documentFields.get(FIELD_LOCALISED), LOCALE_ENGLISH, null);
+        String englishValue = (String) CoveoFieldValueResolverUtils.resolveFieldValue(documentFields.get(FIELD_LOCALISED), LOCALE_ENGLISH, null);
         assertEquals(LOCALE_ENGLISH_VALUE, englishValue);
-        String nameValue = CoveoFieldValueResolverUtils.resolveFieldValue(documentFields.get(FIELD_NAME), null, null);
+        String nameValue = (String) CoveoFieldValueResolverUtils.resolveFieldValue(documentFields.get(FIELD_NAME), null, null);
         assertEquals(FIELD_NAME_VALUE, nameValue);
-        String usdValue = CoveoFieldValueResolverUtils.resolveFieldValue(documentFields.get(FIELD_PRICE), null, Currency.getInstance(CURRENCY_USD));
-        assertEquals(CURRENCY_USD_VALUE.toString(), usdValue);
+        Double usdValue = (Double) CoveoFieldValueResolverUtils.resolveFieldValue(documentFields.get(FIELD_PRICE), null, Currency.getInstance(CURRENCY_USD));
+        assertEquals(CURRENCY_USD_VALUE, usdValue);
     }
 }

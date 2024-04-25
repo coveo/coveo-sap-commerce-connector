@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COSAP_CONNECTOR_USER_AGENT;
+import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COSAP_CONNECTOR_USER_AGENT_PROPERTY;
+import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE;
+
 public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
 {
     private static final Logger LOG = Logger.getLogger(CoveoSnIndexerContextFactory.class);
@@ -33,15 +37,16 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
     protected void populateIndexerContext(final DefaultSnIndexerContext context, final SnIndexerRequest indexerRequest) {
         super.populateIndexerContext(context,indexerRequest);
         CoveoSearchSnSearchProviderConfiguration coveoSearchProviderConfiguration = (CoveoSearchSnSearchProviderConfiguration) context.getIndexConfiguration().getSearchProviderConfiguration();
+        String userAgent = configurationService.getConfiguration().getString(COSAP_CONNECTOR_USER_AGENT_PROPERTY, COSAP_CONNECTOR_USER_AGENT);
         List<CoveoUpdateStreamService> updateStreamServices = new ArrayList<>();
         List<CoveoRebuildStreamService> rebuildStreamServices = new ArrayList<>();
         if (LOG.isDebugEnabled()) LOG.debug("Number of sources configured is: " + coveoSearchProviderConfiguration.getSources().size());
         coveoSearchProviderConfiguration.getSources().forEach(source -> {
-            updateStreamServices.add(new CoveoUpdateStreamService(source));
-            rebuildStreamServices.add(new CoveoRebuildStreamService(source));
+            updateStreamServices.add(new CoveoUpdateStreamService(source, new String[]{userAgent}));
+            rebuildStreamServices.add(new CoveoRebuildStreamService(source, new String[]{userAgent}));
         });
 
-        String[] availabilityTypes = configurationService.getConfiguration().getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE).split(",");
+        String[] availabilityTypes = configurationService.getConfiguration().getString(SUPPORTED_AVAILABILITY_TYPES_CODE).split(",");
         if (availabilityTypes != null && Arrays.asList(availabilityTypes).contains(context.getIndexType().getItemComposedType())) {
             context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_REBUILD_STREAM_SERVICES_KEY,new CoveoAvailabilityStreamServiceStrategy<>(rebuildStreamServices));
             context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_UPDATE_STREAM_SERVICES_KEY,new CoveoAvailabilityStreamServiceStrategy<>(updateStreamServices));

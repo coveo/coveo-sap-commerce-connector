@@ -12,10 +12,10 @@ INSERT UserGroup;uid[unique=true]; locname[lang=en]; userPriceGroup(code,itemtyp
 ;testGroup1;Example Group One; "userPriceGroup1:UserPriceGroup"
 ;testGroup2;Example Group One; "userPriceGroup2:UserPriceGroup"
 
-INSERT Customer; uid[unique=true]; password; groups(uid); europe1PriceFactory_upg(code,itemtype(code))
-;test@email.com;password;testGroup1,testGroup2; "userPriceGroup1:UserPriceGroup"
+INSERT Customer; uid[unique=true]; name; password; groups(uid); europe1PriceFactory_upg(code,itemtype(code))
+;test@email.com;Test Name;password;testGroup1,testGroup2; "userPriceGroup1:UserPriceGroup"
 
 INSERT BaseSite; uid; coveoApiKey; coveoPlatformUrl
-;testbasesite; test-key; http://localhost:8200
+;coveotestbasesite; test-key; http://localhost:8200
 
 

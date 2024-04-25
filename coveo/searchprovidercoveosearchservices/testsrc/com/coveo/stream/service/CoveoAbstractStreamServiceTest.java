@@ -46,7 +46,7 @@ public class CoveoAbstractStreamServiceTest {
         }
 
         @Override
-        protected Object createStreamService(CatalogSource catalogSource) {
+        protected Object createStreamService(CatalogSource catalogSource, String[] userAgents) {
             return null;
         }
 

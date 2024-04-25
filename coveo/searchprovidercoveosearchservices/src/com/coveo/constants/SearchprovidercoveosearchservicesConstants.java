@@ -28,4 +28,8 @@ public final class SearchprovidercoveosearchservicesConstants extends GeneratedS
 
 	public static final String COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE = "coveoDocumentId";
 	public static final String COVEO_URI_TYPE_INDEX_ATTRIBUTE = "coveoClickableUri";
+
+	public static final String COSAP_CONNECTOR_USER_AGENT = "CoSAPConnector/v3";
+
+	public static final String COSAP_CONNECTOR_USER_AGENT_PROPERTY = "coveo.header.useragent";
 }

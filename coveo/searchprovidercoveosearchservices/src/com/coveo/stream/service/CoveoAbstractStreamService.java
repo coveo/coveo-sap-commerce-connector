@@ -25,7 +25,7 @@ public abstract class CoveoAbstractStreamService<S> implements CoveoStreamServic
         }
     }
 
-    protected abstract S createStreamService(CatalogSource catalogSource);
+    protected abstract S createStreamService(CatalogSource catalogSource, String[] userAgents);
 
     public CoveoSource getCoveoSource() {
         return coveoSource;

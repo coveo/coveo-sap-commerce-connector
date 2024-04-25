@@ -20,4 +20,8 @@ public final class CoveoccConstants extends GeneratedCoveoccConstants
 	public static final String ORG_API_KEY ="coveocc.org.api.key";
 
 	public static final int SEARCH_TOKEN_MAX_AGE_SECONDS=86400;
+
+	public static final String COVEOCC_USER_AGENT = "CoSAPTokenConnector/v3";
+
+	public static final String COVEOCC_USER_AGENT_PROPERTY = "coveocc.header.useragent";
 }
