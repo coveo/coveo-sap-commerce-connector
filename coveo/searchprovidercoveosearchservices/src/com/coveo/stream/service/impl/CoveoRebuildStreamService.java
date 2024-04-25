@@ -9,18 +9,20 @@ import com.coveo.stream.service.CoveoAbstractStreamService;
 
 import java.io.IOException;
 
+import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COSAP_CONNECTOR_USER_AGENT;
+
 public class CoveoRebuildStreamService extends CoveoAbstractStreamService<StreamService> {
 
     StreamService rebuildStreamService;
 
-    public CoveoRebuildStreamService(CoveoSource coveoSource) {
+    public CoveoRebuildStreamService(CoveoSource coveoSource, String[] userAgents) {
         super(coveoSource);
-        rebuildStreamService = createStreamService(createCatalogSource(coveoSource));
+        rebuildStreamService = createStreamService(createCatalogSource(coveoSource), userAgents);
     }
 
     @Override
-    protected StreamService createStreamService(CatalogSource catalogSource) {
-        return new StreamService(catalogSource);
+    protected StreamService createStreamService(CatalogSource catalogSource, String[] userAgents) {
+        return new StreamService(catalogSource, userAgents);
     }
 
     @Override

@@ -16,4 +16,4 @@ REMOVE UserGroup;uid[unique=true]
 ;testGroup2
 
 REMOVE BaseSite; uid
-;testbasesite
+;coveotestbasesite

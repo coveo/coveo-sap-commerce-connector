@@ -3,6 +3,7 @@ package com.coveo.controllers;
 import com.coveo.SearchTokenWsDTO;
 import com.coveo.constants.CoveoccConstants;
 import com.coveo.facades.SearchTokenFacade;
+import de.hybris.platform.servicelayer.config.ConfigurationService;
 import de.hybris.platform.webservicescommons.cache.CacheControl;
 import de.hybris.platform.webservicescommons.cache.CacheControlDirective;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdParam;
@@ -21,12 +22,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
+import static com.coveo.constants.CoveoccConstants.COVEOCC_USER_AGENT;
+import static com.coveo.constants.CoveoccConstants.COVEOCC_USER_AGENT_PROPERTY;
+
 @Controller
 @RequestMapping(value="/{baseSiteId}/coveo")
 public class SearchTokenController {
 
     @Resource(name = "searchTokenFacade")
     private SearchTokenFacade searchTokenFacade;
+
+    @Resource(name = "configurationService")
+    private ConfigurationService configurationService;
 
     @GetMapping(value="token/{searchHub}")
     @CacheControl(directive = CacheControlDirective.PRIVATE,maxAge = CoveoccConstants.SEARCH_TOKEN_MAX_AGE_SECONDS)
@@ -40,8 +47,9 @@ public class SearchTokenController {
                                                            @ApiParam(value="searchHub", required=true)
                                                            @PathVariable final String searchHub)
     {
+        String userAgent = configurationService.getConfiguration().getString(COVEOCC_USER_AGENT_PROPERTY, COVEOCC_USER_AGENT);
         return searchTokenFacade.getSearchToken(baseSiteId, getUserId(),
-                searchHub, TimeUnit.SECONDS.toMillis(CoveoccConstants.SEARCH_TOKEN_MAX_AGE_SECONDS));
+                searchHub, TimeUnit.SECONDS.toMillis(CoveoccConstants.SEARCH_TOKEN_MAX_AGE_SECONDS), userAgent);
     }
 
     private String getUserId() {

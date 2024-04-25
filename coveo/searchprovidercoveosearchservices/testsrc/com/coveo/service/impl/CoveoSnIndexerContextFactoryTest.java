@@ -30,6 +30,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COSAP_CONNECTOR_USER_AGENT;
+import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COSAP_CONNECTOR_USER_AGENT_PROPERTY;
+import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -40,9 +44,10 @@ import static org.mockito.Mockito.when;
 @UnitTest
 public class CoveoSnIndexerContextFactoryTest {
 
-    private static final String SUPPORTED_AVAILABILITY_TYPES_CODE = "Warehouse,Store,WarehouseStore";
+    private static final String SUPPORTED_AVAILABILITY_TYPES_CODE_VALUES = "Warehouse,Store,WarehouseStore";
     private static final String PRODUCT_COMPOSED_TYPE = "Product";
     private static final String WAREHOUSE_COMPOSED_TYPE = "Warehouse";
+    private static final String USER_AGENT_HEADER = "TestAgent/v3";
 
     DefaultSnIndexerContext context;
     SnIndexType indexType;
@@ -58,8 +63,8 @@ public class CoveoSnIndexerContextFactoryTest {
     @Before
     public void setUp() {
         when(configurationService.getConfiguration()).thenReturn(configuration);
-        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn(SUPPORTED_AVAILABILITY_TYPES_CODE);
-
+        when(configuration.getString(COSAP_CONNECTOR_USER_AGENT_PROPERTY, COSAP_CONNECTOR_USER_AGENT)).thenReturn(USER_AGENT_HEADER);
+        when(configuration.getString(SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn(SUPPORTED_AVAILABILITY_TYPES_CODE_VALUES);
         context = new DefaultSnIndexerContext();
         CoveoSnIndexConfiguration indexConfiguration = new CoveoSnIndexConfiguration();
         CoveoSearchSnSearchProviderConfiguration coveoSearchSnSearchProviderConfiguration = getCoveoSearchSnSearchProviderConfiguration();

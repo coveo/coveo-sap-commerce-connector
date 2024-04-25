@@ -2,6 +2,7 @@ package com.coveo.facades.impl;
 
 import com.coveo.SearchTokenBody;
 import com.coveo.SearchTokenWsDTO;
+import com.coveo.constants.CoveoccConstants;
 import de.hybris.bootstrap.annotations.UnitTest;
 import de.hybris.platform.basecommerce.model.site.BaseSiteModel;
 import de.hybris.platform.core.model.user.UserGroupModel;
@@ -105,7 +106,7 @@ public class DefaultSearchTokenFacadeTest {
 
     @Test
     public void testTokenGeneration() {
-        ResponseEntity<SearchTokenWsDTO> tokenResponse = searchTokenFacade.getSearchToken(TEST_BASE_SITE_ID, TEST_USER_ID, TEST_SEARCH_HUB, TEST_MAX_AGE_MS);
+        ResponseEntity<SearchTokenWsDTO> tokenResponse = searchTokenFacade.getSearchToken(TEST_BASE_SITE_ID, TEST_USER_ID, TEST_SEARCH_HUB, TEST_MAX_AGE_MS, CoveoccConstants.COVEOCC_USER_AGENT);
 
         assertThat(tokenResponse.getBody()).isNotNull();
         assertThat(tokenResponse.getBody().getToken()).isEqualTo(TEST_TOKEN);
@@ -120,6 +121,10 @@ public class DefaultSearchTokenFacadeTest {
         final List<String> auth = httpEntity.getHeaders().get("Authorization");
         assertThat(auth).isNotNull().hasSize(1);
         assertThat(auth.get(0)).contains(TEST_COVEO_API_KEY);
+
+        final List<String> userAgent = httpEntity.getHeaders().get("User-Agent");
+        assertThat(userAgent).isNotNull().hasSize(1);
+        assertThat(userAgent.get(0)).contains(CoveoccConstants.COVEOCC_USER_AGENT);
 
         final SearchTokenBody body = httpEntity.getBody();
         assertThat(body).isNotNull();
