@@ -6,6 +6,8 @@
 
 1. Add `<extension name='searchprovidercoveosearchservices'/>` in your `localextensions.xml` file.
 
+1. Make sure to update your Maven settings to use the [Coveo Push API client library for Java](https://github.com/coveo/push-api-client.java).
+
 1. Go to the `hybris/bin/platform/` folder.
 
 1. Set up the Ant environment by running the script: `. ./setantenv.sh` (Linux) or `./setantenv.bat` (Windows).
@@ -36,7 +38,7 @@ This is an example impex of how you can perform the SAP Commerce Cloud configura
 This can be used as a template to fill with your data and configure your project faster.
 
 You can also manually configure every source and your indexes via the Backoffice.
-Peform the following steps to do so.
+Perform the following steps to do so.
 
 
 ## Coveo setup
@@ -51,9 +53,9 @@ Peform the following steps to do so.
 
    - Each combination of language, currency, and country existing in your data should have a separate Coveo Catalog source to push to.
 
-   - Any availability data you have should also have it's own dedicated Catalog source
+   - Any availability data you have should also have it's own dedicated Catalog source.
 
-1. Note down the [**Stream API URL**](https://docs.coveo.com/en/n8of0593) value for your source.
+1. Note down the [**Stream API URL**](https://docs.coveo.com/en/n8of0593#stream-api-url) value for your source.
 
 ### Step 2: Create an API key
 
@@ -65,14 +67,14 @@ Peform the following steps to do so.
 
 ### Step 1: Create Coveo sources
 
-For each source you created in the Coveo Administration Console you should perform the following steps in the SAP Backoffice.
+For each source you created in the Coveo Administration Console, you should perform the following steps in the SAP Backoffice.
 
 1. In the [SAP Backoffice Administration Cockpit](https://help.sap.com/docs/SAP_COMMERCE/5c9ea0c629214e42b727bf08800d8dfa/8c16979286691014abe6f41434c7614a.html), go to **System** → **API** → **Destinations** → **Coveo Source**
 
 1. Click the plus sign (**+**) above the search results.
 
 1. In the modal window that appears, enter a unique ID that represents your Catalog source.
-   It's recommended to sue a human-readable value to assist with identifying a specific source.
+   It's recommended to use a human-readable value to assist with identifying a specific source.
 
 1. Click the **Finish** button.
 
@@ -108,7 +110,7 @@ Create a consumed destination:
 
    - **URL**. Paste the **Stream API URL** that you copied from the Coveo Catalog source.
 
-   - **Active**. Verify that the Active checkbox is selected.
+   - **Active**. Verify that the **Active** checkbox is selected.
 
    - **Destination Target**. Click the field and select **Default_Template**.
 
@@ -122,7 +124,7 @@ Create a consumed destination:
 
 1. Click the destination you created and switch to the **Destination Configuration** tab.
 
-1. Double-click in the **Credential** field to open a dropdown menu and select Create **Credential** → **Consumed OAuth Credential**.
+1. Double-click in the **Credential** field to open a dropdown menu and select **Create Credential** → **Consumed OAuth Credential**.
 
 1. Fill in the following fields:
 
@@ -207,13 +209,13 @@ Create the ServiceLayerJobs for the future cron jobs, one for full indexing and 
 
 1. In the upper part of the properties, click the search icon that's titled **Search by type**.
 
-1. Click the plus sign (**+**) above the search listing .
+1. Click the plus sign (**+**) above the search listing.
 
 1. In the modal window that appears:
 
    - **Spring ID**. Paste `fullCoveoSnIndexerJob`.
 
-   - **Code**. Paste `fullCoveoSnIndexerJob`
+   - **Code**. Paste `fullCoveoSnIndexerJob`.
 
 1. Click the **Finish** button.
 
@@ -221,7 +223,7 @@ Create the ServiceLayerJobs for the future cron jobs, one for full indexing and 
 
 ### Step 8: Create the Index types
 
-You to create one Index type for full indexing and one for incremental indexing.
+Create one Index type for full indexing and one for incremental indexing.
 
 1. Go to **System** → **Search and Navigation** → **Index Types**.
 
@@ -258,7 +260,17 @@ You to create one Index type for full indexing and one for incremental indexing.
      `SELECT {w:PK} FROM {Warehouse as w JOIN BaseStore2WarehouseRel as rel ON {w:PK} = {rel:target} JOIN BaseStore AS bs ON {rel:source} = {bs:PK} } WHERE {bs:uid}='electronics'`
      ```
 
+     For product indexing, the following query would retrieve all approved products in the catalog.
+
+     ```sql
+     `SELECT {p:pk} FROM {Product AS p LEFT JOIN ArticleApprovalStatus AS a ON {p:approvalStatus} = {a:pk}} WHERE {a:code} = 'approved'`
+     ```
+
 1. Click the **Finish** button for every modal window that has been opened.
+
+1. Select the newly created Index type.
+
+1. On the **General** tab, configure the **Identity Provider** as `snIdentityProvider` and link the catalog you want to index in the **Catalogs** field.
 
 1. Perform the same steps to create an Index type for incremental indexing, but adjust them as follows:
 
@@ -274,7 +286,7 @@ In both created Index types, create a field that will be used to specify the Cov
 
 1. Switch to the **Fields** tab.
 
-1. For Coveo Push solution, the **Code** and **Name** fields are mandatory.
+1. For Coveo Push solution, the **Code**, **Name**, and **DocumentId** fields are mandatory.
 
 1. Click in the **Fields** menu, to create a field specific for Coveo.
 

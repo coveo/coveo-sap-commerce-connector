@@ -81,24 +81,23 @@ public class CoveoAvailabilityStreamServiceStrategy<T extends CoveoStreamService
     private DocumentBuilder createCoveoDocument(SnDocument document) {
         Map<String, Object> documentFields = document.getFields();
 
-        String documentId = CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE, documentFields);
+        String documentId = (String) CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE, documentFields);
         // If the value is still blank at this point we are unable to build the document
         if (StringUtils.isBlank(documentId)) {
             LOG.warn("SnDocument with id " + document.getId() + " does not have a " + COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE + " field, will not push this document");
             return null;
         }
 
-        String documentName = CoveoFieldValueResolverUtils.resolveFieldValue("name", documentFields);
+        String documentName = (String) CoveoFieldValueResolverUtils.resolveFieldValue("name", documentFields);
         // If the value is still blank at this point we are unable to build the document
         if (StringUtils.isBlank(documentName)) {
             LOG.warn("SnDocument with id " + document.getId() + " does not have a name field, will not push this document");
             return null;
         }
 
-        DocumentBuilder documentBuilder = new DocumentBuilder(documentId, documentName)
-                .withMetadata(document.getFields());
+        DocumentBuilder documentBuilder = new DocumentBuilder(documentId, documentName).withMetadata(document.getFields());
 
-        String coveoClickableUri = CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_URI_TYPE_INDEX_ATTRIBUTE, documentFields);
+        String coveoClickableUri = (String) CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_URI_TYPE_INDEX_ATTRIBUTE, documentFields);
         if (!StringUtils.isBlank(coveoClickableUri)) {
             documentBuilder.withClickableUri(coveoClickableUri);
         }

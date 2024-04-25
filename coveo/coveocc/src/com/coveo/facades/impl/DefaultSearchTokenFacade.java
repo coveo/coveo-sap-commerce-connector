@@ -22,14 +22,12 @@ import org.springframework.web.client.RestTemplate;
 import javax.annotation.Resource;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class DefaultSearchTokenFacade implements SearchTokenFacade {
 
@@ -46,11 +44,12 @@ public class DefaultSearchTokenFacade implements SearchTokenFacade {
     private UserService userService;
 
     @Override
-    public ResponseEntity<SearchTokenWsDTO> getSearchToken(String baseSiteId , String userId, String searchHub, long maxAgeMilliseconds) {
+    public ResponseEntity<SearchTokenWsDTO> getSearchToken(String baseSiteId , String userId, String searchHub,
+                                                           long maxAgeMilliseconds, String userAgent) {
 
         BaseSiteModel baseSite = baseSiteService.getBaseSiteForUID(baseSiteId);
 
-        HttpHeaders headers = buildHeaders(baseSite.getCoveoApiKey());
+        HttpHeaders headers = buildHeaders(baseSite.getCoveoApiKey(), userAgent);
 
         Set<String> userPriceGroupIds = getUserPriceGroups(userId);
 
@@ -86,11 +85,12 @@ public class DefaultSearchTokenFacade implements SearchTokenFacade {
         return userPriceGroupIds;
     }
 
-    private HttpHeaders buildHeaders(String coveoApiKey) {
+    private HttpHeaders buildHeaders(String coveoApiKey, String userAgent) {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(coveoApiKey);
+        headers.set("User-Agent", userAgent);
         return headers;
     }
 

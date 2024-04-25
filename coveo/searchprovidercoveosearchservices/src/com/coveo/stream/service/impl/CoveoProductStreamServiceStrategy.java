@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE;
 import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COVEO_URI_TYPE_INDEX_ATTRIBUTE;
@@ -57,27 +58,24 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
     public List<SnDocumentBatchOperationResponse> pushDocuments(List<SnDocumentBatchOperationRequest> documents) {
         Map<String, SnDocumentBatchOperationResponse> responseMap = new HashMap<>();
         if (LOG.isDebugEnabled()) LOG.debug("Streaming Documents");
-        for (SnLanguage language : languages) {
-            for (SnCurrency currency : currencies) {
-                for (CoveoSnCountry country : countries) {
-                    T streamService = getStreamService(language, currency, country);
-                    if (streamService != null) {
-                        documents.forEach(request -> {
-                            SnDocumentBatchOperationResponse documentBatchOperationResponse = new SnDocumentBatchOperationResponse();
-                            documentBatchOperationResponse.setId(request.getDocument().getId());
-                            documentBatchOperationResponse.setStatus(
-                                    streamDocument(request, language, currency, country, streamService) ?
-                                            SnDocumentOperationStatus.UPDATED : SnDocumentOperationStatus.FAILED);
-                            if (!responseMap.containsKey(documentBatchOperationResponse.getId()) ||
-                                    documentBatchOperationResponse.getStatus() == SnDocumentOperationStatus.FAILED) {
-                                responseMap.put(documentBatchOperationResponse.getId(), documentBatchOperationResponse);
-                            }
-                        });
+        for (T streamService : streamServices) {
+            CoveoSource source = streamService.getCoveoSource();
+            if (isSourceConfiguredForJob(source)) {
+                documents.forEach(request -> {
+                    SnDocumentBatchOperationResponse documentBatchOperationResponse = new SnDocumentBatchOperationResponse();
+                    documentBatchOperationResponse.setId(request.getDocument().getId());
+                    documentBatchOperationResponse.setStatus(streamDocument(request, source.getLanguage(), source.getCurrency(), source.getCountry(), streamService) ? SnDocumentOperationStatus.UPDATED : SnDocumentOperationStatus.FAILED);
+                    if (!responseMap.containsKey(documentBatchOperationResponse.getId()) || documentBatchOperationResponse.getStatus() == SnDocumentOperationStatus.FAILED) {
+                        responseMap.put(documentBatchOperationResponse.getId(), documentBatchOperationResponse);
                     }
-                }
+                });
             }
         }
         return new ArrayList<>(responseMap.values());
+    }
+
+    private boolean isSourceConfiguredForJob(CoveoSource source) {
+        return languages.contains(source.getLanguage()) && currencies.contains(source.getCurrency()) && countries.contains(source.getCountry());
     }
 
     private boolean streamDocument(SnDocumentBatchOperationRequest request, SnLanguage language, SnCurrency currency, CoveoSnCountry country, T streamService) {
@@ -108,28 +106,28 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         Locale locale = new Locale(languageIsoCode);
         Currency currency = Currency.getInstance(currencyIsoCode);
         Map<String, Object> documentFields = document.getFields();
-        String documentId = CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE, documentFields, locale, currency);
+        String documentId = (String) CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE, documentFields, locale, currency);
         // If the value is still blank at this point we are unable to build the document
         if (StringUtils.isBlank(documentId)) {
             LOG.warn("SnDocument with id " + document.getId() + " does not have a " + COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE + " field, will not push this document");
             return null;
         }
 
-        String documentName = CoveoFieldValueResolverUtils.resolveFieldValue("name", documentFields, locale, currency);
+        String documentName = (String) CoveoFieldValueResolverUtils.resolveFieldValue("name", documentFields, locale, currency);
         // If the value is still blank at this point we are unable to build the document
         if (StringUtils.isBlank(documentName)) {
             LOG.warn("SnDocument with id " + document.getId() + " does not have a name field, will not push this document");
             return null;
         }
 
-        DocumentBuilder documentBuilder = new DocumentBuilder(documentId, documentName);
         Map<String, Object> fields = document.getFields();
+        Map<String, Object> values = new HashMap<>();
         for (Map.Entry<String, Object> field : fields.entrySet()) {
-            documentBuilder.withMetadataValue(field.getKey(), CoveoFieldValueResolverUtils.resolveFieldValue(field.getValue(), locale, currency));
+            values.put(field.getKey(), CoveoFieldValueResolverUtils.resolveFieldValue(field.getValue(), locale, currency));
         }
+        DocumentBuilder documentBuilder = new DocumentBuilder(documentId, documentName).withMetadata(values);
 
-        String coveoClickableUri = CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_URI_TYPE_INDEX_ATTRIBUTE, documentFields, locale, currency);
-
+        String coveoClickableUri = (String) CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_URI_TYPE_INDEX_ATTRIBUTE, documentFields, locale, currency);
         if (!StringUtils.isBlank(coveoClickableUri)) {
             documentBuilder.withClickableUri(coveoClickableUri);
         }
@@ -139,29 +137,6 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
             LOG.debug("Coveo Document " + jsonDocument.toString());
         }
         return documentBuilder;
-    }
-
-    private static boolean isNameLocalised(Map<String, Object> documentFields, Locale locale) {
-        return documentFields.get("name") instanceof HashMap<?, ?> && ((HashMap<Locale, String>) documentFields.get("name")).containsKey(locale);
-    }
-
-    private T getStreamService(SnLanguage language, SnCurrency currency, CoveoSnCountry country) {
-        T streamService = null;
-        for (T service : streamServices) {
-            CoveoSource coveoSource = service.getCoveoSource();
-            if (coveoSource.getLanguage() == null || coveoSource.getCurrency() == null || coveoSource.getCountry() == null) {
-                // this will be the availability source which is a special case, so it's safe to continue
-                continue;
-            }
-            if (coveoSource.getLanguage().getId().equals(language.getId())
-                    && coveoSource.getCurrency().getId().equals(currency.getId())
-                    && coveoSource.getCountry().getId().equals(country.getId())) {
-                streamService = service;
-                // there should only ever be 1 stream service for a given language, currency and country, hence why we break here
-                break;
-            }
-        }
-        return streamService;
     }
 
     @Override

@@ -4,11 +4,8 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:aop="http://www.springframework.org/schema/aop"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd
-           http://www.springframework.org/schema/aop
-           http://www.springframework.org/schema/aop/spring-aop.xsd">
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <!-- Indexer Configuration -->
     <alias name="coveoSnIndexerContextFactory" alias="coveoSnIndexerContextFactory" />
@@ -172,9 +169,42 @@
            parent="modelAttributeSnIndexerValueProvider">
     </bean>
 
+    <alias name="coveoProductCategoryHierarchyAttributeSnIndexValueProvider" alias="coveoProductCategoryHierarchyAttributeSnIndexValueProvider" />
+    <bean id="coveoProductCategoryHierarchyAttributeSnIndexValueProvider"
+          class="com.coveo.indexer.service.impl.CoveoProductCategoryHierarchyAttributeSnIndexValueProvider"
+          parent="productCategoryAttributeSnIndexerValueProvider">
+    </bean>
+
     <alias name="coveoWarehouseAvailableSkusSnIndexerProvider" alias="coveoWarehouseAvailableSkusSnIndexerProvider" />
     <bean id="coveoWarehouseAvailableSkusSnIndexerProvider"
           class="com.coveo.indexer.service.impl.CoveoWarehouseAvailableSkusSnIndexerProvider"
           parent="abstractSnIndexerValueProvider">
     </bean>
+
+    <alias name="coveoProductPriceToUserPriceGroupSnIndexerValueProvider" alias="coveoProductPriceToUserPriceGroupSnIndexerValueProvider" />
+    <bean id="coveoProductPriceToUserPriceGroupSnIndexerValueProvider"
+          class="com.coveo.indexer.service.impl.CoveoProductPriceToUserPriceGroupSnIndexerValueProvider"
+          parent="abstractSnIndexerValueProvider">
+        <property name="snSessionService" ref="snSessionService" />
+    </bean>
+
+    <alias name="coveoProductStockLevelSnIndexerValueProvider" alias="coveoProductStockLevelSnIndexerValueProvider" />
+    <bean id="coveoProductStockLevelSnIndexerValueProvider"
+          class="com.coveo.indexer.service.impl.CoveoProductStockLevelSnIndexerValueProvider"
+          parent="abstractSnIndexerValueProvider">
+        <property name="snSessionService" ref="snSessionService" />
+    </bean>
+
+    <alias name="coveoWarehouseSnQualifierProvider" alias="coveoWarehouseSnQualifierProvider" />
+    <bean id="coveoWarehouseSnQualifierProvider"
+          class="com.coveo.indexer.service.impl.CoveoWarehouseSnQualifierProvider">
+        <property name="baseStoreService" ref="baseStoreService" />
+        <property name="snStoreSelectionStrategy" ref="snStoreSelectionStrategy" />
+    </bean>
+
+    <bean id="warehousesnQualifierType" parent="snQualifierType">
+        <property name="id" value="warehouse" />
+        <property name="qualifierProvider" ref="coveoWarehouseSnQualifierProvider" />
+    </bean>
+
 </beans>
