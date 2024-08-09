@@ -102,6 +102,7 @@ INSERT_UPDATE SnField; indexType(id)[unique = true]; id[unique = true]          
                      ; $coveoProductIndexType      ; coveoProductCategoryHierarchy   ; Coveo Product Category Hierarchy ; STRING         ; true                      ; coveoProductCategoryHierarchyAttributeSnIndexValueProvider ; rootCategory->1|expression->name                                                                      ;
 
 # Please note the spring ID value relates to a coveo indexer job. This is crutial for the coveo indexer to work
+# This data is added here for completeness as it will be imported as essential data as part of the update process used when installing the extension
 INSERT_UPDATE ServicelayerJob; code[unique = true]          ; springid
                              ; fullCoveoSnIndexerJob        ; fullCoveoSnIndexerJob
                              ; incrementalCoveoSnIndexerJob ; incrementalCoveoSnIndexerJob

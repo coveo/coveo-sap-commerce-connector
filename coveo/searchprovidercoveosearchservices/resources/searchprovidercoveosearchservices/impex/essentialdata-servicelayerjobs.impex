@@ -1,0 +1,6 @@
+# Please note the spring ID value relates to a Coveo indexer job. This is crucial for the Coveo indexer to work
+# The fullCoveoSnIndexerJob needs to be used when creating your FullSnIndexerCronJob
+# The incrementalCoveoSnIndexerJob needs to be used when creating your IncrementalSnIndexerCronJob
+INSERT_UPDATE ServicelayerJob; code[unique = true]          ; springid
+                             ; fullCoveoSnIndexerJob        ; fullCoveoSnIndexerJob
+                             ; incrementalCoveoSnIndexerJob ; incrementalCoveoSnIndexerJob
