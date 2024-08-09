@@ -4,7 +4,7 @@
 --><extensioninfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
            
     
-    <extension abstractclassprefix="Generated" classprefix="Searchprovidercoveosearchservices" jaloLogicFree="true" managername="SearchprovidercoveosearchservicesManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="searchprovidercoveosearchservices" usemaven="true">
+    <extension abstractclassprefix="Generated" classprefix="Searchprovidercoveosearchservices" jaloLogicFree="true" managername="SearchprovidercoveosearchservicesManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="searchprovidercoveosearchservices" usemaven="false">
 
         <requires-extension name="platformbackoffice"/>
         <requires-extension name="searchservices"/>
