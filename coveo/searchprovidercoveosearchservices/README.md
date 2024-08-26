@@ -4,7 +4,8 @@
 
 1. Copy the `searchprovidercoveosearchservices` extension to the `hybris/bin/custom` directory of your project.
 
-1. Add `<extension name='searchprovidercoveosearchservices'/>` in your `localextensions.xml` file. The Coveo Push API client library for Java is now installed as part of the extension, see the `.jar` files in the `hybris/bin/custom/searchprovidercoveosearchservices/lib` directory.
+1. Add `<extension name='searchprovidercoveosearchservices'/>` in your `localextensions.xml` file. 
+The Coveo Push API client library for Java is now installed as part of the extension, see the `.jar` files in the `hybris/bin/custom/searchprovidercoveosearchservices/lib` directory.
 
 1. Go to the `hybris/bin/platform/` folder.
 
