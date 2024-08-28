@@ -1,7 +1,6 @@
 package com.coveo.indexer.service.impl;
 
 import com.coveo.constants.SearchprovidercoveosearchservicesConstants;
-import com.coveo.core.model.ApparelProductModel;
 import de.hybris.bootstrap.annotations.UnitTest;
 import de.hybris.platform.category.model.CategoryModel;
 import de.hybris.platform.core.model.product.ProductModel;
@@ -26,6 +25,9 @@ import static org.mockito.Mockito.when;
 public class CoveoObjectTypeSnIndexerValueProviderTest {
 
     @Mock
+    ProductModel coveoMockProduct;
+
+    @Mock
     ConfigurationService configurationService;
 
     @Mock
@@ -38,7 +40,7 @@ public class CoveoObjectTypeSnIndexerValueProviderTest {
     public void setUp() {
         when(configurationService.getConfiguration()).thenReturn(configuration);
 
-        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_PRODUCT_TYPES_CODE)).thenReturn("Product,ApparelProduct");
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_PRODUCT_TYPES_CODE)).thenReturn("Product,CoveoMockProduct");
         when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_VARIANT_TYPES_CODE)).thenReturn("VariantProduct");
         when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn("Warehouse");
     }
@@ -49,8 +51,9 @@ public class CoveoObjectTypeSnIndexerValueProviderTest {
     }
 
     @Test
-    public void testGetFieldValue_ForApparelProduct() throws SnIndexerException {
-        assertEquals(CoveoObjectTypeSnIndexerValueProvider.PRODUCT_OBJECT_TYPE, coveoObjectTypeSnIndexerValueProvider.getFieldValue(null, null, new ApparelProductModel(), null));
+    public void testGetFieldValue_ForCoveoMockProduct() throws SnIndexerException {
+        when(coveoMockProduct.getItemtype()).thenReturn("CoveoMockProduct");
+        assertEquals(CoveoObjectTypeSnIndexerValueProvider.PRODUCT_OBJECT_TYPE, coveoObjectTypeSnIndexerValueProvider.getFieldValue(null, null, coveoMockProduct, null));
     }
 
     @Test
