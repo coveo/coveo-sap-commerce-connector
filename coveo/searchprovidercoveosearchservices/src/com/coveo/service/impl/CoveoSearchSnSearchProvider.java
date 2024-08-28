@@ -164,12 +164,14 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
     public SnSearchResult search(SnContext context, String indexId, SnSearchQuery searchQuery) throws SnException {
         //since we are using coveo just in the frontend , this method is never used , it is called by search api from occ
         //and probably from backoffice
+        LOG.error("Search method is not implemented");
         return null;
     }
 
     @Override
     public SnSuggestResult suggest(SnContext context, String indexId, SnSuggestQuery suggestQuery) throws SnException {
         //since we are using coveo just in the frontend , this method is never used , it is called for autocomplete via occ
+        LOG.error("Suggest method is not implemented");
         return null;
     }
 
