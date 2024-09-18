@@ -16,7 +16,7 @@ See the `.jar` files in the `hybris/bin/custom/searchprovidercoveosearchservices
 
 1. Start your SAP Commerce installation by running the `./hybrisserver.sh` script.
 
-1. Open the Hybris Administration console (HAC) at https://localhost:9002/platform/update.
+1. Open the Hybris Administration console (HAC) at https://localhost:9002/hac/platform/update.
    You can also navigate to the Update page by clicking **Platform** → **Update** in the top menu.
 
 1. Find and select the checkboxes for:
