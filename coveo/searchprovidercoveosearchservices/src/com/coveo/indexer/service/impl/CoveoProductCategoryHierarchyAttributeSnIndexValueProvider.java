@@ -14,7 +14,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -52,11 +54,8 @@ import java.util.stream.Collectors;
  * This is an optional SnField and is applicable to product only.
  */
 public class CoveoProductCategoryHierarchyAttributeSnIndexValueProvider extends ProductCategoryAttributeSnIndexerValueProvider {
-
     private static final Logger LOG =
             Logger.getLogger(CoveoProductCategoryHierarchyAttributeSnIndexValueProvider.class);
-
-    public static final String INCLUDE_ROOT_CATEGORY_KEY = "coveo.categoryhierarchy.includerootcategory";
 
     @Override
     protected Object getFieldValue(final SnIndexerContext indexerContext, final SnIndexerFieldWrapper fieldWrapper,
@@ -80,13 +79,10 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProvider extends 
 
             for (CategoryModel category : categories) {
                 Collection<List<CategoryModel>> categoryPaths = this.getCategoryService().getPathsForCategory(category);
-                // remove root category as this will be the same for all paths and not required by Coveo
-                categoryPaths.forEach(path -> path.remove(0));
-                if (!categoryPaths.isEmpty()) {
-                    allCategoryPaths.addAll(categoryPaths);
-                }
+                categoryPaths.stream()
+                        .map(categoryModels -> categoryModels.listIterator(categoryModels.size()))
+                        .forEach(categoryModelsIt -> allCategoryPaths.add(extractCategoriesAfterRoot(categoryModelsIt, rootCategory)));
             }
-
 
             if (fieldWrapper.isLocalized()) {
                 final List<Locale> locales =
@@ -97,27 +93,46 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProvider extends 
                             (Map<Locale, Collection<String>>) this.getSnExpressionEvaluator().evaluate(path,
                                     expression, locales);
                     localizedPathValues.forEach((locale, values) -> {
-                        String pathHierarchy = String.join(" | ", values);
+                        String pathHierarchy = String.join("|", values);
                         localizedCategoryHierarchies.merge(locale, pathHierarchy,
-                                (oldVal, newVal) -> oldVal + " ; " + newVal);
+                                (oldVal, newVal) -> oldVal + ";" + newVal);
                     });
                 }
+                if (LOG.isDebugEnabled())
+                    LOG.debug("Category Hierarchy: { " +
+                            localizedCategoryHierarchies.entrySet().stream()
+                                    .map(entry -> entry.getKey() + " -> " + entry.getValue())
+                                    .collect(Collectors.joining(", "))
+                            + " }");
                 return localizedCategoryHierarchies;
             } else {
                 StringBuilder categoryHierarchies = new StringBuilder();
                 for (List<CategoryModel> path : allCategoryPaths) {
                     Collection<String> pathValues =
                             (Collection<String>) this.getSnExpressionEvaluator().evaluate(path, expression);
-                    String pathHierarchy = String.join(" | ", pathValues);
+                    String pathHierarchy = String.join("|", pathValues);
                     if (!categoryHierarchies.isEmpty()) {
-                        categoryHierarchies.append(" ; ");
+                        categoryHierarchies.append(";");
                     }
                     categoryHierarchies.append(pathHierarchy);
                 }
+                if (LOG.isDebugEnabled()) LOG.debug("Product : " + source.getCode() + "; Category Hierarchy: " + categoryHierarchies);
                 return categoryHierarchies.toString();
             }
         } catch (final SnException e) {
             throw new SnIndexerException(e);
         }
+    }
+
+    private LinkedList<CategoryModel> extractCategoriesAfterRoot(ListIterator<CategoryModel> iterator, String rootCategory) {
+        LinkedList<CategoryModel> validCategoryModels = new LinkedList<>();
+        while (iterator.hasPrevious()) {
+            CategoryModel current = iterator.previous();
+            if (current.getCode().equals(rootCategory)) {
+                break;
+            }
+            validCategoryModels.addFirst(current);
+        }
+        return validCategoryModels;
     }
 }

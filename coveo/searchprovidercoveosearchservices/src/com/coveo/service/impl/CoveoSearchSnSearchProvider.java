@@ -49,6 +49,7 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
     public void exportConfiguration(SnExportConfiguration exportConfiguration, List<Locale> locales) throws SnException {
         //there is no need to export any configuration to Coveo at this stage
         //a placeholder to export synonyms dictionaries
+        LOG.warn("Export configuration method is not implemented");
     }
 
     @Override
@@ -65,15 +66,18 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
 
     @Override
     public void deleteIndex(SnContext context, String indexId) throws SnException {
+        LOG.warn("Delete index method is not implemented");
     }
 
     @Override
     public SnIndexerOperation createIndexerOperation(SnContext context, SnIndexerOperationType indexerOperationType, int totalItems) throws SnException {
+        if(LOG.isDebugEnabled()) LOG.debug(String.format("Starting to create the indexer operation for the index type %s and operation type %s", context.getIndexType().getId(), indexerOperationType.getCode()));
         SnIndexerOperation indexerOperation = createSnIndexerOperation(context, indexerOperationType);
 
         String composedType = context.getIndexType().getItemComposedType();
         String[] availabilityTypes = configurationService.getConfiguration().getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE).split(",");
 
+        if(LOG.isDebugEnabled()) LOG.debug(String.format("Availability types are %s and composed type is %s", Arrays.toString(availabilityTypes), composedType));
         if (availabilityTypes != null && Arrays.asList(availabilityTypes).contains(composedType)) {
             if (indexerOperationType == SnIndexerOperationType.FULL) {
                 streamServiceStrategyMap.put(indexerOperation.getIndexId(), (CoveoStreamServiceStrategy) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_REBUILD_STREAM_SERVICES_KEY));
@@ -89,6 +93,7 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
         }
 
         if (streamServiceStrategyMap.isEmpty()) {
+            LOG.error("No stream service found for the index operation");
             throw new SnException("error creating client service");
         }
         if (LOG.isTraceEnabled()) {
@@ -116,13 +121,14 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
 
     @Override
     public SnIndexerOperation updateIndexerOperationStatus(SnContext context, String indexerOperationId, SnIndexerOperationStatus status, String errorMessage) throws SnException {
+        LOG.warn("Update indexer operation method is not implemented");
         return null;
     }
 
 
     @Override
     public void completeIndexerOperation(SnContext context, String indexerOperationId) throws SnException {
-        //TODO
+        LOG.info(String.format("The indexer operation %s has been completed", indexerOperationId));
     }
 
     @Override
@@ -133,14 +139,16 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
 
     @Override
     public void failIndexerOperation(SnContext context, String indexerOperationId, String message) throws SnException {
+        LOG.warn(String.format("The indexer operation %s failed with message: %s", indexerOperationId, message));
     }
 
     @Override
     public SnDocumentBatchResponse executeDocumentBatch(SnContext context, String indexId, SnDocumentBatchRequest documentBatchRequest, String indexerOperationId) throws SnException {
-
         List<SnDocumentBatchOperationRequest> requests = documentBatchRequest.getRequests();
-        if (LOG.isDebugEnabled()) LOG.debug("Document batch with size " + requests.size());
-        if (LOG.isDebugEnabled()) LOG.debug("Have indexerOperationId " + indexerOperationId);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Document batch with size " + requests.size());
+            LOG.debug("Have indexerOperationId " + indexerOperationId);
+        }
         CoveoStreamServiceStrategy streamServiceStrategy = streamServiceStrategyMap.get(indexerOperationId);
         List<SnDocumentBatchOperationResponse> responses = streamServiceStrategy.pushDocuments(requests);
         SnDocumentBatchResponse documentBatchResponse = new SnDocumentBatchResponse();

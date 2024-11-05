@@ -40,8 +40,8 @@ public class CoveoProductStockLevelSnIndexerValueProvider extends AbstractSnInde
         } else {
             value.putAll(data);
         }
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Product : " + source.getCode() + "; Stock Levels : " + value);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Product : " + source.getCode() + "; Stock Levels : " + value);
         }
         return value;
     }

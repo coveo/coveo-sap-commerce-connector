@@ -13,6 +13,7 @@ import de.hybris.platform.searchservices.document.data.SnDocument;
 import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationRequest;
 import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationResponse;
 import de.hybris.platform.searchservices.enums.SnDocumentOperationStatus;
+import de.hybris.platform.servicelayer.config.ConfigurationService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE;
+import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE;
+import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE_DEFAULT;
 import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COVEO_URI_TYPE_INDEX_ATTRIBUTE;
 
 public class CoveoAvailabilityStreamServiceStrategy<T extends CoveoStreamService> implements CoveoStreamServiceStrategy {
@@ -30,9 +33,12 @@ public class CoveoAvailabilityStreamServiceStrategy<T extends CoveoStreamService
 
     T availabilityStreamService;
 
-    public CoveoAvailabilityStreamServiceStrategy(List<T> streamServices) {
+    private ConfigurationService configurationService;
+
+    public CoveoAvailabilityStreamServiceStrategy(List<T> streamServices, ConfigurationService configurationService) {
         for (T streamService : streamServices) {
             if (streamService.getCoveoSource().getObjectType().equals(CoveoCatalogObjectType.AVAILABILITY)) {
+                if (LOG.isDebugEnabled()) LOG.debug("Setting availability stream service based on source " + streamService.getCoveoSource().getId());
                 availabilityStreamService = streamService;
                 // There should only ever be 1 availability stream service, hence why we break here
                 break;
@@ -41,29 +47,41 @@ public class CoveoAvailabilityStreamServiceStrategy<T extends CoveoStreamService
         if (availabilityStreamService == null) {
             throw new IllegalArgumentException("No availability stream service found");
         }
+        this.configurationService = configurationService;
     }
 
     @Override
     public List<SnDocumentBatchOperationResponse> pushDocuments(List<SnDocumentBatchOperationRequest> documents) {
         List<SnDocumentBatchOperationResponse> responses = new ArrayList<>();
-        documents.forEach(request -> {
-            responses.add(streamDocument(request));
-        });
+        int totalDocumentsCount = documents.size();
+        int logIntervalPercentage = configurationService.getConfiguration().getInt(COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE);
+        if (logIntervalPercentage < 0 || logIntervalPercentage > 100) {
+            LOG.warn("Log interval percentage is out of range (0-100%). Using default of 20%.");
+            logIntervalPercentage = COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE_DEFAULT;
+        }
+        int logInterval = (int) Math.ceil(totalDocumentsCount * (logIntervalPercentage / 100.0));
+        LOG.info(String.format("Streaming %s documents for source %s", totalDocumentsCount, availabilityStreamService.getCoveoSource().getId()));
+        for (int documentIndex = 1; documentIndex <= totalDocumentsCount; documentIndex++) {
+            responses.add(streamDocument(documents.get(documentIndex - 1)));
+            if (logInterval != 0 && documentIndex % logInterval == 0) {
+                LOG.info(String.format("Processed %s of %s documents", documentIndex, totalDocumentsCount));
+            }
+        }
+        LOG.info(String.format("Finished streaming %s documents", responses.size()));
         return responses;
     }
 
     private SnDocumentBatchOperationResponse streamDocument(SnDocumentBatchOperationRequest request) {
-        if (LOG.isDebugEnabled()) {
-            JsonObject jsonDocument = (new Gson()).toJsonTree(request.getDocument()).getAsJsonObject();
-            LOG.debug("Adding SnDocument " + jsonDocument.toString());
-        }
         SnDocumentBatchOperationResponse documentBatchOperationResponse = new SnDocumentBatchOperationResponse();
         documentBatchOperationResponse.setId(request.getDocument().getId());
-        if (LOG.isDebugEnabled()) LOG.debug("Adding Availability Document " + request.getDocument());
         synchronized (availabilityStreamService) {
             DocumentBuilder coveoDocument = createCoveoDocument(request.getDocument());
             if (coveoDocument != null) {
                 try {
+                    if (LOG.isDebugEnabled()) {
+                        JsonObject jsonDocument = (new Gson()).toJsonTree(coveoDocument.getDocument()).getAsJsonObject();
+                        LOG.debug("Pushing document: " + jsonDocument.toString());
+                    }
                     availabilityStreamService.pushDocument(coveoDocument);
                     documentBatchOperationResponse.setStatus(SnDocumentOperationStatus.UPDATED);
                 } catch (IOException | InterruptedException exception) {
@@ -100,11 +118,6 @@ public class CoveoAvailabilityStreamServiceStrategy<T extends CoveoStreamService
         String coveoClickableUri = (String) CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_URI_TYPE_INDEX_ATTRIBUTE, documentFields);
         if (!StringUtils.isBlank(coveoClickableUri)) {
             documentBuilder.withClickableUri(coveoClickableUri);
-        }
-
-        if (LOG.isDebugEnabled()) {
-            JsonObject jsonDocument = (new Gson()).toJsonTree(documentBuilder.getDocument()).getAsJsonObject();
-            LOG.debug("Coveo Document " + jsonDocument.toString());
         }
         return documentBuilder;
     }

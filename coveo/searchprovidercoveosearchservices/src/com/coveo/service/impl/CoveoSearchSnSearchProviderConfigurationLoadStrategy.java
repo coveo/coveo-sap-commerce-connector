@@ -7,6 +7,7 @@ import com.coveo.searchservices.data.CoveoSearchSnSearchProviderConfiguration;
 import com.coveo.model.CoveoSearchSnSearchProviderConfigurationModel;
 import de.hybris.platform.searchservices.spi.service.SnSearchProviderConfigurationLoadStrategy;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Required;
 
 
@@ -16,12 +17,21 @@ import org.springframework.beans.factory.annotation.Required;
 public class CoveoSearchSnSearchProviderConfigurationLoadStrategy implements
 		SnSearchProviderConfigurationLoadStrategy<CoveoSearchSnSearchProviderConfigurationModel, CoveoSearchSnSearchProviderConfiguration>
 {
+	private final static Logger LOG = Logger.getLogger(CoveoSearchSnSearchProviderConfigurationLoadStrategy.class);
 	private Converter<CoveoSearchSnSearchProviderConfigurationModel, CoveoSearchSnSearchProviderConfiguration> coveoSearchSnSearchProviderConfigurationConverter;
 
 	@Override
 	public CoveoSearchSnSearchProviderConfiguration load(final CoveoSearchSnSearchProviderConfigurationModel searchProviderConfiguration)
 	{
-		return coveoSearchSnSearchProviderConfigurationConverter.convert(searchProviderConfiguration);
+		CoveoSearchSnSearchProviderConfiguration converted = coveoSearchSnSearchProviderConfigurationConverter.convert(searchProviderConfiguration);
+		if (LOG.isDebugEnabled()) {
+			if (converted != null) {
+				LOG.debug("Loaded search provider configuration: " + converted.getId());
+			} else {
+				LOG.debug("No search provider configuration has been loaded");
+			}
+		}
+		return converted;
 	}
 
 

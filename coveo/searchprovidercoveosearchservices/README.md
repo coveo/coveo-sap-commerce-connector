@@ -16,7 +16,7 @@ See the `.jar` files in the `hybris/bin/custom/searchprovidercoveosearchservices
 
 1. Start your SAP Commerce installation by running the `./hybrisserver.sh` script.
 
-1. Open the Hybris Administration console (HAC) at https://localhost:9002/platform/update.
+1. Open the Hybris Administration console (HAC) at https://localhost:9002/hac/platform/update.
    You can also navigate to the Update page by clicking **Platform** → **Update** in the top menu.
 
 1. Find and select the checkboxes for:
@@ -29,7 +29,7 @@ See the `.jar` files in the `hybris/bin/custom/searchprovidercoveosearchservices
 
 1. At the top of the page, click the **Update** button.
 
-> **_&#9432;_** &nbsp; The extension creates new data types in the database, but it does not import any data.
+> **_&#9432;_** &nbsp; The extension creates new data types in the database, and creates 2 new service layer jobs for a full and incremental index.
 
 ## Semi-automatic configuration
 
@@ -195,33 +195,7 @@ Now that you've mapped the Coveo sources to the SAP Commerce API destinations, y
 
 1. Click the **Finish** button.
 
-### Step 7: Create the ServiceLayerJobs
-
-Create the ServiceLayerJobs for the future cron jobs, one for full indexing and one for incremental indexing.
-
-1. Go to **System** → **Types**.
-
-1. In the search bar, type in `ServicelayerJob` and search.
-
-1. In the search results, click the **ServicelayerJob**.
-
-   The properties of the ServicelayerJob are displayed on the page.
-
-1. In the upper part of the properties, click the search icon that's titled **Search by type**.
-
-1. Click the plus sign (**+**) above the search listing.
-
-1. In the modal window that appears:
-
-   - **Spring ID**. Paste `fullCoveoSnIndexerJob`.
-
-   - **Code**. Paste `fullCoveoSnIndexerJob`.
-
-1. Click the **Finish** button.
-
-1. Perform the same steps to create another ServicelayerJob for which specify `incrementalCoveoSnIndexerJob` for the **Code** and the **Spring ID** attributes.
-
-### Step 8: Create the Index types
+### Step 7: Create the Index types
 
 Create one Index type for full indexing and one for incremental indexing.
 
@@ -278,7 +252,7 @@ Create one Index type for full indexing and one for incremental indexing.
 
    - in the **Create Cron Jobs** step, select **Incremental Indexer Cronjob**. Use `coveoIncrementalIndexType` for the **Code** attribute and `incrementalCoveoSnIndexerJob` for the **Job Definition** attribute. Update the FlexibleSearch query to match the incremental indexing requirements.
 
-### Step 9: Create the objectType field
+### Step 8: Create the objectType field
 
 In both created Index types, create a field that will be used to specify the Coveo object type.
 
@@ -318,7 +292,7 @@ In both created Index types, create a field that will be used to specify the Cov
    coveo.variant.typecodes=VariantProduct
    ```
 
-### Step 10: Map the catalog fields
+### Step 9: Map the catalog fields
 
 For both created Index types, map catalog fields with the Coveo fields.
 Do the mapping only for the fields that you want to push to Coveo.
@@ -336,7 +310,7 @@ Do the mapping only for the fields that you want to push to Coveo.
 
 1. If you need to create a new field, do so the same way you created the `objectType` field in the previous step.
 
-### Step 11: Run the indexers
+### Step 10: Run the indexers
 
 Once you've configured your system correctly, you can run your indexers.
 

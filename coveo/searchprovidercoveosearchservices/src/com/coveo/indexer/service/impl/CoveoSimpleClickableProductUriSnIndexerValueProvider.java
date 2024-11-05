@@ -55,7 +55,9 @@ public class CoveoSimpleClickableProductUriSnIndexerValueProvider extends Produc
         String storeId = parameters.get(SITE_ID_PARAM);
         String propertyName = "website." + storeId + ".https";
         String baseUri = configurationService.getConfiguration().getString(propertyName, StringUtils.EMPTY);
-        return baseUri + super.getFieldValue(indexerContext, fieldWrapper, source, productUrl);
+        String clickableUri = baseUri + super.getFieldValue(indexerContext, fieldWrapper, source, productUrl);
+        if (LOG.isDebugEnabled()) LOG.debug("Product : " + source.getCode() + "; Clickable URI: " + clickableUri);
+        return clickableUri;
     }
 
     @Required

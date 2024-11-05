@@ -84,7 +84,6 @@ public class CoveoSearchSnSearchProviderTest {
         attributes.put(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_REBUILD_STREAM_SERVICES_KEY, coveoAvailabilityRebuildStreamServiceStrategy);
         attributes.put(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_UPDATE_STREAM_SERVICES_KEY, coveoAvailabilityUpdateStreamServiceStrategy);
         when(snContext.getAttributes()).thenReturn(attributes);
-        when(snContext.getIndexConfiguration()).thenReturn(snIndexConfiguration);
     }
 
     @Test

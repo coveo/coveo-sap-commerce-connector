@@ -30,6 +30,8 @@ public final class SearchprovidercoveosearchservicesConstants extends GeneratedS
 	public static final String COVEO_URI_TYPE_INDEX_ATTRIBUTE = "coveoClickableUri";
 
 	public static final String COSAP_CONNECTOR_USER_AGENT = "CoSAPConnector/v3";
-
 	public static final String COSAP_CONNECTOR_USER_AGENT_PROPERTY = "coveo.header.useragent";
+
+	public static final String COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE = "coveo.document.stream.log.interval.percentage";
+	public static final int COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE_DEFAULT = 20;
 }

@@ -9,6 +9,7 @@ import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ import java.util.stream.Collectors;
  * }</pre>
  */
 public class CoveoWarehouseSnQualifierProvider implements SnQualifierProvider {
+    private static final Logger LOG = Logger.getLogger(CoveoWarehouseSnQualifierProvider.class);
+
     protected static final Set<Class<?>> SUPPORTED_QUALIFIER_CLASSES = Set.of(WarehouseModel.class);
     protected static final String WAREHOUSE_QUALIFIERS_KEY = CoveoWarehouseSnQualifierProvider.class.getName() + ".warehouseQualifiers";
 
@@ -64,6 +67,7 @@ public class CoveoWarehouseSnQualifierProvider implements SnQualifierProvider {
             context.getAttributes().put(WAREHOUSE_QUALIFIERS_KEY, qualifiers);
         }
 
+        if (LOG.isDebugEnabled()) LOG.debug("Available warehouse qualifiers: " + qualifiers.stream().map(SnQualifier::getId).toList());
         return qualifiers;
     }
 

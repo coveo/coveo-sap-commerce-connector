@@ -3,16 +3,12 @@ package com.coveo.indexer.service.impl;
 import de.hybris.platform.core.model.c2l.CurrencyModel;
 import de.hybris.platform.core.model.product.ProductModel;
 import de.hybris.platform.europe1.model.PriceRowModel;
-import de.hybris.platform.order.strategies.calculation.pdt.criteria.PriceValueInfoCriteria;
-import de.hybris.platform.order.strategies.calculation.pdt.criteria.impl.DefaultPriceValueInfoCriteria;
-import de.hybris.platform.order.strategies.calculation.pdt.matcher.PDTModelMatcher;
 import de.hybris.platform.searchservices.core.service.SnQualifier;
 import de.hybris.platform.searchservices.core.service.SnSessionService;
 import de.hybris.platform.searchservices.indexer.SnIndexerException;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerContext;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
 import de.hybris.platform.searchservices.indexer.service.impl.AbstractSnIndexerValueProvider;
-import de.hybris.platform.servicelayer.user.UserService;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Required;
@@ -56,25 +52,20 @@ public class CoveoProductPriceToUserPriceGroupSnIndexerValueProvider
         }
 
         final Map<String, UserPriceGroupToPrice> prices = data.getPrices();
-
+        final Map<String, Map<String, Double>> value = new HashMap<>();
         if (fieldWrapper.isQualified()) {
-            final Map<String, Map<String, Double>> value = new HashMap<>();
-
             final List<SnQualifier> qualifiers = fieldWrapper.getQualifiers();
             for (final SnQualifier qualifier : qualifiers) {
                 value.put(qualifier.getId(), prices.get(qualifier.getId()).getUserGroupPrices());
             }
-
-            if (LOG.isDebugEnabled()) LOG.debug("Returning value: " + value);
-            return value;
         } else {
-            final Map<String, Map<String, Double>> value = new HashMap<>();
             for (Map.Entry<String, UserPriceGroupToPrice> entry : prices.entrySet()) {
                 Map<String, Double> userPricingGroupToPriceMap = new HashMap<>(entry.getValue().getUserGroupPrices());
                 value.put(entry.getKey(), userPricingGroupToPriceMap);
             }
-            return value;
         }
+        if (LOG.isDebugEnabled()) LOG.debug("Product : " + source.getCode() + "; Price: " + value);
+        return value;
     }
 
     @Override

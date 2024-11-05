@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(MockitoJUnitRunner.class)
 @UnitTest
@@ -75,7 +76,7 @@ public class CoveoFieldValueResolverUtilsTest {
         String nameValue = (String) CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_NAME, documentFields, null, null);
         assertEquals(FIELD_NAME_VALUE, nameValue);
         String noValue = (String) CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_NONE, documentFields, null, null);
-        assertEquals("", noValue);
+        assertNull(noValue);
         Double usdValue = (Double) CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_PRICE, documentFields, null, Currency.getInstance(CURRENCY_USD));
         assertEquals(CURRENCY_USD_VALUE, usdValue);
         Double eurValue = (Double) CoveoFieldValueResolverUtils.resolveFieldValue(FIELD_PRICE, documentFields, null, Currency.getInstance(CURRENCY_EUR));

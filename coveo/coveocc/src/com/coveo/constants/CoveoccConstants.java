@@ -24,4 +24,5 @@ public final class CoveoccConstants extends GeneratedCoveoccConstants
 	public static final String COVEOCC_USER_AGENT = "CoSAPTokenConnector/v3";
 
 	public static final String COVEOCC_USER_AGENT_PROPERTY = "coveocc.header.useragent";
+	public static final String USER_AGENT = "User-Agent";
 }

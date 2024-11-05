@@ -12,8 +12,6 @@ import de.hybris.platform.searchservices.core.SnException;
 import de.hybris.platform.searchservices.core.service.SnExpressionEvaluator;
 import de.hybris.platform.searchservices.core.service.SnQualifier;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
-import de.hybris.platform.servicelayer.config.ConfigurationService;
-import org.apache.commons.configuration.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -62,7 +59,12 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
     private static final String ROOT_CATEGORY_CODE = "rootCategory";
 
     @Mock
+    CategoryModel fineRootCategory;
+    private static final String FINE_ROOT_CATEGORY_CODE = "fineRootCategory";
+
+    @Mock
     CategoryModel branchCategoryAB;
+    private static final String BRANCH_CATEGORY_AB_CODE = "branchAB";
     private static final String BRANCH_CATEGORY_AB_NAME_EN = "Branch Category AB";
     private static final String BRANCH_CATEGORY_AB_NAME_FR = "Catégorie branche AB";
     private static final String EXPECTED_BRANCH_AB_PATH_EN = BRANCH_CATEGORY_AB_NAME_EN;
@@ -70,6 +72,7 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
 
     @Mock
     CategoryModel twigCategoryA;
+    private static final String TWIG_CATEGORY_CODE_A = "twigA";
     private static final String TWIG_CATEGORY_A_NAME_EN = "Twig Category A";
     private static final String TWIG_CATEGORY_A_NAME_FR = "Catégorie brindille A";
     private static final String EXPECTED_TWIG_A_PATH_EN = generateEvaluatedPath(BRANCH_CATEGORY_AB_NAME_EN, TWIG_CATEGORY_A_NAME_EN);
@@ -77,6 +80,7 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
 
     @Mock
     CategoryModel twigCategoryB;
+    private static final String TWIG_CATEGORY_CODE_B = "twigB";
     private static final String TWIG_CATEGORY_B_NAME_EN = "Twig Category B";
     private static final String TWIG_CATEGORY_B_NAME_FR = "Catégorie brindille B";
     private static final String EXPECTED_TWIG_B_PATH_EN = generateEvaluatedPath(BRANCH_CATEGORY_AB_NAME_EN, TWIG_CATEGORY_B_NAME_EN);
@@ -85,6 +89,7 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
 
     @Mock
     CategoryModel leafCategoryA;
+    private static final String LEAF_CATEGORY_CODE_A = "leafA";
     private static final String LEAF_CATEGORY_A_NAME_EN = "Leaf Category A";
     private static final String LEAF_CATEGORY_A_NAME_FR = "Catégorie feuille A";
     private static final String EXPECTED_LEAF_A_PATH_1_EN = generateEvaluatedPath(BRANCH_CATEGORY_AB_NAME_EN, TWIG_CATEGORY_A_NAME_EN, LEAF_CATEGORY_A_NAME_EN);
@@ -137,6 +142,12 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
          *
          * so 6 possible paths:
          */
+
+        when(rootCategory.getCode()).thenReturn(ROOT_CATEGORY_CODE);
+        when(branchCategoryAB.getCode()).thenReturn(BRANCH_CATEGORY_AB_CODE);
+        when(twigCategoryA.getCode()).thenReturn(TWIG_CATEGORY_CODE_A);
+        when(twigCategoryB.getCode()).thenReturn(TWIG_CATEGORY_CODE_B);
+        when(leafCategoryA.getCode()).thenReturn(LEAF_CATEGORY_CODE_A);
 
         List<CategoryModel> path2 = new LinkedList<>(List.of(rootCategory, branchCategoryAB));
         Map<Locale, Collection<String>> branchCatAName = new HashMap<>();
@@ -199,6 +210,60 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
 
     }
 
+    private void setUpPathEvaluationWithFineRoot() throws SnException {
+        /*
+         * Category hierarchy set up as follows:
+         *     fineRoot
+         *        |
+         *       root
+         *        |
+         *    branchAB
+         *    /     \
+         * twigA   twigB
+         *     \    /
+         *     leafA
+         *
+         * so 6 possible paths:
+         */
+        when(rootCategory.getCode()).thenReturn(ROOT_CATEGORY_CODE);
+        when(branchCategoryAB.getCode()).thenReturn(BRANCH_CATEGORY_AB_CODE);
+        when(twigCategoryA.getCode()).thenReturn(TWIG_CATEGORY_CODE_A);
+        when(twigCategoryB.getCode()).thenReturn(TWIG_CATEGORY_CODE_B);
+        when(leafCategoryA.getCode()).thenReturn(LEAF_CATEGORY_CODE_A);
+
+
+        List<CategoryModel> path2 = new LinkedList<>(List.of(fineRootCategory, rootCategory, branchCategoryAB));
+        Collection<String> enCatANames = List.of(BRANCH_CATEGORY_AB_NAME_EN);
+        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB)), any())).thenReturn(enCatANames);
+        when(categoryService.getPathsForCategory(branchCategoryAB)).thenReturn(List.of(path2));
+
+        List<CategoryModel> path3 = new LinkedList<>(List.of(fineRootCategory, rootCategory, branchCategoryAB, twigCategoryA));
+        Collection<String> enTwigANames = List.of(BRANCH_CATEGORY_AB_NAME_EN,
+                TWIG_CATEGORY_A_NAME_EN);
+        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryA)), any())).thenReturn(enTwigANames);
+        when(categoryService.getPathsForCategory(twigCategoryA)).thenReturn(List.of(path3));
+
+        List<CategoryModel> path4 = new LinkedList<>(List.of(fineRootCategory, rootCategory, branchCategoryAB, twigCategoryB));
+        Collection<String> enTwigBNames = List.of(BRANCH_CATEGORY_AB_NAME_EN,
+                TWIG_CATEGORY_B_NAME_EN);
+        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryB)), any())).thenReturn(enTwigBNames);
+        when(categoryService.getPathsForCategory(twigCategoryB)).thenReturn(List.of(path4));
+
+        List<CategoryModel> path5 = new LinkedList<>(List.of(fineRootCategory, rootCategory, branchCategoryAB, twigCategoryA,
+                leafCategoryA));
+        Collection<String> enLeafA1Names = List.of(BRANCH_CATEGORY_AB_NAME_EN,
+                TWIG_CATEGORY_A_NAME_EN, LEAF_CATEGORY_A_NAME_EN);
+        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryA,leafCategoryA)), any())).thenReturn(enLeafA1Names);
+
+        List<CategoryModel> path6 = new LinkedList<>(List.of(fineRootCategory, rootCategory, branchCategoryAB, twigCategoryB,
+                leafCategoryA));
+        Collection<String> enLeafA2Names = List.of(BRANCH_CATEGORY_AB_NAME_EN,
+                TWIG_CATEGORY_B_NAME_EN, LEAF_CATEGORY_A_NAME_EN);
+        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryB,leafCategoryA)), any())).thenReturn(enLeafA2Names);
+        when(categoryService.getPathsForCategory(leafCategoryA)).thenReturn(List.of(path5, path6));
+
+    }
+
     public void setUpLocalization() throws SnException {
         when(fieldWrapper.isLocalized()).thenReturn(true);
         when(fieldWrapper.getQualifiers()).thenReturn(List.of(qualifierEn, qualifierFr));
@@ -216,7 +281,7 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
         setUpPathEvaluation();
         String value = (String) coveoProductCategoryHierarchyAttributeSnIndexValueProvider.getFieldValue(null,
                 fieldWrapper, productModel, productCategoryData);
-        String[] paths = value.split(" ; ");
+        String[] paths = value.split(";");
         validateEnPaths(paths);
     }
 
@@ -232,11 +297,21 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
         assertTrue(value.containsKey(localeEn));
         assertTrue(value.containsKey(localeFr));
         String localisedValueEn = value.get(localeEn);
-        String[] pathsEn = localisedValueEn.split(" ; ");
+        String[] pathsEn = localisedValueEn.split(";");
         validateEnPaths(pathsEn);
         String localisedValueFr = value.get(localeFr);
-        String[] pathsFr = localisedValueFr.split(" ; ");
+        String[] pathsFr = localisedValueFr.split(";");
         validateFrPaths(pathsFr);
+    }
+
+    @Test
+    public void testCategoryFilteringForNonLocalizedPath() throws SnException {
+        setUpPathEvaluationWithFineRoot();
+        String value =
+                (String) coveoProductCategoryHierarchyAttributeSnIndexValueProvider.getFieldValue(null,
+                        fieldWrapper, productModel, productCategoryData);
+        String[] pathsEn = value.split(";");
+        validateEnPaths(pathsEn);
     }
 
     private void validateFrPaths(String[] pathsFr) {
@@ -258,6 +333,6 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
     }
 
     private static String generateEvaluatedPath(String... categories) {
-        return String.join(" | ", categories);
+        return String.join("|", categories);
     }
 }

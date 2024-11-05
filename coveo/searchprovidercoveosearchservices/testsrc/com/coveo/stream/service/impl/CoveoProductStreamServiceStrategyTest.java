@@ -1,5 +1,6 @@
 package com.coveo.stream.service.impl;
 
+import com.coveo.constants.SearchprovidercoveosearchservicesConstants;
 import com.coveo.indexer.service.impl.CoveoObjectTypeSnIndexerValueProvider;
 import com.coveo.pushapiclient.exceptions.NoOpenFileContainerException;
 import com.coveo.pushapiclient.exceptions.NoOpenStreamException;
@@ -13,6 +14,8 @@ import de.hybris.platform.searchservices.admin.data.SnField;
 import de.hybris.platform.searchservices.admin.data.SnLanguage;
 import de.hybris.platform.searchservices.document.data.SnDocument;
 import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationRequest;
+import de.hybris.platform.servicelayer.config.ConfigurationService;
+import org.apache.commons.configuration.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,6 +82,11 @@ public class CoveoProductStreamServiceStrategyTest {
     @Mock
     CoveoAbstractStreamService<Object> coveoAbstractStreamServiceAvailability;
 
+    @Mock
+    ConfigurationService configurationService;
+    @Mock
+    private Configuration configuration;
+
     CoveoProductStreamServiceStrategy<CoveoAbstractStreamService<Object>> coveoProductStreamServiceStrategy;
 
     @Before
@@ -127,7 +135,9 @@ public class CoveoProductStreamServiceStrategyTest {
         streamServices.add(coveoAbstractStreamServiceDE);
         streamServices.add(coveoAbstractStreamServiceAvailability);
 
-        coveoProductStreamServiceStrategy = new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, streamServices);
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(50);
+        coveoProductStreamServiceStrategy = new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, streamServices, configurationService);
     }
 
     @Test

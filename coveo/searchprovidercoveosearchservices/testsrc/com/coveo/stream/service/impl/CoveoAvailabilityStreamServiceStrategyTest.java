@@ -1,5 +1,6 @@
 package com.coveo.stream.service.impl;
 
+import com.coveo.constants.SearchprovidercoveosearchservicesConstants;
 import com.coveo.pushapiclient.exceptions.NoOpenFileContainerException;
 import com.coveo.pushapiclient.exceptions.NoOpenStreamException;
 import com.coveo.searchservices.admin.data.CoveoSnCountry;
@@ -12,6 +13,8 @@ import de.hybris.platform.searchservices.admin.data.SnField;
 import de.hybris.platform.searchservices.admin.data.SnLanguage;
 import de.hybris.platform.searchservices.document.data.SnDocument;
 import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationRequest;
+import de.hybris.platform.servicelayer.config.ConfigurationService;
+import org.apache.commons.configuration.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,6 +74,10 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
     CoveoAbstractStreamService<Object> coveoAbstractStreamServiceDE;
     @Mock
     CoveoAbstractStreamService<Object> coveoAbstractStreamServiceAvailability;
+    @Mock
+    ConfigurationService configurationService;
+    @Mock
+    private Configuration configuration;
 
     CoveoAvailabilityStreamServiceStrategy<CoveoAbstractStreamService<Object>> coveoAvailabilityStreamServiceStrategy;
 
@@ -104,7 +111,9 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
         streamServices.add(coveoAbstractStreamServiceDE);
         streamServices.add(coveoAbstractStreamServiceAvailability);
 
-        coveoAvailabilityStreamServiceStrategy = new CoveoAvailabilityStreamServiceStrategy<>(streamServices);
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(0);
+        coveoAvailabilityStreamServiceStrategy = new CoveoAvailabilityStreamServiceStrategy<>(streamServices, configurationService);
     }
 
     @Test

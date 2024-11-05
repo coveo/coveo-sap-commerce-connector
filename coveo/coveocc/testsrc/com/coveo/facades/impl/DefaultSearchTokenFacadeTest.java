@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.coveo.constants.CoveoccConstants.USER_AGENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Matchers.anyObject;
@@ -122,7 +123,7 @@ public class DefaultSearchTokenFacadeTest {
         assertThat(auth).isNotNull().hasSize(1);
         assertThat(auth.get(0)).contains(TEST_COVEO_API_KEY);
 
-        final List<String> userAgent = httpEntity.getHeaders().get("User-Agent");
+        final List<String> userAgent = httpEntity.getHeaders().get(USER_AGENT);
         assertThat(userAgent).isNotNull().hasSize(1);
         assertThat(userAgent.get(0)).contains(CoveoccConstants.COVEOCC_USER_AGENT);
 

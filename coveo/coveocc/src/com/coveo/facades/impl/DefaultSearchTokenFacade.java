@@ -5,12 +5,14 @@ import com.coveo.SearchTokenUserId;
 import com.coveo.SearchTokenWsDTO;
 import com.coveo.constants.CoveoccConstants;
 import com.coveo.facades.SearchTokenFacade;
+import com.coveo.facades.utils.SensitiveDataMaskingUtils;
 import de.hybris.platform.basecommerce.model.site.BaseSiteModel;
 import de.hybris.platform.core.model.user.UserGroupModel;
 import de.hybris.platform.core.model.user.UserModel;
 import de.hybris.platform.europe1.enums.UserPriceGroup;
 import de.hybris.platform.servicelayer.user.UserService;
 import de.hybris.platform.site.BaseSiteService;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -28,8 +30,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static com.coveo.constants.CoveoccConstants.USER_AGENT;
 
 public class DefaultSearchTokenFacade implements SearchTokenFacade {
+    private static final Logger LOG = Logger.getLogger(DefaultSearchTokenFacade.class);
 
     @Value("${coveocc.searchtoken.path}")
     private String searchTokenPath;
@@ -46,18 +52,23 @@ public class DefaultSearchTokenFacade implements SearchTokenFacade {
     @Override
     public ResponseEntity<SearchTokenWsDTO> getSearchToken(String baseSiteId , String userId, String searchHub,
                                                            long maxAgeMilliseconds, String userAgent) {
-
         BaseSiteModel baseSite = baseSiteService.getBaseSiteForUID(baseSiteId);
-
         HttpHeaders headers = buildHeaders(baseSite.getCoveoApiKey(), userAgent);
-
         Set<String> userPriceGroupIds = getUserPriceGroups(userId);
-
         SearchTokenBody searchTokenBody = buildRequestBody(userId, userPriceGroupIds, searchHub);
-
         URI uri = URI.create(baseSite.getCoveoPlatformUrl() + searchTokenPath);
-
         HttpEntity<SearchTokenBody> requestEntity = new HttpEntity<>(searchTokenBody, headers);
+
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("Making a request to get a search token: ");
+            LOG.trace("URI: " + uri);
+            LOG.trace("User ids: [ " + searchTokenBody.getUserIds().stream()
+                    .map(userInfo -> SensitiveDataMaskingUtils.maskEmail(userInfo.getName()))
+                    .collect(Collectors.joining(", ")) + " ]");
+            LOG.trace("Valid for: " + searchTokenBody.getValidFor());
+            LOG.trace("Accept: " + headers.getAccept() + "; Content-Type: " + headers.getContentType());
+            LOG.trace("User-Agent: " + headers.get(USER_AGENT));
+        }
         return searchTokenRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, SearchTokenWsDTO.class);
     }
 
@@ -90,7 +101,7 @@ public class DefaultSearchTokenFacade implements SearchTokenFacade {
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(coveoApiKey);
-        headers.set("User-Agent", userAgent);
+        headers.set(USER_AGENT, userAgent);
         return headers;
     }
 

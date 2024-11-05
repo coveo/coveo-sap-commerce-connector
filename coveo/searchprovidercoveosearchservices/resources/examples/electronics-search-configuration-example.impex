@@ -41,7 +41,7 @@ INSERT_UPDATE CoveoSnIndexConfiguration; id[unique = true]        ; name        
 
 INSERT_UPDATE SnIndexType; indexConfiguration(id)   ; id[unique = true]           ; name                          ; itemComposedType(code); identityProvider   ; listeners                            ; catalogs(id)              ; stores(uid)
                          ; $coveoIndexConfiguration ; $coveoProductIndexType      ; CoveoElectronics Product      ; Product               ; snIdentityProvider ; catalogVersionFilterSnSearchListener ; electronicsProductCatalog ; electronics
-                         ; $coveoIndexConfiguration ; $coveoAvailabilityIndexType ; CoveoElectronics Availability ; PointOfService        ; snIdentityProvider ;                                      ;                           ; electronics
+                         ; $coveoIndexConfiguration ; $coveoAvailabilityIndexType ; CoveoElectronics Availability ; Warehouse             ; snIdentityProvider ;                                      ;                           ; electronics
 
 INSERT_UPDATE SnField; indexType(id)[unique = true]; id[unique = true]               ; name                             ; fieldType(code); localized[default = false]; valueProvider                                              ; valueProviderParameters[map-delimiter = |]                                                            ; qualifierTypeId
                      ; $coveoProductIndexType      ; allCategories                   ; All Categories                   ; STRING         ;                           ; productCategoryAttributeSnIndexerValueProvider             ;                                                                                                       ;

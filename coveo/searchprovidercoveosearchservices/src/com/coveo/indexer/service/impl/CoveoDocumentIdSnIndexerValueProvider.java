@@ -4,9 +4,9 @@ import de.hybris.platform.core.model.ItemModel;
 import de.hybris.platform.searchservices.indexer.SnIndexerException;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerContext;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
-import de.hybris.platform.searchservices.indexer.service.impl.AbstractSnIndexerValueProvider;
 import de.hybris.platform.searchservices.indexer.service.impl.ModelAttributeSnIndexerValueProvider;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import java.util.Set;
 
@@ -30,6 +30,7 @@ import java.util.Set;
  * The prefix value in the valueProviderParameters is optional. Use the expression attribute to define which field of the model should be used for the unique id
  */
 public class CoveoDocumentIdSnIndexerValueProvider extends ModelAttributeSnIndexerValueProvider {
+    private static final Logger LOG = Logger.getLogger(CoveoDocumentIdSnIndexerValueProvider.class);
 
     private static final String PREFIX_PARAM = "prefix";
     private static final String URI_ELEMENT = "://";
@@ -38,10 +39,10 @@ public class CoveoDocumentIdSnIndexerValueProvider extends ModelAttributeSnIndex
 
     @Override
     protected Object getFieldValue(SnIndexerContext indexerContext, SnIndexerFieldWrapper fieldWrapper, ItemModel source, Void data) throws SnIndexerException {
-
         String documentIdPrefix = fieldWrapper.getValueProviderParameters().getOrDefault(PREFIX_PARAM, StringUtils.EMPTY);
-
-        return documentIdPrefix + URI_ELEMENT + super.getFieldValue(indexerContext, fieldWrapper, source, data);
+        String documentId = documentIdPrefix + URI_ELEMENT + super.getFieldValue(indexerContext, fieldWrapper, source, data);
+        if (LOG.isDebugEnabled()) LOG.debug("Document ID: " + documentId);
+        return documentId;
     }
 
     @Override

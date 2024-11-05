@@ -34,16 +34,18 @@ public class CoveoObjectTypeSnIndexerValueProvider extends AbstractSnIndexerValu
 
     @Override
     protected Object getFieldValue(SnIndexerContext indexerContext, SnIndexerFieldWrapper fieldWrapper, ItemModel source, Void data) throws SnIndexerException {
+        String objectType = null;
         if (Arrays.asList(configurationService.getConfiguration().getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_PRODUCT_TYPES_CODE).split(",")).contains(source.getItemtype())) {
-            return PRODUCT_OBJECT_TYPE;
+            objectType = PRODUCT_OBJECT_TYPE;
         } else if (Arrays.asList(configurationService.getConfiguration().getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_VARIANT_TYPES_CODE).split(",")).contains(source.getItemtype())) {
-            return PRODUCT_VARIANT_TYPE;
+            objectType = PRODUCT_VARIANT_TYPE;
         } else if (Arrays.asList(configurationService.getConfiguration().getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE).split(",")).contains(source.getItemtype())) {
-            return PRODUCT_AVAILABILITY_TYPE;
+            objectType = PRODUCT_AVAILABILITY_TYPE;
         } else {
             LOG.warn("Item type not supported: " + source.getItemtype());
         }
-        return null;
+        if (LOG.isDebugEnabled()) LOG.debug("Object type: " + objectType);
+        return objectType;
     }
 
     @Required

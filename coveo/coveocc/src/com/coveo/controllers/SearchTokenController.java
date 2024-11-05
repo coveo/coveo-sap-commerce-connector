@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +30,7 @@ import static com.coveo.constants.CoveoccConstants.COVEOCC_USER_AGENT_PROPERTY;
 @Controller
 @RequestMapping(value="/{baseSiteId}/coveo")
 public class SearchTokenController {
+    private static final Logger LOG = Logger.getLogger(SearchTokenController.class);
 
     @Resource(name = "searchTokenFacade")
     private SearchTokenFacade searchTokenFacade;
@@ -49,6 +51,7 @@ public class SearchTokenController {
                                                            @Parameter(in=ParameterIn.PATH, required=true, description="The specific Coveo search hub the JWT is for")
                                                            @PathVariable final String searchHub)
     {
+        if (LOG.isTraceEnabled()) LOG.trace("Getting search token for baseSiteId: " + baseSiteId + " and searchHub: " + searchHub);
         String userAgent = configurationService.getConfiguration().getString(COVEOCC_USER_AGENT_PROPERTY, COVEOCC_USER_AGENT);
         return searchTokenFacade.getSearchToken(baseSiteId, getUserId(),
                 searchHub, TimeUnit.SECONDS.toMillis(CoveoccConstants.SEARCH_TOKEN_MAX_AGE_SECONDS), userAgent);
