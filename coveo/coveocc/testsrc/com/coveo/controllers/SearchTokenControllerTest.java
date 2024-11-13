@@ -21,6 +21,7 @@ import de.hybris.platform.webservicescommons.testsupport.client.WsSecuredRequest
 import de.hybris.platform.webservicescommons.testsupport.server.NeedsEmbeddedServer;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.io.IOUtils;
@@ -61,10 +62,8 @@ public class SearchTokenControllerTest extends ServicelayerTest
 	private static final Key HMAC_KEY = new SecretKeySpec(Base64.getDecoder().decode(JWT_SECRET), SignatureAlgorithm.HS256.getJcaName());
 	private static final String INVALID = "invalid";
 	private static final String TEST_BASE_SITE = "coveotestbasesite";
-	private static final String TEST_SEARCH_HUB = "searchHub";
 	private static final String JWT_ROLE = "role";
 	private static final String JWT_PROVIDER = "provider";
-	private static final String JWT_SOURCE = "source";
 	private static final String JWT_GROUP = "group";
 	private static final String TEST_USER = "test@email.com";
 	private static final String TEST_USER_PASSWORD = "password";
@@ -80,6 +79,8 @@ public class SearchTokenControllerTest extends ServicelayerTest
 	private WsSecuredRequestBuilder wsSecuredRequestBuilder;
 
 	private static WsRequestBuilder wsRequestBuilder;
+
+	private static WsRequestBuilder wsRequestBuilderNoHub;
 
 	@Resource(name="configurationService")
 	private ConfigurationService configurationService;
@@ -102,16 +103,14 @@ public class SearchTokenControllerTest extends ServicelayerTest
 				.path(SERVICE_VERSION)
 				.path(TEST_BASE_SITE)
 				.path(COVEO_PATH)
-				.path(TOKEN_RESOURCE)
-				.path(TEST_SEARCH_HUB);
+				.path(TOKEN_RESOURCE);
 
 		wsRequestBuilder = new WsRequestBuilder()
 				.extensionName(YcommercewebservicesConstants.EXTENSIONNAME)
 				.path(SERVICE_VERSION)
 				.path(TEST_BASE_SITE)
 				.path(COVEO_PATH)
-				.path(TOKEN_RESOURCE)
-				.path(TEST_SEARCH_HUB);
+				.path(TOKEN_RESOURCE);
 	}
 
 	@After
@@ -142,7 +141,6 @@ public class SearchTokenControllerTest extends ServicelayerTest
 
 		final String sub = jwt.getBody().getSubject();
 		assertThat(sub).isEqualTo(ANON_USER);
-
 	}
 
 	@Test
@@ -168,10 +166,8 @@ public class SearchTokenControllerTest extends ServicelayerTest
 	private static void validateCommonValues(final Jws<Claims> jwt) {
 		final String role = (String) jwt.getBody().get(JWT_ROLE);
 		final String provider = (String) jwt.getBody().get(JWT_PROVIDER);
-		final String source = (String) jwt.getBody().get(JWT_SOURCE);
 		assertThat(role).isEqualTo("User");
 		assertThat(provider).isEqualTo("Email Security Provider");
-		assertThat(source).isEqualTo(TEST_SEARCH_HUB);
 	}
 
 	private static HttpServer createServer() throws IOException {
@@ -193,7 +189,6 @@ public class SearchTokenControllerTest extends ServicelayerTest
 				String role = null;
 				String provider = null;
 				StringBuilder group = new StringBuilder();
-				String source = (String) payloadMap.getOrDefault("searchHub", INVALID);
 
 				if (payloadMap.containsKey("userIds")) {
 					final List<Map<String, String>> userIds = (List<Map<String, String>>) payloadMap.get("userIds");
@@ -211,20 +206,20 @@ public class SearchTokenControllerTest extends ServicelayerTest
 				}
 
 				final Date now = new Date();
-				final String jwtToken = Jwts.builder()
+				final JwtBuilder jwtToken = Jwts.builder()
 						.claim(JWT_ROLE, role)
 						.claim(JWT_PROVIDER, provider)
-						.claim(JWT_SOURCE, source)
 						.claim(JWT_GROUP, group.toString())
 						.setSubject(sub)
 						.setId(UUID.randomUUID().toString())
 						.setIssuedAt(now)
 						.setExpiration(Date.from(now.toInstant().plus(5L, ChronoUnit.MINUTES)))
-						.signWith(HMAC_KEY)
-						.compact();
+						.signWith(HMAC_KEY);
+
+				final String jwtTokenString = jwtToken.compact();
 
 				final SearchTokenWsDTO token = new SearchTokenWsDTO();
-				token.setToken(jwtToken);
+				token.setToken(jwtTokenString);
 				final String jsonString = mapper.writeValueAsString(token);
 
 				exchange.getResponseHeaders().set("Content-Type", "application/json");

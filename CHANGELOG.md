@@ -14,18 +14,21 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.3.0 (2024-11-12) <sub>$${\color{green}recommended}$$</sub>
+
+- Remove the `searchhub` parameter from the Coveo search token endpoint.
+
 ## v3.2.0 (2024-11-5) <sub>$${\color{green}recommended}$$</sub>
 
-- Added improved logging for monitoring and indexation progress
+- Add improved logging for indexing process.
 
-- Changed category hierarchy index value provider to format the data in line with Coveo best practice
+- Change the `coveoProductCategoryHierarchy` value provider to format the data in line with Coveo best practice.
 
-- For attributes of a document that have no value, no value is pushed to the index rather than a an empty string
+- For attributes of a document that have no value, no value is pushed to the index instead of an empty string.
 
 ## v3.1.4 (2024-08-27) <sub>$${\color{red}required}$$</sub>
 
 - Fix a bug in a unit test that used data that wasn't available without an internal extension.
-
 
 ## v3.1.3 (2024-08-09) <sub>$${\color{green}recommended}$$</sub>
 

@@ -5,5 +5,5 @@ import org.springframework.http.ResponseEntity;
 
 public interface SearchTokenFacade {
 
-    ResponseEntity<SearchTokenWsDTO> getSearchToken(String baseSiteId, String userId, String searchHub, long maxAgeMilliseconds, String userAgent);
+    ResponseEntity<SearchTokenWsDTO> getSearchToken(String baseSiteId, String userId, long maxAgeMilliseconds, String userAgent);
 }

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 
 import javax.annotation.Resource;
+import javax.ws.rs.QueryParam;
 import java.util.concurrent.TimeUnit;
 
 import static com.coveo.constants.CoveoccConstants.COVEOCC_USER_AGENT;
@@ -38,7 +39,7 @@ public class SearchTokenController {
     @Resource(name = "configurationService")
     private ConfigurationService configurationService;
 
-    @GetMapping(value="token/{searchHub}")
+    @GetMapping(value="token")
     @CacheControl(directive = CacheControlDirective.PRIVATE,maxAge = CoveoccConstants.SEARCH_TOKEN_MAX_AGE_SECONDS)
     @ResponseBody
     @Tag(name="Coveo Search Token")
@@ -47,14 +48,12 @@ public class SearchTokenController {
                     +"If the user is currently logged in, the JWT will contain the users unique ID, otherwise the JWT will be for an anonymous user",
             summary="Get JWT for Coveo Search API")
     public ResponseEntity<SearchTokenWsDTO> getSearchToken(@Parameter(in=ParameterIn.PATH, required=true, description="The base site id the JWT is for")
-                                                           @PathVariable final String baseSiteId,
-                                                           @Parameter(in=ParameterIn.PATH, required=true, description="The specific Coveo search hub the JWT is for")
-                                                           @PathVariable final String searchHub)
+                                                           @PathVariable final String baseSiteId)
     {
-        if (LOG.isTraceEnabled()) LOG.trace("Getting search token for baseSiteId: " + baseSiteId + " and searchHub: " + searchHub);
+        if (LOG.isTraceEnabled()) LOG.trace("Getting search token for baseSiteId: " + baseSiteId);
         String userAgent = configurationService.getConfiguration().getString(COVEOCC_USER_AGENT_PROPERTY, COVEOCC_USER_AGENT);
         return searchTokenFacade.getSearchToken(baseSiteId, getUserId(),
-                searchHub, TimeUnit.SECONDS.toMillis(CoveoccConstants.SEARCH_TOKEN_MAX_AGE_SECONDS), userAgent);
+                TimeUnit.SECONDS.toMillis(CoveoccConstants.SEARCH_TOKEN_MAX_AGE_SECONDS), userAgent);
     }
 
     private String getUserId() {

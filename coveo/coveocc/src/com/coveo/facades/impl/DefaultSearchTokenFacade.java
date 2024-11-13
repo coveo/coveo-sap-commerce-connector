@@ -50,12 +50,12 @@ public class DefaultSearchTokenFacade implements SearchTokenFacade {
     private UserService userService;
 
     @Override
-    public ResponseEntity<SearchTokenWsDTO> getSearchToken(String baseSiteId , String userId, String searchHub,
-                                                           long maxAgeMilliseconds, String userAgent) {
+    public ResponseEntity<SearchTokenWsDTO> getSearchToken(String baseSiteId, String userId, long maxAgeMilliseconds,
+                                                           String userAgent) {
         BaseSiteModel baseSite = baseSiteService.getBaseSiteForUID(baseSiteId);
         HttpHeaders headers = buildHeaders(baseSite.getCoveoApiKey(), userAgent);
         Set<String> userPriceGroupIds = getUserPriceGroups(userId);
-        SearchTokenBody searchTokenBody = buildRequestBody(userId, userPriceGroupIds, searchHub);
+        SearchTokenBody searchTokenBody = buildRequestBody(userId, userPriceGroupIds);
         URI uri = URI.create(baseSite.getCoveoPlatformUrl() + searchTokenPath);
         HttpEntity<SearchTokenBody> requestEntity = new HttpEntity<>(searchTokenBody, headers);
 
@@ -105,7 +105,7 @@ public class DefaultSearchTokenFacade implements SearchTokenFacade {
         return headers;
     }
 
-    private static SearchTokenBody buildRequestBody(String userId, Set<String> userGroupIds, String searchHub) {
+    private static SearchTokenBody buildRequestBody(String userId, Set<String> userGroupIds) {
         SearchTokenBody searchTokenBody = new SearchTokenBody();
         List<SearchTokenUserId> userTokenIds = new ArrayList<>();
         userTokenIds.add(createSearchTokenUserId(userId, "User"));
@@ -114,7 +114,6 @@ public class DefaultSearchTokenFacade implements SearchTokenFacade {
         userGroupIds.forEach(userGroupId ->
                 userTokenIds.add(createSearchTokenUserId(userGroupId, "Group")));
         searchTokenBody.setUserIds(userTokenIds);
-        searchTokenBody.setSearchHub(searchHub);
         searchTokenBody.setValidFor(TimeUnit.SECONDS.toMillis(CoveoccConstants.SEARCH_TOKEN_MAX_AGE_SECONDS));
         return searchTokenBody;
     }

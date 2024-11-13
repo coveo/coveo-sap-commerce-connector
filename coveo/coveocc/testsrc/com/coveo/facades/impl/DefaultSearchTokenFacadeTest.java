@@ -45,7 +45,6 @@ public class DefaultSearchTokenFacadeTest {
     private static final String TEST_COVEO_API_KEY = "test-api-key";
     private static final String TEST_BASE_SITE_ID = "testBaseSite";
     private static final String TEST_USER_ID = "testUserId";
-    private static final String TEST_SEARCH_HUB = "testSearchHub";
     private static final String TEST_TOKEN = "testToken";
     private static final Long TEST_MAX_AGE_MS = 3000L;
     private static final String PRICE_GROUP1 = "group1";
@@ -107,7 +106,7 @@ public class DefaultSearchTokenFacadeTest {
 
     @Test
     public void testTokenGeneration() {
-        ResponseEntity<SearchTokenWsDTO> tokenResponse = searchTokenFacade.getSearchToken(TEST_BASE_SITE_ID, TEST_USER_ID, TEST_SEARCH_HUB, TEST_MAX_AGE_MS, CoveoccConstants.COVEOCC_USER_AGENT);
+        ResponseEntity<SearchTokenWsDTO> tokenResponse = searchTokenFacade.getSearchToken(TEST_BASE_SITE_ID, TEST_USER_ID, TEST_MAX_AGE_MS, CoveoccConstants.COVEOCC_USER_AGENT);
 
         assertThat(tokenResponse.getBody()).isNotNull();
         assertThat(tokenResponse.getBody().getToken()).isEqualTo(TEST_TOKEN);
@@ -129,7 +128,6 @@ public class DefaultSearchTokenFacadeTest {
 
         final SearchTokenBody body = httpEntity.getBody();
         assertThat(body).isNotNull();
-        assertThat(body.getSearchHub()).isEqualTo(TEST_SEARCH_HUB);
         assertThat(body.getUserIds()).hasSize(3).extracting("name", "type")
                 .containsExactlyInAnyOrder(
                         tuple(TEST_USER_ID, "User"),

@@ -1,6 +1,20 @@
 # Coveo SAP Commerce indexer push extension
 
+> [!IMPORTANT]
+> For the exhaustive guide on how to set up the extension, see the [Coveo documentation](https://docs.coveo.com/en/ladf2011).
+
 ## Installation
+
+Depending on your SAP Commerce version, download the extension from the appropriate branch:
+
+* For SAP Commerce Cloud 2011, use the `v1` branch.
+
+* For SAP Commerce Cloud 2105 and 2205, use the `v2` branch.
+
+* For SAP Commerce Cloud 2211, use the `main` branch.
+
+In the `main` branch, you can find that the extension has different versions.
+For detailed changes between versions, see the [Change Log](https://github.com/coveo/coveo-sap-commerce-connector/blob/main/CHANGELOG.md). 
 
 1. Copy the `searchprovidercoveosearchservices` extension to the `hybris/bin/custom` directory of your project.
 
@@ -29,7 +43,8 @@ See the `.jar` files in the `hybris/bin/custom/searchprovidercoveosearchservices
 
 1. At the top of the page, click the **Update** button.
 
-> **_&#9432;_** &nbsp; The extension creates new data types in the database, and creates 2 new service layer jobs for a full and incremental index.
+> [!NOTE]
+> The extension creates new data types in the database, and creates 2 new service layer jobs for a full and incremental index.
 
 ## Semi-automatic configuration
 
@@ -61,7 +76,7 @@ Perform the following steps to do so.
 
 1. Create one API key that you'll use for all your sources. See [Manage API Keys](https://docs.coveo.com/en/1718/manage-an-organization/manage-api-keys). The key should have the privileges detailed here [Catalog Source Privileges](https://docs.coveo.com/en/n8of0593/coveo-for-commerce/create-a-catalog-source#required-privileges).
 
-   > **_&#9432;_** &nbsp; Remember to note down the secret in a safe place.
+   > ✏️ Remember to note down the secret in a safe place.
 
 ## SAP Commerce setup
 
@@ -90,7 +105,7 @@ For each source you created in the Coveo Administration Console, you should perf
 
       - **PRODUCTANDVARIANT**. This type is for the the products and variations of the catalog. See [Catalog product data](https://docs.coveo.com/en/m53g7119) and [Catalog variant data and product groupings](https://docs.coveo.com/en/m53g0506).
 
-      > **_&#9432;_** &nbsp; When selecting an object type of **PRODUCTANDVARIANT**, Language, Currency, and Country are mandatory for the system to determine the correct source for your product data.
+         > ⚠️ When selecting an object type of **PRODUCTANDVARIANT**, Language, Currency, and Country are mandatory for the system to determine the correct source for your product data.
 
    1. If the object type is **PRODUCTANDVARIANT**, specify the combination of the **Language**, **Currency**, and **Country** which this source represents.
 
@@ -114,13 +129,14 @@ Create a consumed destination:
 
    - **Destination Target**. Click the field and select **Default_Template**.
 
-   > **_&#9432;_** &nbsp; The **Destination Target** value is ignored by the Coveo extension, but is required to create the destination
+      > ✏️ The **Destination Target** value is ignored by the Coveo extension, but is required to create the destination
 
 1. Click the **Finish** button.
 
 ### Step 3: Create a credential for the consumed destination
 
-> **_&#9432;_** &nbsp; If you have a number of sources, you only need to create one OAuth Credential and attach it to many Consumed Destinations.
+> [!IMPORTANT]
+> If you have a number of sources, you only need to create one OAuth Credential and attach it to many Consumed Destinations.
 
 1. Click the destination you created and switch to the **Destination Configuration** tab.
 
@@ -195,7 +211,37 @@ Now that you've mapped the Coveo sources to the SAP Commerce API destinations, y
 
 1. Click the **Finish** button.
 
-### Step 7: Create the Index types
+### Step 7: Create the ServiceLayerJobs
+
+> [!TIP]
+> Skip this step if you’re using the connector version 3.1.3 or later. 
+> The connector versions starting from 3.1.3 have the ServiceLayerJobs created automatically.
+
+Create the ServiceLayerJobs for the future cron jobs, one for full indexing and one for incremental indexing.
+
+1. **Go to System** → **Types**.
+
+1. In the search bar, type in `ServicelayerJob` and search.
+
+1. In the search results, click the **ServicelayerJob**.
+
+   The properties of the ServicelayerJob are displayed on the page.
+
+1. In the upper part of the properties, click the search icon that’s titled **Search by type**.
+
+1. Click the plus sign (**+**) above the search listing.
+
+1. In the modal window that appears:
+
+   - **Spring ID**. Paste `fullCoveoSnIndexerJob`.
+
+   - **Code**. Paste `fullCoveoSnIndexerJob`.
+
+1. Click **Finish**.
+
+1. Perform the same steps to create another ServicelayerJob for which specify `incrementalCoveoSnIndexerJob` for the **Code** and the **Spring ID** attributes.
+
+### Step 8: Create the Index types
 
 Create one Index type for full indexing and one for incremental indexing.
 
@@ -252,7 +298,7 @@ Create one Index type for full indexing and one for incremental indexing.
 
    - in the **Create Cron Jobs** step, select **Incremental Indexer Cronjob**. Use `coveoIncrementalIndexType` for the **Code** attribute and `incrementalCoveoSnIndexerJob` for the **Job Definition** attribute. Update the FlexibleSearch query to match the incremental indexing requirements.
 
-### Step 8: Create the objectType field
+### Step 9: Create the objectType field
 
 In both created Index types, create a field that will be used to specify the Coveo object type.
 
@@ -264,7 +310,7 @@ In both created Index types, create a field that will be used to specify the Cov
 
 1. Click in the **Fields** menu, to create a field specific for Coveo.
 
-   > **_&#9432;_** &nbsp; You can create as many additional fields as you need to push to Coveo. In this example, you'll create one field, `objectType`.
+   > ✏️ You can create as many additional fields as you need to push to Coveo. In this example, you'll create one field, `objectType`.
 
 1. In the modal window that appears, fill in the following fields:
 
@@ -292,7 +338,23 @@ In both created Index types, create a field that will be used to specify the Cov
    coveo.variant.typecodes=VariantProduct
    ```
 
-### Step 9: Map the catalog fields
+### Step 10: Use the value providers
+
+Your Coveo organization has a set of expected fields to be indexed. 
+The values for these fields should follow the Coveo index format.
+
+However, your SAP Commerce Cloud project might generate values whose formats are different from what the Coveo index expects, so this will lead to errors during indexing. 
+To handle this, you can employ value providers to retrieve and change field names from the SAP Commerce Cloud database.
+
+The Coveo SAP Commerce indexer push extension includes two sets of value providers:
+
+* Standard providers that are used to retrieve values from the database as is. For the list of provider names, see the [example impex file](https://github.com/coveo/coveo-sap-commerce-connector/blob/main/coveo/searchprovidercoveosearchservices/resources/examples/electronics-search-configuration-example.impex#L46).
+
+* Coveo value providers that transform the values before they’re pushed to Coveo. Examine the table below to learn more about the Coveo-specific value providers.
+
+For details, see the [Use the value providers](https://docs.coveo.com/en/ladf2011) section in the Coveo documentation.
+
+### Step 11: Map the catalog fields
 
 For both created Index types, map catalog fields with the Coveo fields.
 Do the mapping only for the fields that you want to push to Coveo.
@@ -303,14 +365,22 @@ Do the mapping only for the fields that you want to push to Coveo.
 
 1. Switch to the **Fields** tab.
 
+1. Examine the fields.
+
+   > ⚠️ Make sure there are only fields that you want to push to Coveo. 
+   > The rest should be removed as they will add to the indexing time.
+   >
+   > Although leaving them in won’t cause the indexing to fail, it’s recommended to remove them for optimization.
+
 1. Examine the **Identifier** column. The values in it should match the field name that was set within the source in the [Coveo Administration Console](https://platform.cloud.coveo.com/login).
+
      For example, for the SAP field `name`, you need to create the mapping `%[name]` in the Coveo Administration Console.
 
      See [Manage source mappings](https://docs.coveo.com/en/1640/) and [Mapping rule syntax reference](https://docs.coveo.com/en/1839/).
 
 1. If you need to create a new field, do so the same way you created the `objectType` field in the previous step.
 
-### Step 10: Run the indexers
+### Step 12: Run the indexers
 
 Once you've configured your system correctly, you can run your indexers.
 
@@ -322,7 +392,14 @@ Once you've configured your system correctly, you can run your indexers.
 
 1. Click the required cronjob.
 
-1. Make sure that the cronjob is enabled, see the **True** checkbox in the **Enabled** section.
+   1. Make sure that the cronjob is enabled, see the **True** checkbox in the **Enabled** section.
+
+   1. On the **Time Schedule** tab, you can set the time when the cronjob should run.
+
+      > ⚠️ For the full indexer, it’s recommended to run it relatively often to ensure the consistency of the data between your SAP Commerce Cloud project and the Coveo index. 
+      > For example, you can schedule the full indexer to run every two or three days, but the exact timeframe will depend on your judgment based on the number of products in your catalog.
+      > 
+      > The exact time depends on the amount of data you have and how often it changes.
 
 1. Click the **Save** button to save and close the cronjob settings.
 
