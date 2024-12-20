@@ -14,6 +14,12 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.3.1 (2024-11-12) <sub>$${\color{green}recommended}$$</sub>
+
+- Added support for regional language ISO codes.
+
+- Added support for pushing products to country-specific sources.
+
 ## v3.3.0 (2024-11-12) <sub>$${\color{green}recommended}$$</sub>
 
 - Remove the `searchhub` parameter from the Coveo search token endpoint.

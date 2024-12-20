@@ -80,5 +80,14 @@
 		<itemtype code="CoveoSearchSnSearchProviderConfiguration" extends="AbstractSnSearchProviderConfiguration"
 				  autocreate="true" generate="true">
 		</itemtype>
+
+		<itemtype code="Product" autocreate="false" generate="false">
+			<attributes>
+				<attribute qualifier="coveoAuthorizedCountries" type="CountryCollection">
+					<persistence type="property" />
+					<modifiers optional="true" />
+				</attribute>
+			</attributes>
+		</itemtype>
 	</itemtypes>
 </items>

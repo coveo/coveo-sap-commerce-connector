@@ -14,6 +14,7 @@
           parent="defaultSnIndexerContextFactory">
         <property name="snIndexConfigurationService" ref="coveoSnIndexConfigurationService" />
         <property name="configurationService" ref="configurationService"/>
+        <property name="commonI18NService" ref="commonI18NService"/>
     </bean>
 
     <alias name="coveoSnIndexConfigurationService" alias="coveoSnIndexConfigurationService" />

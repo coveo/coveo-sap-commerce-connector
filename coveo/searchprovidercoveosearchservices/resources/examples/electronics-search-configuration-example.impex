@@ -101,6 +101,11 @@ INSERT_UPDATE SnField; indexType(id)[unique = true]; id[unique = true]          
 # This is an optional field that demonstrates how to push a category hierarchy to the index. The value provider is a custom value provider that will return the category hierarchy in the format required by the index
                      ; $coveoProductIndexType      ; coveoProductCategoryHierarchy   ; Coveo Product Category Hierarchy ; STRING         ; true                      ; coveoProductCategoryHierarchyAttributeSnIndexValueProvider ; rootCategory->1|expression->name                                                                      ;
 
+# This field is optional and can be used to provide country specific product support. Note that it needs to be a multi-valued field
+INSERT_UPDATE SnField; indexType(id)[unique = true]; id[unique = true]        ; name                       ; fieldType(code); localized[default = false]; valueProvider                          ; valueProviderParameters[map-delimiter = |]; qualifierTypeId; multiValued
+                     ; $coveoProductIndexType      ; coveoAuthorizedCountries ; Coveo Authorized Countries ; COVEOARRAY     ;                           ; productAttributeSnIndexerValueProvider ;                                           ;                ; true
+
+
 # Please note the spring ID value relates to a coveo indexer job. This is crutial for the coveo indexer to work
 # This data is added here for completeness as it will be imported as essential data as part of the update process used when installing the extension
 INSERT_UPDATE ServicelayerJob; code[unique = true]          ; springid
@@ -177,3 +182,16 @@ INSERT_UPDATE PriceRow; productId[unique = true]; unit(code[unique = true, defau
                       ; 824267                  ; pieces                                     ; USD                             ; 263,85  ; 1     ; 1         ; false ; loyalty-card
                       ; 824267                  ; pieces                                     ; JPY                             ; 23180   ; 1     ; 1         ; false ; logged-in
                       ; 824267                  ; pieces                                     ; JPY                             ; 22180   ; 1     ; 1         ; false ; loyalty-card
+
+# This data is added to demonstrate the country specific source support
+INSERT_UPDATE Product; code[unique = true]; coveoAuthorizedCountries
+                     ; 107701             ; US,JP
+                     ; 266899             ; US
+                     ; 325234             ; US
+                     ; 479956             ; JP
+                     ; 592506             ; JP
+                     ; 805693             ; US
+                     ; 816379             ; JP
+                     ; 824259             ; JP
+                     ; 861175             ; US,JP
+                     ; 824267             ; US,JP

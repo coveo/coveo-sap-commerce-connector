@@ -16,6 +16,7 @@ import de.hybris.platform.searchservices.indexer.service.SnIndexerRequest;
 import de.hybris.platform.searchservices.indexer.service.impl.DefaultSnIndexerContext;
 import de.hybris.platform.searchservices.indexer.service.impl.DefaultSnIndexerContextFactory;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
+import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import org.apache.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 
@@ -31,6 +32,7 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
     private static final Logger LOG = Logger.getLogger(CoveoSnIndexerContextFactory.class);
 
     private ConfigurationService configurationService;
+    private CommonI18NService commonI18NService;
 
     protected void populateIndexerContext(final DefaultSnIndexerContext context, final SnIndexerRequest indexerRequest) {
         if (LOG.isDebugEnabled()) LOG.debug("Populating indexer context for Coveo search provider");
@@ -66,9 +68,9 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
             }
 
             context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_REBUILD_STREAM_SERVICES_KEY,
-                    new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, rebuildStreamServices, configurationService));
+                    new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, rebuildStreamServices, configurationService, commonI18NService));
             context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_UPDATE_STREAM_SERVICES_KEY,
-                    new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, updateStreamServices, configurationService));
+                    new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, updateStreamServices, configurationService, commonI18NService));
         }
     }
 
@@ -98,5 +100,9 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
 
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
+    }
+
+    public void setCommonI18NService(CommonI18NService commonI18NService) {
+        this.commonI18NService = commonI18NService;
     }
 }

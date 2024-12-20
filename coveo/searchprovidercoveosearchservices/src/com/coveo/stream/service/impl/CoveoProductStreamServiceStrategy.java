@@ -11,6 +11,7 @@ import com.coveo.stream.service.CoveoStreamServiceStrategy;
 import com.coveo.stream.service.utils.CoveoFieldValueResolverUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import de.hybris.platform.core.model.c2l.CountryModel;
 import de.hybris.platform.searchservices.admin.data.SnCurrency;
 import de.hybris.platform.searchservices.admin.data.SnLanguage;
 import de.hybris.platform.searchservices.document.data.SnDocument;
@@ -18,11 +19,13 @@ import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationR
 import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationResponse;
 import de.hybris.platform.searchservices.enums.SnDocumentOperationStatus;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
+import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
@@ -45,10 +48,11 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
     List<T> streamServices;
 
     private final ConfigurationService configurationService;
+    private final CommonI18NService commonI18NService;
 
     public CoveoProductStreamServiceStrategy(List<SnLanguage> languages, List<SnCurrency> currencies,
                                              List<CoveoSnCountry> countries, List<T> incomingStreamServices,
-                                             ConfigurationService configurationService) {
+                                             ConfigurationService configurationService, CommonI18NService commonI18NService) {
         this.languages = languages;
         this.currencies = currencies;
         this.countries = countries;
@@ -61,6 +65,7 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
             }
         });
         this.configurationService = configurationService;
+        this.commonI18NService = commonI18NService;
     }
 
     @Override
@@ -80,14 +85,16 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
                 LOG.info(String.format("Streaming %s documents for source %s", totalDocumentsCount, source.getId()));
                 for (int documentIndex = 1; documentIndex <= totalDocumentsCount; documentIndex++) {
                     SnDocumentBatchOperationRequest request = documents.get(documentIndex - 1);
-                    SnDocumentBatchOperationResponse documentBatchOperationResponse = new SnDocumentBatchOperationResponse();
-                    documentBatchOperationResponse.setId(request.getDocument().getId());
-                    documentBatchOperationResponse.setStatus(streamDocument(request, source.getLanguage(), source.getCurrency(), source.getCountry(), streamService) ? SnDocumentOperationStatus.UPDATED : SnDocumentOperationStatus.FAILED);
-                    if (!responseMap.containsKey(documentBatchOperationResponse.getId()) || documentBatchOperationResponse.getStatus() == SnDocumentOperationStatus.FAILED) {
-                        responseMap.put(documentBatchOperationResponse.getId(), documentBatchOperationResponse);
-                    }
-                    if (logInterval != 0 && documentIndex % logInterval == 0) {
-                        LOG.info(String.format("Processed %s of %s documents", documentIndex, totalDocumentsCount));
+                    if (isApplicableForCountry(request, source.getLanguage(), source.getCurrency(), source.getCountry())) {
+                        SnDocumentBatchOperationResponse documentBatchOperationResponse = new SnDocumentBatchOperationResponse();
+                        documentBatchOperationResponse.setId(request.getDocument().getId());
+                        documentBatchOperationResponse.setStatus(streamDocument(request, source.getLanguage(), source.getCurrency(), source.getCountry(), streamService) ? SnDocumentOperationStatus.UPDATED : SnDocumentOperationStatus.FAILED);
+                        if (!responseMap.containsKey(documentBatchOperationResponse.getId()) || documentBatchOperationResponse.getStatus() == SnDocumentOperationStatus.FAILED) {
+                            responseMap.put(documentBatchOperationResponse.getId(), documentBatchOperationResponse);
+                        }
+                        if (logInterval != 0 && documentIndex % logInterval == 0) {
+                            LOG.info(String.format("Processed %s of %s documents", documentIndex, totalDocumentsCount));
+                        }
                     }
                 }
             }
@@ -102,6 +109,7 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
 
     private boolean streamDocument(SnDocumentBatchOperationRequest request, SnLanguage language, SnCurrency currency, CoveoSnCountry country, T streamService) {
         boolean success = true;
+
         synchronized (streamService) {
             DocumentBuilder coveoDocument = createCoveoDocument(request.getDocument(), language.getId(), currency.getId());
             if (coveoDocument != null) {
@@ -124,8 +132,47 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         return success;
     }
 
+    protected boolean isApplicableForCountry(SnDocumentBatchOperationRequest request, SnLanguage language,
+                                                    SnCurrency currency, CoveoSnCountry country) {
+        Object authorizedCountries = CoveoFieldValueResolverUtils.resolveFieldValue(
+                "coveoAuthorizedCountries",
+                request.getDocument().getFields(),
+                new Locale(language.getId()),
+                Currency.getInstance(currency.getId())
+        );
+
+        // skip as default behavior is to send to all sources
+        if (authorizedCountries == null) {
+            return true;
+        }
+
+        if (!(authorizedCountries instanceof Collection<?>)) {
+            LOG.warn("Document " + request.getDocument().getId() + " has an invalid coveoAuthorizedCountries field. This must be a collection of CountryModel objects.");
+            return true;
+        }
+
+        Collection<?> countriesToCheck = (Collection<?>) authorizedCountries;
+        if (countriesToCheck.isEmpty()) {
+            return true;
+        }
+
+        for (Object countryToCheck : countriesToCheck) {
+            if (countryToCheck instanceof CountryModel) {
+                CountryModel countryModel = (CountryModel) countryToCheck;
+                if (countryModel.getIsocode().equalsIgnoreCase(country.getId())) {
+                    return true;
+                }
+            } else {
+                LOG.warn("Document " + request.getDocument().getId() + " has an invalid country object " + countryToCheck + " in the coveoAuthorizedCountries field. This must be a CountryModel object.");
+            }
+        }
+
+        LOG.debug("Document " + request.getDocument().getId() + " is not authorized for country " + country.getId());
+        return false;
+    }
+
     private DocumentBuilder createCoveoDocument(SnDocument document, String languageIsoCode, String currencyIsoCode) {
-        Locale locale = new Locale(languageIsoCode);
+        Locale locale = commonI18NService.getLocaleForIsoCode(languageIsoCode);
         Currency currency = Currency.getInstance(currencyIsoCode);
         Map<String, Object> documentFields = document.getFields();
         String documentId = (String) CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_DOCUMENT_ID_INDEX_ATTRIBUTE, documentFields, locale, currency);
