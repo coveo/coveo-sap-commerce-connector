@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.util.Currency;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -26,7 +27,8 @@ public class CoveoFieldValueResolverUtils {
         return StringUtils.EMPTY;
     }
 
-    public static Object resolveFieldValue(String fieldName, Map<String, Object> documentFields, Locale locale, Currency currency) {
+    public static Object resolveFieldValue(String fieldName, Map<String, Object> documentFields, Locale locale,
+                                           Currency currency) {
         Object fieldValue = documentFields.getOrDefault(fieldName, null);
         if (LOG.isTraceEnabled()) LOG.trace("FieldName = " + fieldName + " : FieldValue = " + fieldValue);
         return resolveFieldValue(fieldValue, locale, currency);
@@ -43,6 +45,8 @@ public class CoveoFieldValueResolverUtils {
             } else if (!map.isEmpty()) {
                 return fieldValue;
             }
+        } else if (fieldValue instanceof Collection) {
+            return fieldValue;
         } else if (fieldValue != null) {
             return fieldValue.toString();
         }

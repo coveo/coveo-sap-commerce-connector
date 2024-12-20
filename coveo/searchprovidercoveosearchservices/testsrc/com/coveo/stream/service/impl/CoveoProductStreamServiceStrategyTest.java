@@ -13,6 +13,7 @@ import de.hybris.platform.searchservices.admin.data.SnField;
 import de.hybris.platform.searchservices.admin.data.SnLanguage;
 import de.hybris.platform.searchservices.document.data.SnDocument;
 import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationRequest;
+import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,6 +79,8 @@ public class CoveoProductStreamServiceStrategyTest {
     CoveoAbstractStreamService<Object> coveoAbstractStreamServiceDE;
     @Mock
     CoveoAbstractStreamService<Object> coveoAbstractStreamServiceAvailability;
+    @Mock
+    CommonI18NService commonI18NService;
 
     CoveoProductStreamServiceStrategy<CoveoAbstractStreamService<Object>> coveoProductStreamServiceStrategy;
 
@@ -109,6 +112,10 @@ public class CoveoProductStreamServiceStrategyTest {
         when(coveoAbstractStreamServiceDE.getCoveoSource()).thenReturn(coveoSourceDE);
         when(coveoAbstractStreamServiceAvailability.getCoveoSource()).thenReturn(coveoSourceAvailability);
 
+        when(commonI18NService.getLocaleForIsoCode(LANG_EN)).thenReturn(new Locale(LANG_EN));
+        when(commonI18NService.getLocaleForIsoCode(LANG_FR)).thenReturn(new Locale(LANG_FR));
+        when(commonI18NService.getLocaleForIsoCode(LANG_DE)).thenReturn(new Locale(LANG_DE));
+
         List<SnLanguage> languages = new ArrayList<>();
         List<SnCurrency> currencies = new ArrayList<>();
         List<CoveoSnCountry> countries = new ArrayList<>();
@@ -127,7 +134,8 @@ public class CoveoProductStreamServiceStrategyTest {
         streamServices.add(coveoAbstractStreamServiceDE);
         streamServices.add(coveoAbstractStreamServiceAvailability);
 
-        coveoProductStreamServiceStrategy = new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, streamServices);
+        coveoProductStreamServiceStrategy =
+                new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, streamServices, commonI18NService);
     }
 
     @Test
