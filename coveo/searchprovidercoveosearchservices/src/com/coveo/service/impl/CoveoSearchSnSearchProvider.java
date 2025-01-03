@@ -27,17 +27,21 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoSearchSnSearchProviderConfiguration> implements InitializingBean {
 
     private static final Logger LOG = Logger.getLogger(CoveoSearchSnSearchProvider.class);
 
     private final Map<String, CoveoStreamServiceStrategy> streamServiceStrategyMap = new HashMap<>();
+
+    private final List<SnIndexerOperation> snIndexerOperations = new ArrayList<>();
 
     private ConfigurationService configurationService;
 
@@ -67,6 +71,15 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
     @Override
     public void deleteIndex(SnContext context, String indexId) throws SnException {
         LOG.warn("Delete index method is not implemented");
+    }
+
+    public Optional<SnIndexerOperation> getIndexerOperation(SnContext context, String indexerOperationId) throws SnException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Getting Indexer Operation with id " + indexerOperationId);
+        }
+        return snIndexerOperations.stream()
+                .filter(op -> op.getId().equals(indexerOperationId))
+                .findFirst();
     }
 
     @Override
@@ -103,6 +116,7 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
             LOG.trace("Index ID: " + indexerOperation.getIndexId());
             LOG.trace("Index Type ID: " + indexerOperation.getIndexTypeId());
         }
+        snIndexerOperations.add(indexerOperation);
         return indexerOperation;
     }
 

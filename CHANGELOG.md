@@ -14,6 +14,12 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.4.0 (2025-1-xx) <sub>$${\color{red}required}$$</sub>
+
+- Added example on how to configure index batch size and concurrency
+
+- Implemented changes required to upgraded connector for use with SAP Commerce 2211.32
+
 ## v3.3.1 (2024-11-12) <sub>$${\color{green}recommended}$$</sub>
 
 - Added support for regional language ISO codes.
