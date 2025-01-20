@@ -1,0 +1,11 @@
+#Ant properties
+#Fri Nov 29 03:10:22 UTC 2024
+version.api=2211
+vendor=hybris
+group.id=de.hybris.platform
+name=coveopushclient
+description=coveopushclient
+builddate=20241129 0309
+releasedate=20241129 0309
+version=2211.32
+module.name=platform-module

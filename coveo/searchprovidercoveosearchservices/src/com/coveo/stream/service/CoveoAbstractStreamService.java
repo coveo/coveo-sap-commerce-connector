@@ -10,11 +10,7 @@ import java.net.URL;
 public abstract class CoveoAbstractStreamService<S> implements CoveoStreamService {
     private static final Logger LOG = Logger.getLogger(CoveoAbstractStreamService.class);
 
-    private final CoveoSource coveoSource;
-
-    protected CoveoAbstractStreamService(CoveoSource coveoSource) {
-        this.coveoSource = coveoSource;
-    }
+    protected CoveoSource coveoSource;
 
     protected CatalogSource createCatalogSource(CoveoSource coveoSource) {
         try {
@@ -26,6 +22,8 @@ public abstract class CoveoAbstractStreamService<S> implements CoveoStreamServic
     }
 
     protected abstract S createStreamService(CatalogSource catalogSource, String[] userAgents);
+
+    protected abstract void init(CoveoSource coveoSource, String[] userAgents);
 
     public CoveoSource getCoveoSource() {
         return coveoSource;

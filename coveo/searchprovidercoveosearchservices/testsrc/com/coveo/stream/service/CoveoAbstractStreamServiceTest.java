@@ -29,20 +29,21 @@ public class CoveoAbstractStreamServiceTest {
 
     @Test
     public void testCreateCatalogSource() {
-        TestCoveoAbstractStreamService testCoveoAbstractStreamService = new TestCoveoAbstractStreamService(coveoSource);
+        TestCoveoAbstractStreamService testCoveoAbstractStreamService = new TestCoveoAbstractStreamService();
         CatalogSource catalogSource = testCoveoAbstractStreamService.createCatalogSource(coveoSource);
         assertEquals(SOURCE_SECRET, catalogSource.getApiKey());
     }
 
     @Test
     public void testGetCoveoSource() {
-        TestCoveoAbstractStreamService testCoveoAbstractStreamService = new TestCoveoAbstractStreamService(coveoSource);
+        TestCoveoAbstractStreamService testCoveoAbstractStreamService = new TestCoveoAbstractStreamService();
+        testCoveoAbstractStreamService.init(coveoSource, new String[]{});
         assertEquals(coveoSource, testCoveoAbstractStreamService.getCoveoSource());
     }
 
     private static class TestCoveoAbstractStreamService extends CoveoAbstractStreamService<Object> {
-        public TestCoveoAbstractStreamService(CoveoSource coveoSource) {
-            super(coveoSource);
+        public TestCoveoAbstractStreamService() {
+            super();
         }
 
         @Override
@@ -50,6 +51,11 @@ public class CoveoAbstractStreamServiceTest {
             return null;
         }
 
+        @Override
+        protected void init(CoveoSource coveoSource, String[] userAgents) {
+            this.coveoSource = coveoSource;
+        }
+        
         @Override
         public void pushDocument(DocumentBuilder document) throws IOException, InterruptedException {
 
