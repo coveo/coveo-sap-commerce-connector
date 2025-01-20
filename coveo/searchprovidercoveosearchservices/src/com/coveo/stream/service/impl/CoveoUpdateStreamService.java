@@ -6,23 +6,25 @@ import com.coveo.pushapiclient.UpdateStreamService;
 import com.coveo.pushapiclient.exceptions.NoOpenFileContainerException;
 import com.coveo.searchservices.data.CoveoSource;
 import com.coveo.stream.service.CoveoAbstractStreamService;
+import de.hybris.platform.core.Registry;
 
 import java.io.IOException;
-
-import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COSAP_CONNECTOR_USER_AGENT;
 
 public class CoveoUpdateStreamService extends CoveoAbstractStreamService<UpdateStreamService> {
 
     UpdateStreamService updateStreamService;
 
-    public CoveoUpdateStreamService(CoveoSource coveoSource, String[] userAgents) {
-        super(coveoSource);
+    @Override
+    public void init(CoveoSource coveoSource, String[] userAgents) {
+        this.coveoSource = coveoSource;
         updateStreamService = createStreamService(createCatalogSource(coveoSource), userAgents);
     }
 
     @Override
     protected UpdateStreamService createStreamService(CatalogSource catalogSource, String[] userAgents) {
-        return new UpdateStreamService(catalogSource, userAgents);
+        final UpdateStreamService updateStreamService = Registry.getApplicationContext().getBean(UpdateStreamService.class);
+        updateStreamService.init(catalogSource, userAgents);
+        return updateStreamService;
     }
 
     @Override

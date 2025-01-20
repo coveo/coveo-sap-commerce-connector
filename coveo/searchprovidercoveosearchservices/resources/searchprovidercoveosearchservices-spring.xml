@@ -8,6 +8,9 @@
            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <!-- Indexer Configuration -->
+    <bean id="coveoUpdateStreamService" class="com.coveo.stream.service.impl.CoveoUpdateStreamService" scope="prototype" />
+    <bean id="coveoRebuildStreamService" class="com.coveo.stream.service.impl.CoveoRebuildStreamService" scope="prototype" />
+
     <alias name="coveoSnIndexerContextFactory" alias="coveoSnIndexerContextFactory" />
     <bean id="coveoSnIndexerContextFactory"
           class="com.coveo.service.impl.CoveoSnIndexerContextFactory"

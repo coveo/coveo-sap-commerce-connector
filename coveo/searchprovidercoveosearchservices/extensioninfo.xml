@@ -11,6 +11,7 @@
 
         <requires-extension name="apiregistryservices"/>
         <requires-extension name="commerceservices"/>
+        <requires-extension name="coveopushclient" />
 
         <coremodule generated="true" manager="com.coveo.jalo.SearchprovidercoveosearchservicesManager" packageroot="com.coveo"/>
 

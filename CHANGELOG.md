@@ -14,17 +14,24 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
-## v3.4.0 (2025-1-xx) <sub>$${\color{red}required}$$</sub>
 
-- Added example on how to configure index batch size and concurrency
+## v3.4.1 (2025-1-20) <sub>$${\color{green}recommended}$$</sub>
 
-- Implemented changes required to upgraded connector for use with SAP Commerce 2211.32
+- Add the ability to configure the Coveo Stream API client retry count and interval duration.
+
+- Fix the issue where manual cancellation of the full index job would corrupt the index.
+
+## v3.4.0 (2025-1-03) <sub>$${\color{red}required}$$</sub>
+
+- Add example on how to configure index batch size and concurrency.
+
+- Implement changes required to upgraded connector for use with SAP Commerce 2211.32.
 
 ## v3.3.1 (2024-11-12) <sub>$${\color{green}recommended}$$</sub>
 
-- Added support for regional language ISO codes.
+- Add support for regional language ISO codes.
 
-- Added support for pushing products to country-specific sources.
+- Add support for pushing products to country-specific sources.
 
 ## v3.3.0 (2024-11-12) <sub>$${\color{green}recommended}$$</sub>
 

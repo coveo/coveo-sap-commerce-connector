@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ Copyright (c) 2021 SAP SE or an SAP affiliate company. All rights reserved.
+--><extensioninfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
+
+    <extension abstractclassprefix="Generated" classprefix="Coveopushclient" jaloLogicFree="true" managername="CoveopushclientManager" managersuperclass="de.hybris.platform.jalo.extension.Extension" name="coveopushclient" usemaven="false">
+
+        <requires-extension name="core" />
+
+        <coremodule generated="true" manager="com.coveo.pushapiclient.jalo.CoveopushclientManager" packageroot="com.coveo.pushapiclient"/>
+
+    </extension>
+        
+
+</extensioninfo>

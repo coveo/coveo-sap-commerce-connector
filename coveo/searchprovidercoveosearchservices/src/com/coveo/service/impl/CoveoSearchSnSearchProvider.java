@@ -147,13 +147,24 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
 
     @Override
     public void abortIndexerOperation(SnContext context, String indexerOperationId, String message) throws SnException {
-        //TODO what should happen if the client abort the indexation before it ends ?
-        closeService(context, indexerOperationId);
+        LOG.warn(String.format("The indexer operation %s was aborted with message: %s", indexerOperationId, message));
+        if (!context.getExceptions().isEmpty()) {
+            for (Exception exception : context.getExceptions()) {
+                LOG.warn("The indexer operation was aborted with the following exception", exception);
+            }
+        }
+        LOG.warn("No items have been updated in the index");
     }
 
     @Override
     public void failIndexerOperation(SnContext context, String indexerOperationId, String message) throws SnException {
         LOG.warn(String.format("The indexer operation %s failed with message: %s", indexerOperationId, message));
+        if (!context.getExceptions().isEmpty()) {
+            for (Exception exception : context.getExceptions()) {
+                LOG.warn("The indexer operation was aborted with the following exception", exception);
+            }
+        }
+        LOG.warn("No items have been updated in the index");
     }
 
     @Override

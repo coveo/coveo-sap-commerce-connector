@@ -3,9 +3,11 @@ package com.coveo.stream.service.impl;
 import com.coveo.pushapiclient.CatalogSource;
 import com.coveo.pushapiclient.DocumentBuilder;
 import com.coveo.pushapiclient.StreamService;
+import com.coveo.pushapiclient.UpdateStreamService;
 import com.coveo.pushapiclient.exceptions.NoOpenStreamException;
 import com.coveo.searchservices.data.CoveoSource;
 import com.coveo.stream.service.CoveoAbstractStreamService;
+import de.hybris.platform.core.Registry;
 
 import java.io.IOException;
 
@@ -15,14 +17,17 @@ public class CoveoRebuildStreamService extends CoveoAbstractStreamService<Stream
 
     StreamService rebuildStreamService;
 
-    public CoveoRebuildStreamService(CoveoSource coveoSource, String[] userAgents) {
-        super(coveoSource);
+    @Override
+    public void init(CoveoSource coveoSource, String[] userAgents) {
+        this.coveoSource = coveoSource;
         rebuildStreamService = createStreamService(createCatalogSource(coveoSource), userAgents);
     }
 
     @Override
     protected StreamService createStreamService(CatalogSource catalogSource, String[] userAgents) {
-        return new StreamService(catalogSource, userAgents);
+        final StreamService streamService = Registry.getApplicationContext().getBean(StreamService.class);
+        streamService.init(catalogSource, userAgents);
+        return streamService;
     }
 
     @Override

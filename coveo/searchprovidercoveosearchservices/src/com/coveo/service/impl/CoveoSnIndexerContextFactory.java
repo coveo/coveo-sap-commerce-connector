@@ -2,6 +2,7 @@ package com.coveo.service.impl;
 
 import com.coveo.constants.SearchprovidercoveosearchservicesConstants;
 
+import com.coveo.pushapiclient.UpdateStreamService;
 import com.coveo.searchservices.admin.data.CoveoSnCountry;
 import com.coveo.searchservices.admin.data.CoveoSnIndexConfiguration;
 import com.coveo.searchservices.data.CoveoSearchSnSearchProviderConfiguration;
@@ -9,6 +10,7 @@ import com.coveo.stream.service.impl.CoveoAvailabilityStreamServiceStrategy;
 import com.coveo.stream.service.impl.CoveoProductStreamServiceStrategy;
 import com.coveo.stream.service.impl.CoveoRebuildStreamService;
 import com.coveo.stream.service.impl.CoveoUpdateStreamService;
+import de.hybris.platform.core.Registry;
 import de.hybris.platform.searchservices.admin.data.SnCurrency;
 import de.hybris.platform.searchservices.admin.data.SnLanguage;
 import de.hybris.platform.searchservices.core.service.SnContext;
@@ -46,8 +48,13 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
                 LOG.trace("Populating Source with name: " + source.getName());
                 LOG.trace("Source target URL: " + source.getDestinationTargetUrl());
             }
-            updateStreamServices.add(new CoveoUpdateStreamService(source, new String[]{userAgent}));
-            rebuildStreamServices.add(new CoveoRebuildStreamService(source, new String[]{userAgent}));
+            CoveoUpdateStreamService coveoUpdateStreamService = Registry.getApplicationContext().getBean(CoveoUpdateStreamService.class);
+            coveoUpdateStreamService.init(source, new String[]{userAgent});
+            updateStreamServices.add(coveoUpdateStreamService);
+
+            CoveoRebuildStreamService coveoRebuildStreamService = Registry.getApplicationContext().getBean(CoveoRebuildStreamService.class);
+            coveoRebuildStreamService.init(source, new String[]{userAgent});
+            rebuildStreamServices.add(coveoRebuildStreamService);
         });
 
         String[] availabilityTypes = configurationService.getConfiguration().getString(SUPPORTED_AVAILABILITY_TYPES_CODE).split(",");

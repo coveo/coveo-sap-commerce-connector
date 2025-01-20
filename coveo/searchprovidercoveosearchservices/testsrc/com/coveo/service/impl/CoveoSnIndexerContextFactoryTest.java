@@ -6,7 +6,6 @@ import com.coveo.searchservices.admin.data.CoveoSnIndexConfiguration;
 import com.coveo.searchservices.data.CoveoCatalogObjectType;
 import com.coveo.searchservices.data.CoveoSearchSnSearchProviderConfiguration;
 import com.coveo.searchservices.data.CoveoSource;
-import com.coveo.stream.service.CoveoStreamServiceStrategy;
 import com.coveo.stream.service.impl.CoveoAvailabilityStreamServiceStrategy;
 import com.coveo.stream.service.impl.CoveoProductStreamServiceStrategy;
 import com.coveo.stream.service.impl.CoveoRebuildStreamService;
@@ -36,7 +35,6 @@ import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COS
 import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
