@@ -16,6 +16,7 @@ import de.hybris.platform.searchservices.admin.data.SnField;
 import de.hybris.platform.searchservices.admin.data.SnLanguage;
 import de.hybris.platform.searchservices.document.data.SnDocument;
 import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationRequest;
+import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationResponse;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import org.apache.commons.configuration.Configuration;
@@ -36,11 +37,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
@@ -108,6 +111,9 @@ public class CoveoProductStreamServiceStrategyTest {
         when(snLanguageDe.getId()).thenReturn(LANG_DE);
         when(snCurrencyUsd.getId()).thenReturn(CURRENCY_USD);
         when(snCurrencyEur.getId()).thenReturn(CURRENCY_EUR);
+        when(coveoSnCountryUs.getId()).thenReturn("US");
+        when(coveoSnCountryFr.getId()).thenReturn("FR");
+        when(coveoSnCountryDe.getId()).thenReturn("DE");
 
         when(coveoSourceUS.getLanguage()).thenReturn(snLanguageEn);
         when(coveoSourceUS.getCurrency()).thenReturn(snCurrencyUsd);
@@ -158,20 +164,42 @@ public class CoveoProductStreamServiceStrategyTest {
 
     @Test
     public void testPushDocuments() throws IOException, InterruptedException {
+
         List<SnDocumentBatchOperationRequest> documents = new ArrayList<>();
         SnDocumentBatchOperationRequest documentA = new SnDocumentBatchOperationRequest();
-        documentA.setDocument(createDocumentFields("nameA", "codeA",
-                CoveoObjectTypeSnIndexerValueProvider.PRODUCT_VARIANT_TYPE));
+        documentA.setDocument(createDocumentFields("nameA", "codeA", CoveoObjectTypeSnIndexerValueProvider.PRODUCT_VARIANT_TYPE));
         SnDocumentBatchOperationRequest documentB = new SnDocumentBatchOperationRequest();
-        documentB.setDocument(createDocumentFields("nameB", "codeB",
-                CoveoObjectTypeSnIndexerValueProvider.PRODUCT_VARIANT_TYPE));
+        documentB.setDocument(createDocumentFields("nameB", "codeB", CoveoObjectTypeSnIndexerValueProvider.PRODUCT_VARIANT_TYPE));
+        SnDocumentBatchOperationRequest documentC = new SnDocumentBatchOperationRequest();
+        documentC.setDocument(createDocumentFields("nameC", "codeC", CoveoObjectTypeSnIndexerValueProvider.PRODUCT_VARIANT_TYPE));
         documents.add(documentA);
         documents.add(documentB);
-        coveoProductStreamServiceStrategy.pushDocuments(documents);
-        verify(coveoAbstractStreamServiceUS, times(2)).pushDocument(any());
-        verify(coveoAbstractStreamServiceFR, times(2)).pushDocument(any());
-        verify(coveoAbstractStreamServiceDE, times(2)).pushDocument(any());
-        verify(coveoAbstractStreamServiceAvailability, times(0)).pushDocument(any());
+        documents.add(documentC);
+
+        try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
+            Collection<CountryModel> countryData = new ArrayList<>();
+            CountryModel jp = mock(CountryModel.class);
+            when(jp.getIsocode()).thenReturn("JP");
+            CountryModel us = mock(CountryModel.class);
+            when(us.getIsocode()).thenReturn("US");
+            countryData.add(jp);
+            countryData.add(us);
+            mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(anyString(), eq(documentC.getDocument().getFields()),
+                    any(Locale.class), any(Currency.class))).thenReturn(countryData);
+            mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("coveoDocumentId"), anyMap(),
+                    any(Locale.class), any(Currency.class))).thenReturn("dummyDocumentId");
+            mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("name"), anyMap(),
+                    any(Locale.class), any(Currency.class))).thenReturn("dummyNameId");
+            mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("coveoClickableUri"), anyMap(),
+                    any(Locale.class), any(Currency.class))).thenReturn("dummyURL");
+
+            List<SnDocumentBatchOperationResponse> responses = coveoProductStreamServiceStrategy.pushDocuments(documents);
+            verify(coveoAbstractStreamServiceUS, times(3)).pushDocument(any());
+            verify(coveoAbstractStreamServiceFR, times(2)).pushDocument(any());
+            verify(coveoAbstractStreamServiceDE, times(2)).pushDocument(any());
+            verify(coveoAbstractStreamServiceAvailability, times(0)).pushDocument(any());
+            assertEquals(documents.size(), responses.size());
+        }
     }
 
     @Test

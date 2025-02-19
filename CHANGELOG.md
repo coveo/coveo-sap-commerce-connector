@@ -14,6 +14,9 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.4.2 (2025-1-20) <sub>$${\color{green}recommended}$$</sub>
+
+- Resolve an issue where the index count was incorrect when processing country-specific products.
 
 ## v3.4.1 (2025-1-20) <sub>$${\color{green}recommended}$$</sub>
 

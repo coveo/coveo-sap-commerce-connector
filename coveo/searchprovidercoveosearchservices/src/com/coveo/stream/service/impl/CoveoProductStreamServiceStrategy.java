@@ -85,16 +85,14 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
                 LOG.info(String.format("Streaming %s documents for source %s", totalDocumentsCount, source.getId()));
                 for (int documentIndex = 1; documentIndex <= totalDocumentsCount; documentIndex++) {
                     SnDocumentBatchOperationRequest request = documents.get(documentIndex - 1);
-                    if (isApplicableForCountry(request, source.getLanguage(), source.getCurrency(), source.getCountry())) {
-                        SnDocumentBatchOperationResponse documentBatchOperationResponse = new SnDocumentBatchOperationResponse();
-                        documentBatchOperationResponse.setId(request.getDocument().getId());
-                        documentBatchOperationResponse.setStatus(streamDocument(request, source.getLanguage(), source.getCurrency(), source.getCountry(), streamService) ? SnDocumentOperationStatus.UPDATED : SnDocumentOperationStatus.FAILED);
-                        if (!responseMap.containsKey(documentBatchOperationResponse.getId()) || documentBatchOperationResponse.getStatus() == SnDocumentOperationStatus.FAILED) {
-                            responseMap.put(documentBatchOperationResponse.getId(), documentBatchOperationResponse);
-                        }
-                        if (logInterval != 0 && documentIndex % logInterval == 0) {
-                            LOG.info(String.format("Processed %s of %s documents", documentIndex, totalDocumentsCount));
-                        }
+                    SnDocumentBatchOperationResponse documentBatchOperationResponse = new SnDocumentBatchOperationResponse();
+                    documentBatchOperationResponse.setId(request.getDocument().getId());
+                    documentBatchOperationResponse.setStatus(streamDocument(request, source.getLanguage(), source.getCurrency(), source.getCountry(), streamService) ? SnDocumentOperationStatus.UPDATED : SnDocumentOperationStatus.FAILED);
+                    if (!responseMap.containsKey(documentBatchOperationResponse.getId()) || documentBatchOperationResponse.getStatus() == SnDocumentOperationStatus.FAILED) {
+                        responseMap.put(documentBatchOperationResponse.getId(), documentBatchOperationResponse);
+                    }
+                    if (logInterval != 0 && documentIndex % logInterval == 0) {
+                        LOG.info(String.format("Processed %s of %s documents", documentIndex, totalDocumentsCount));
                     }
                 }
             }
@@ -109,26 +107,26 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
 
     private boolean streamDocument(SnDocumentBatchOperationRequest request, SnLanguage language, SnCurrency currency, CoveoSnCountry country, T streamService) {
         boolean success = true;
-
-        synchronized (streamService) {
-            DocumentBuilder coveoDocument = createCoveoDocument(request.getDocument(), language.getId(), currency.getId());
-            if (coveoDocument != null) {
-                try {
-                    if (LOG.isDebugEnabled()) {
-                        JsonObject jsonDocument = (new Gson()).toJsonTree(coveoDocument.getDocument()).getAsJsonObject();
-                        LOG.debug("Pushing document: " + jsonDocument.toString());
+        if (isApplicableForCountry(request, language, currency, country)) {
+            synchronized (streamService) {
+                DocumentBuilder coveoDocument = createCoveoDocument(request.getDocument(), language.getId(), currency.getId());
+                if (coveoDocument != null) {
+                    try {
+                        if (LOG.isDebugEnabled()) {
+                            JsonObject jsonDocument = (new Gson()).toJsonTree(coveoDocument.getDocument()).getAsJsonObject();
+                            LOG.debug("Pushing document: " + jsonDocument.toString());
+                        }
+                        streamService.pushDocument(coveoDocument);
+                    } catch (IOException | InterruptedException exception) {
+                        success = false;
+                        LOG.error("Failed to index " + request.getDocument().getId(), exception);
                     }
-                    streamService.pushDocument(coveoDocument);
-                } catch (IOException | InterruptedException exception) {
+                } else {
+                    LOG.error("Failed to index " + request.getDocument().getId());
                     success = false;
-                    LOG.error("Failed to index " + request.getDocument().getId(), exception);
                 }
-            } else {
-                LOG.error("Failed to index " + request.getDocument().getId());
-                success = false;
             }
         }
-
         return success;
     }
 
