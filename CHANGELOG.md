@@ -14,6 +14,14 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.4.3 (2025-3-05) <sub>$${\color{green}recommended}$$</sub>
+
+- Add new conditions to the retry logic that handles the following: 
+
+   - HTTP error codes of 408, 503, and 504
+
+   - a scenario when the server responds with the `HTTP/1.1 header parser received no bytes` message
+
 ## v3.4.2 (2025-1-20) <sub>$${\color{green}recommended}$$</sub>
 
 - Resolve an issue where the index count was incorrect when processing country-specific products.

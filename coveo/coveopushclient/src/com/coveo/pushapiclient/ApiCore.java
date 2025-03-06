@@ -14,6 +14,7 @@ import java.net.http.HttpResponse;
 import java.util.function.Function;
 
 class ApiCore {
+  private static final String EMPTY_HEADER_EXCEPTION_MESSAGE = "HTTP/1.1 header parser received no bytes";
   private static final Logger LOGGER = Logger.getLogger(ApiCore.class);
 
   private final HttpClient httpClient;
@@ -46,7 +47,19 @@ class ApiCore {
         RetryConfig.<HttpResponse<String>>custom()
             .maxAttempts(this.options.getMaxRetries())
             .intervalFunction(intervalFn)
-            .retryOnResult(response -> response != null && response.statusCode() == 429)
+            .retryOnResult(response -> response != null && (
+               response.statusCode() == 429 ||
+               response.statusCode() == 503 ||
+               response.statusCode() == 504 ||
+               response.statusCode() == 408
+            ))
+            .retryOnException(e -> {
+              if (e instanceof RuntimeException) {
+                return e.getMessage() != null &&
+                        e.getMessage().contains(EMPTY_HEADER_EXCEPTION_MESSAGE);
+              }
+              return false;
+            })
             .build();
 
     if(LOGGER.isDebugEnabled()) {
@@ -59,7 +72,7 @@ class ApiCore {
     Retry retry = Retry.of("platformRequest", retryConfig);
 
     Function<HttpRequest, HttpResponse<String>> retryRequestFn =
-        Retry.decorateFunction(retry, req -> sendRequest(req));
+        Retry.decorateFunction(retry, this::sendRequest);
 
     return retryRequestFn.apply(request);
   }
@@ -69,12 +82,11 @@ class ApiCore {
     String reqMethod = request.method();
     if(LOGGER.isDebugEnabled()) this.LOGGER.debug(reqMethod + " " + uri);
     try {
-      HttpResponse<String> response =
-          this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+      HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
       this.logResponse(response);
       return response;
     } catch (IOException | InterruptedException e) {
-      throw new Error(e.getMessage());
+      throw new RuntimeException(e);
     }
   }
 
