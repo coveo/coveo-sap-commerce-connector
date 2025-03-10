@@ -14,6 +14,10 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.4.4 (2025-3-10) <sub>$${\color{green}recommended}$$</sub>
+
+- Upgrade of the `resilience4j` library to v2.2.0
+
 ## v3.4.3 (2025-3-05) <sub>$${\color{green}recommended}$$</sub>
 
 - Add new conditions to the retry logic that handles the following: 
