@@ -39,8 +39,12 @@ INSERT_UPDATE CoveoSearchSnSearchProviderConfiguration; id[unique = true]       
 INSERT_UPDATE CoveoSnIndexConfiguration; id[unique = true]        ; name              ; user(uid) ; languages(isocode); currencies(isocode); countries(isocode); searchProviderConfiguration(id)
                                        ; $coveoIndexConfiguration ; Coveo Electronics ; anonymous ; ja,en,de,zh       ; JPY,USD            ; JP,US             ; $coveoSearchProviderConfiguration
 
-INSERT_UPDATE SnIndexerConfiguration; &indexerConfig; id[unique = true] ; name; concurrency; batchSize
-                                    ; coveoIndexerConfiguration ; coveoIndexerConfiguration ; Coveo Electronics Indexer Configuration ; 5 ; 10
+# Configure an exponential backof policy for the indexer. All times are in ms.
+INSERT_UPDATE SnRetryConfiguration; id[unique = true]         ; maxAttempts; timeout; initialDelay; interval; maxInterval; multiplier
+                                  ; coveo-retry-configuration ; 5          ; 30000  ; 500         ; 1000    ; 600000     ; 2
+
+INSERT_UPDATE SnIndexerConfiguration; &indexerConfig            ; id[unique = true]         ; name                                    ; concurrency; batchSize ; retryConfiguration(id)
+                                    ; coveoIndexerConfiguration ; coveoIndexerConfiguration ; Coveo Electronics Indexer Configuration ; 5          ; 10 ; coveo-retry-configuration
 
 INSERT_UPDATE SnIndexType; indexConfiguration(id)   ; id[unique = true]           ; name                          ; itemComposedType(code); identityProvider   ; listeners                            ; catalogs(id)              ; stores(uid) ; indexerConfiguration(&indexerConfig)
                          ; $coveoIndexConfiguration ; $coveoProductIndexType      ; CoveoElectronics Product      ; Product               ; snIdentityProvider ; catalogVersionFilterSnSearchListener ; electronicsProductCatalog ; electronics ; coveoIndexerConfiguration

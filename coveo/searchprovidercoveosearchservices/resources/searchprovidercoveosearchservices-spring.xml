@@ -166,6 +166,12 @@
         <property name="configurationService" ref="configurationService"/>
     </bean>
 
+    <alias name="coveoSkuStockLevelWarehouseAvailabilitySnIndexerValueProvider" alias="coveoSkuStockLevelWarehouseAvailabilitySnIndexerValueProvider" />
+    <bean id="coveoSkuStockLevelWarehouseAvailabilitySnIndexerValueProvider"
+          class="com.coveo.indexer.service.impl.CoveoSkuStockLevelWarehouseAvailabilitySnIndexerValueProvider">
+        <property name="configurationService" ref="configurationService"/>
+    </bean>
+
     <alias name="coveoDocumentIdSnIndexerValueProvider" alias="coveoDocumentIdSnIndexerValueProvider" />
     <bean id="coveoDocumentIdSnIndexerValueProvider"
            class="com.coveo.indexer.service.impl.CoveoDocumentIdSnIndexerValueProvider"

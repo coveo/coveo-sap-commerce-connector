@@ -197,6 +197,7 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
                 LOG.debug("Field " + field.getKey() + " is empty or null, will not push this field for document " + documentId);
             }
         }
+        addEcProductIdToValues(document, documentFields, locale, currency, values);
         DocumentBuilder documentBuilder = new DocumentBuilder(documentId, documentName).withMetadata(values);
 
         String coveoClickableUri = (String) CoveoFieldValueResolverUtils.resolveFieldValue(COVEO_URI_TYPE_INDEX_ATTRIBUTE, documentFields, locale, currency);
@@ -204,6 +205,16 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
             documentBuilder.withClickableUri(coveoClickableUri);
         }
         return documentBuilder;
+    }
+
+    protected static void addEcProductIdToValues(SnDocument document, Map<String, Object> documentFields, Locale locale, Currency currency, Map<String, Object> values) {
+        String documentCode = (String) CoveoFieldValueResolverUtils.resolveFieldValue("code", documentFields, locale, currency);
+        if (StringUtils.isNotBlank(documentCode)) {
+            values.put("ec_product_id", documentCode);
+        } else {
+            LOG.warn("SnDocument with id " + document.getId() + " does not have a code field, will not push ec_product_id field");
+
+        }
     }
 
     @Override

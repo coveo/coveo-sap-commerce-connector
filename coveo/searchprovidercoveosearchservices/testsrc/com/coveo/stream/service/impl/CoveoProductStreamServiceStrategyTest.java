@@ -192,6 +192,8 @@ public class CoveoProductStreamServiceStrategyTest {
                     any(Locale.class), any(Currency.class))).thenReturn("dummyNameId");
             mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("coveoClickableUri"), anyMap(),
                     any(Locale.class), any(Currency.class))).thenReturn("dummyURL");
+            mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("code"), anyMap(),
+                    any(Locale.class), any(Currency.class))).thenReturn("dummyDocumentId");
 
             List<SnDocumentBatchOperationResponse> responses = coveoProductStreamServiceStrategy.pushDocuments(documents);
             verify(coveoAbstractStreamServiceUS, times(3)).pushDocument(any());
@@ -446,6 +448,59 @@ public class CoveoProductStreamServiceStrategyTest {
                     currency, country);
 
             assertTrue(result);
+        }
+    }
+
+    @Test
+    public void testAddEcProductIdToValues_WithValidCode() {
+        SnDocument document = new SnDocument();
+        document.setId("doc1");
+        Map<String, Object> documentFields = new HashMap<>();
+        documentFields.put("code", "CODE123");
+        Locale locale = Locale.ENGLISH;
+        Currency currency = Currency.getInstance("USD");
+        Map<String, Object> values = new HashMap<>();
+
+        try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
+            mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("code"), eq(documentFields), eq(locale), eq(currency)))
+                    .thenReturn("CODE123");
+            CoveoProductStreamServiceStrategy.addEcProductIdToValues(document, documentFields, locale, currency, values);
+            assertEquals("CODE123", values.get("ec_product_id"));
+        }
+    }
+
+    @Test
+    public void testAddEcProductIdToValues_WithBlankCode() {
+        SnDocument document = new SnDocument();
+        document.setId("doc2");
+        Map<String, Object> documentFields = new HashMap<>();
+        documentFields.put("code", "");
+        Locale locale = Locale.ENGLISH;
+        Currency currency = Currency.getInstance("USD");
+        Map<String, Object> values = new HashMap<>();
+
+        try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
+            mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("code"), eq(documentFields), eq(locale), eq(currency)))
+                    .thenReturn("");
+            CoveoProductStreamServiceStrategy.addEcProductIdToValues(document, documentFields, locale, currency, values);
+            assertFalse(values.containsKey("ec_product_id"));
+        }
+    }
+
+    @Test
+    public void testAddEcProductIdToValues_WithNullCode() {
+        SnDocument document = new SnDocument();
+        document.setId("doc3");
+        Map<String, Object> documentFields = new HashMap<>();
+        Locale locale = Locale.ENGLISH;
+        Currency currency = Currency.getInstance("USD");
+        Map<String, Object> values = new HashMap<>();
+
+        try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
+            mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("code"), eq(documentFields), eq(locale), eq(currency)))
+                    .thenReturn(null);
+            CoveoProductStreamServiceStrategy.addEcProductIdToValues(document, documentFields, locale, currency, values);
+            assertFalse(values.containsKey("ec_product_id"));
         }
     }
 }

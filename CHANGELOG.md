@@ -14,6 +14,14 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.4.5 (2025-6-09) <sub>$${\color{green}recommended}$$</sub>
+
+- Add example of OOTB indexer retry configuration in the electronics index impex example file. This example if for optimising the SAP Commerce retry logic and is seperate from the Coveo Client retry configuration.
+
+- Add new index value provider to allow the configuration of a stock threshold to decide if a sku is available. By configuring the property `coveo.availability.lowstock.threshold`, the value provider will only mark this sku as available in that location if the stock level is greater that this configuration. This new value provider is in addition to the pre-existing availability provider which marks a sku as available even if it's not in stock.
+
+- Push `ec_product_id` by default. If a code attribute is configured on the index as per the example provided in the electronics index example impex file, the connector will set this value in the standard `ec_product_id` field. If a mapping for `ec_product_id` already exists for the source in Coveo, this mapping will take precedence.
+
 ## v3.4.4 (2025-3-10) <sub>$${\color{green}recommended}$$</sub>
 
 - Upgrade of the `resilience4j` library to v2.2.0
@@ -28,13 +36,13 @@ Next to each version number, you can see if the version is required or recommend
 
 ## v3.4.2 (2025-1-20) <sub>$${\color{green}recommended}$$</sub>
 
-- Resolve an issue where the index count was incorrect when processing country-specific products.
+- Resolve an issue where the index count was wrong when processing country-specific products.
 
 ## v3.4.1 (2025-1-20) <sub>$${\color{green}recommended}$$</sub>
 
 - Add the ability to configure the Coveo Stream API client retry count and interval duration.
 
-- Fix the issue where manual cancellation of the full index job would corrupt the index.
+- Fix the issue where manual cancellation of the full index job would corrupt the index. Previously if an indexing job was aborted, or failed, the index would be pushed with all the documents that had been processed to that point. This could result in some of the index being removed. Now if there is a failure, or the job is stoped, nothing is pushed so that the index remains in the original state.
 
 ## v3.4.0 (2025-1-03) <sub>$${\color{red}required}$$</sub>
 
@@ -44,9 +52,9 @@ Next to each version number, you can see if the version is required or recommend
 
 ## v3.3.1 (2024-11-12) <sub>$${\color{green}recommended}$$</sub>
 
-- Add support for regional language ISO codes.
+- Add support for regional language ISO codes. Previously, only ISO 3166-1 alpha-2 (XX) was supported; now, ISO 3166-2 is also supported for defining regions within the country (XX_yy).
 
-- Add support for pushing products to country-specific sources.
+- Add support for pushing products to country-specific sources. If a country isn't specified for a product, the product will be pushed to all sources.
 
 ## v3.3.0 (2024-11-12) <sub>$${\color{green}recommended}$$</sub>
 
@@ -56,7 +64,7 @@ Next to each version number, you can see if the version is required or recommend
 
 - Add improved logging for indexing process.
 
-- Change the `coveoProductCategoryHierarchy` value provider to format the data in line with Coveo best practice.
+- Change the `coveoProductCategoryHierarchy` value provider to format the data in line with Coveo best practice. This removed spaces between the demimiter and the values.
 
 - For attributes of a document that have no value, no value is pushed to the index instead of an empty string.
 
@@ -66,9 +74,9 @@ Next to each version number, you can see if the version is required or recommend
 
 ## v3.1.3 (2024-08-09) <sub>$${\color{green}recommended}$$</sub>
 
-- Add the [Coveo Push API client](https://github.com/coveo/push-api-client.java) 2.6.1 directly to the connector.
+- Add the [Coveo Push API client](https://github.com/coveo/push-api-client.java) 2.6.1 directly to the connector. The original client is being sunsetted, and this change protects against any future removal of the library.
 
-- Add the ServicelayerJobs to both default indexing processes, full and incremental.
+- Add the ServicelayerJobs to both default indexing processes, full and incremental. This removed the need to explixitly import this data when configuring a new index configuration
 
 
 ## v3.1.2 (2024-05-01) <sub>$${\color{green}recommended}$$</sub>
@@ -77,9 +85,9 @@ Next to each version number, you can see if the version is required or recommend
 
 ## v3.1.1 (2024-04-25) <sub>$${\color{green}recommended}$$</sub>
 
-- Add the `User-Agent` header to requests.
+- Add the `User-Agent` header to requests to provide information on version usage.
 
-- Add dictionary field support.
+- Add dictionary field support. Dictionary fields are added as a Java Map using Gson to serialize to a json object for the request.
 
 
 ## 3.1.0 (2024-03-14) <sub>$${\color{green}recommended}$$</sub>
