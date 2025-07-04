@@ -14,6 +14,10 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.4.6 (2025-6-09) <sub>$${\color{green}recommended}$$</sub>
+
+- Increased the document queue size to 50MB to improve index performance
+
 ## v3.4.5 (2025-6-09) <sub>$${\color{green}recommended}$$</sub>
 
 - Add example of OOTB indexer retry configuration in the electronics index impex example file. This example if for optimising the SAP Commerce retry logic and is seperate from the Coveo Client retry configuration.

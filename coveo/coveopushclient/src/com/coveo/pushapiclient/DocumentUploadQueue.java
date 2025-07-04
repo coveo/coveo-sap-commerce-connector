@@ -10,7 +10,7 @@ import java.util.ArrayList;
 class DocumentUploadQueue {
   private static final Logger logger = LogManager.getLogger(DocumentUploadQueue.class);
   protected final UploadStrategy uploader;
-  protected final int maxQueueSize = 5 * 1024 * 1024;
+  protected final int maxQueueSize = 50 * 1024 * 1024;
   protected ArrayList<DocumentBuilder> documentToAddList;
   protected ArrayList<DeleteDocument> documentToDeleteList;
   protected int size;
