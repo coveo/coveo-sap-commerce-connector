@@ -19,8 +19,8 @@ public class UpdateStreamService {
   UpdateStreamServiceInternal updateStreamServiceInternal;
 
   private final ConfigurationService configurationService;
+  private String sourceId;
 
-  private FileContainer fileContainer;
 
   public UpdateStreamService(ConfigurationService configurationService) {
     super();
@@ -45,9 +45,8 @@ public class UpdateStreamService {
     this.platformClient.setUserAgents(userAgents);
     this.updateStreamServiceInternal =
             new UpdateStreamServiceInternal(
-                    source,
-                    new StreamDocumentUploadQueue(this.getUploadStrategy()),
-                    this.platformClient, LOG);
+                    new StreamDocumentUploadQueue(this.getUploadStrategy()));
+    this.sourceId = source.getId();
   }
 
   /**
@@ -84,7 +83,7 @@ public class UpdateStreamService {
    */
   public void addOrUpdate(DocumentBuilder document) throws IOException, InterruptedException {
       try {
-          fileContainer = updateStreamServiceInternal.addOrUpdate(document);
+          updateStreamServiceInternal.addOrUpdate(document);
       } catch (Exception e) {
         LOG.error("Error adding or updating document", e);
         throw e;
@@ -129,7 +128,7 @@ public class UpdateStreamService {
   public void addPartialUpdate(PartialUpdateDocument document)
       throws IOException, InterruptedException {
       try {
-          fileContainer = updateStreamServiceInternal.addPartialUpdate(document);
+          updateStreamServiceInternal.addPartialUpdate(document);
       } catch (Exception e) {
         LOG.error("Error adding partial document", e);
         throw e;
@@ -170,7 +169,7 @@ public class UpdateStreamService {
    */
   public void delete(DeleteDocument document) throws IOException, InterruptedException {
       try {
-          fileContainer = updateStreamServiceInternal.delete(document);
+          updateStreamServiceInternal.delete(document);
       }  catch (Exception e) {
         LOG.error("Error deleting document", e);
         throw e;
@@ -190,10 +189,10 @@ public class UpdateStreamService {
    * @throws InterruptedException If the pushing file container is interrupted.
    * @throws NoOpenFileContainerException If there is no open file container to push.
    */
-  public HttpResponse<String> close()
+  public void close()
       throws IOException, InterruptedException, NoOpenFileContainerException {
       try {
-        return updateStreamServiceInternal.close();
+        updateStreamServiceInternal.close();
       }  catch (Exception e) {
         LOG.error("Error closing stream", e);
         throw e;
@@ -203,7 +202,10 @@ public class UpdateStreamService {
   private UploadStrategy getUploadStrategy() {
     return (streamUpdate) -> {
       String batchUpdateJson = new Gson().toJson(streamUpdate.marshal());
-      return this.platformClient.uploadContentToFileContainer(fileContainer, batchUpdateJson);
+      HttpResponse<String> response = this.platformClient.createFileContainer();
+      FileContainer fileContainer = new Gson().fromJson(response.body(), FileContainer.class);
+      this.platformClient.uploadContentToFileContainer(fileContainer, batchUpdateJson);
+      return this.platformClient.pushFileContainerContentToStreamSource(this.sourceId, fileContainer);
     };
   }
 }

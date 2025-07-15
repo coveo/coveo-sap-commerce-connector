@@ -14,6 +14,10 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.4.7 (2025-7-16) <sub>$${\color{green}recommended}$$</sub>
+
+- Resolves an issue where pushing a large amount of data during an incremental update could result in the loss of some of thoes updates
+
 ## v3.4.6 (2025-6-09) <sub>$${\color{green}recommended}$$</sub>
 
 - Increased the document queue size to 50MB to improve index performance
