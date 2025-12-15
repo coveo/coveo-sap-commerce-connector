@@ -1,6 +1,7 @@
 package com.coveo.pushapiclient;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import de.hybris.bootstrap.annotations.UnitTest;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
@@ -31,7 +32,7 @@ class UpdateStreamServiceTest {
     }
 
     @Test
-    void init_initializesPlatformClientAndInternalService() {
+    void testInit_initializesPlatformClientAndInternalService() {
         when(configuration.getInt("coveopushclient.maxretries", 10)).thenReturn(10);
         when(configuration.getInt("coveopushclient.retryafter.milliseconds", 5000)).thenReturn(5000);
 

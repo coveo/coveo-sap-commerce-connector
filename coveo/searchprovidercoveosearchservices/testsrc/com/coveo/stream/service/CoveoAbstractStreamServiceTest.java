@@ -6,12 +6,12 @@ import com.coveo.pushapiclient.exceptions.NoOpenFileContainerException;
 import com.coveo.pushapiclient.exceptions.NoOpenStreamException;
 import com.coveo.searchservices.data.CoveoSource;
 import de.hybris.bootstrap.annotations.UnitTest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @UnitTest
 public class CoveoAbstractStreamServiceTest {
@@ -21,7 +21,7 @@ public class CoveoAbstractStreamServiceTest {
 
     CoveoSource coveoSource = new CoveoSource();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         coveoSource.setDestinationSecret(SOURCE_SECRET);
         coveoSource.setDestinationTargetUrl(SOURCE_URL);

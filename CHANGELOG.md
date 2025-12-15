@@ -14,6 +14,12 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.4.8 (2025-12-16) <sub>$${\color{green}recommended}$$</sub>
+
+- Removed a number of unused classes and code from the `coveopushclient` extension
+- Increased test covarage for the `coveopushclient` and `searchprovidercoveosearchservices` extensions
+- Removed redundent test from the coveocc `extension`
+
 ## v3.4.7 (2025-7-16) <sub>$${\color{green}recommended}$$</sub>
 
 - Resolves an issue where pushing a large amount of data during an incremental update could result in the loss of some of thoes updates

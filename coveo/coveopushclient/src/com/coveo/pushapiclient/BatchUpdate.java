@@ -11,32 +11,25 @@ import java.util.Objects;
 public class BatchUpdate {
 
   private final List<DocumentBuilder> addOrUpdate;
-  private final List<DeleteDocument> delete;
 
-  public BatchUpdate(List<DocumentBuilder> addOrUpdate, List<DeleteDocument> delete) {
+  public BatchUpdate(List<DocumentBuilder> addOrUpdate) {
     this.addOrUpdate = addOrUpdate;
-    this.delete = delete;
   }
 
   public BatchUpdateRecord marshal() {
     return new BatchUpdateRecord(
         this.addOrUpdate.stream()
             .map(DocumentBuilder::marshalJsonObject)
-            .toArray(JsonObject[]::new),
-        this.delete.stream().map(DeleteDocument::marshalJsonObject).toArray(JsonObject[]::new));
+            .toArray(JsonObject[]::new));
   }
 
   public List<DocumentBuilder> getAddOrUpdate() {
     return addOrUpdate;
   }
 
-  public List<DeleteDocument> getDelete() {
-    return delete;
-  }
-
   @Override
   public String toString() {
-    return "BatchUpdate[" + "addOrUpdate=" + addOrUpdate + ", delete=" + delete + ']';
+    return "BatchUpdate[" + "addOrUpdate=" + addOrUpdate + ']';
   }
 
   @Override
@@ -44,11 +37,11 @@ public class BatchUpdate {
     if (this == obj) return true;
     if (obj == null || getClass() != obj.getClass()) return false;
     BatchUpdate that = (BatchUpdate) obj;
-    return addOrUpdate.equals(that.addOrUpdate) && delete.equals(that.delete);
+    return addOrUpdate.equals(that.addOrUpdate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(addOrUpdate, delete);
+    return Objects.hash(addOrUpdate);
   }
 }

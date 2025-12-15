@@ -20,12 +20,12 @@ import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationR
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import org.apache.commons.configuration.Configuration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,9 +37,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -50,7 +50,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoProductStreamServiceStrategyTest {
 
@@ -104,17 +104,18 @@ public class CoveoProductStreamServiceStrategyTest {
 
     CoveoProductStreamServiceStrategy<CoveoAbstractStreamService<Object>> coveoProductStreamServiceStrategy;
 
-    @Before
-    public void setUp() {
+    private void mockLanguages() {
         when(snLanguageEn.getId()).thenReturn(LANG_EN);
         when(snLanguageFr.getId()).thenReturn(LANG_FR);
         when(snLanguageDe.getId()).thenReturn(LANG_DE);
+    }
+
+    private void mockCurrencies() {
         when(snCurrencyUsd.getId()).thenReturn(CURRENCY_USD);
         when(snCurrencyEur.getId()).thenReturn(CURRENCY_EUR);
-        when(coveoSnCountryUs.getId()).thenReturn("US");
-        when(coveoSnCountryFr.getId()).thenReturn("FR");
-        when(coveoSnCountryDe.getId()).thenReturn("DE");
+    }
 
+    private void mockSources() {
         when(coveoSourceUS.getLanguage()).thenReturn(snLanguageEn);
         when(coveoSourceUS.getCurrency()).thenReturn(snCurrencyUsd);
         when(coveoSourceUS.getCountry()).thenReturn(coveoSnCountryUs);
@@ -124,7 +125,22 @@ public class CoveoProductStreamServiceStrategyTest {
         when(coveoSourceDE.getLanguage()).thenReturn(snLanguageDe);
         when(coveoSourceDE.getCurrency()).thenReturn(snCurrencyEur);
         when(coveoSourceDE.getCountry()).thenReturn(coveoSnCountryDe);
+    }
 
+    private void mockCountries() {
+        when(coveoSnCountryUs.getId()).thenReturn("US");
+        when(coveoSnCountryFr.getId()).thenReturn("FR");
+        when(coveoSnCountryDe.getId()).thenReturn("DE");
+    }
+
+    private void mockLocales() {
+        when(commonI18NService.getLocaleForIsoCode(LANG_EN)).thenReturn(new Locale(LANG_EN));
+        when(commonI18NService.getLocaleForIsoCode(LANG_FR)).thenReturn(new Locale(LANG_FR));
+        when(commonI18NService.getLocaleForIsoCode(LANG_DE)).thenReturn(new Locale(LANG_DE));
+    }
+
+    @BeforeEach
+    public void setUp() {
         when(coveoSourceUS.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
         when(coveoSourceFR.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
         when(coveoSourceDE.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
@@ -134,10 +150,6 @@ public class CoveoProductStreamServiceStrategyTest {
         when(coveoAbstractStreamServiceFR.getCoveoSource()).thenReturn(coveoSourceFR);
         when(coveoAbstractStreamServiceDE.getCoveoSource()).thenReturn(coveoSourceDE);
         when(coveoAbstractStreamServiceAvailability.getCoveoSource()).thenReturn(coveoSourceAvailability);
-
-        when(commonI18NService.getLocaleForIsoCode(LANG_EN)).thenReturn(new Locale(LANG_EN));
-        when(commonI18NService.getLocaleForIsoCode(LANG_FR)).thenReturn(new Locale(LANG_FR));
-        when(commonI18NService.getLocaleForIsoCode(LANG_DE)).thenReturn(new Locale(LANG_DE));
 
         List<SnLanguage> languages = new ArrayList<>();
         List<SnCurrency> currencies = new ArrayList<>();
@@ -157,13 +169,19 @@ public class CoveoProductStreamServiceStrategyTest {
         streamServices.add(coveoAbstractStreamServiceDE);
         streamServices.add(coveoAbstractStreamServiceAvailability);
 
-        when(configurationService.getConfiguration()).thenReturn(configuration);
-        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(50);
         coveoProductStreamServiceStrategy = new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, streamServices, configurationService, commonI18NService);
     }
 
     @Test
     public void testPushDocuments() throws IOException, InterruptedException {
+        mockCountries();
+        mockSources();
+        mockCurrencies();
+        mockLanguages();
+        mockLocales();
+
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(50);
 
         List<SnDocumentBatchOperationRequest> documents = new ArrayList<>();
         SnDocumentBatchOperationRequest documentA = new SnDocumentBatchOperationRequest();
@@ -206,6 +224,14 @@ public class CoveoProductStreamServiceStrategyTest {
 
     @Test
     public void testPushDocuments_MissingOneName() throws IOException, InterruptedException {
+        mockSources();
+        mockCurrencies();
+        mockLanguages();
+        mockLocales();
+
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(50);
+
         List<SnDocumentBatchOperationRequest> documents = new ArrayList<>();
         SnDocumentBatchOperationRequest documentA = new SnDocumentBatchOperationRequest();
         documentA.setDocument(createDocumentFields("nameA", "codeA",
@@ -224,6 +250,14 @@ public class CoveoProductStreamServiceStrategyTest {
 
     @Test
     public void testPushDocuments_MissingOneCode() throws IOException, InterruptedException {
+        mockSources();
+        mockCurrencies();
+        mockLanguages();
+        mockLocales();
+
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(50);
+
         List<SnDocumentBatchOperationRequest> documents = new ArrayList<>();
         SnDocumentBatchOperationRequest documentA = new SnDocumentBatchOperationRequest();
         documentA.setDocument(createDocumentFields("nameA", "codeA",

@@ -10,9 +10,8 @@ public class StreamUpdate extends BatchUpdate {
 
   public StreamUpdate(
       List<DocumentBuilder> addOrUpdate,
-      List<DeleteDocument> delete,
       List<PartialUpdateDocument> partialUpdate) {
-    super(addOrUpdate, delete);
+    super(addOrUpdate);
     this.partialUpdate = partialUpdate;
   }
 
@@ -22,7 +21,6 @@ public class StreamUpdate extends BatchUpdate {
         this.getAddOrUpdate().stream()
             .map(DocumentBuilder::marshalJsonObject)
             .toArray(JsonObject[]::new),
-        this.getDelete().stream().map(DeleteDocument::marshalJsonObject).toArray(JsonObject[]::new),
         this.partialUpdate.stream()
             .map(PartialUpdateDocument::marshalJsonObject)
             .toArray(JsonObject[]::new));
@@ -37,8 +35,6 @@ public class StreamUpdate extends BatchUpdate {
     return "StreamUpdate["
         + "addOrUpdate="
         + getAddOrUpdate()
-        + ", delete="
-        + getDelete()
         + ", partialUpdate="
         + partialUpdate
         + ']';
@@ -50,7 +46,6 @@ public class StreamUpdate extends BatchUpdate {
     if (obj == null || getClass() != obj.getClass()) return false;
     StreamUpdate that = (StreamUpdate) obj;
     return getAddOrUpdate().equals(that.getAddOrUpdate())
-        && getDelete().equals(that.getDelete())
         && partialUpdate.equals(that.partialUpdate);
   }
 

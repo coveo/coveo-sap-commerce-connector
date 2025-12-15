@@ -5,20 +5,20 @@ import de.hybris.platform.searchservices.admin.data.SnField;
 import de.hybris.platform.searchservices.core.service.SnExpressionEvaluator;
 import de.hybris.platform.searchservices.indexer.SnIndexerException;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoDocumentIdSnIndexerValueProviderTest {
 
@@ -36,14 +36,14 @@ public class CoveoDocumentIdSnIndexerValueProviderTest {
     @InjectMocks
     CoveoDocumentIdSnIndexerValueProvider coveoDocumentIdSnIndexerValueProvider;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         when(fieldWrapper.getField()).thenReturn(new SnField());
         when(snExpressionEvaluator.evaluate(any(), any())).thenReturn(CODE);
     }
 
     @Test
-    public void getFieldValue() throws SnIndexerException {
+    void getFieldValue() throws SnIndexerException {
         Map<String, String> parameters = Map.of(PREFIX_PARAM, PREFIX_PARAM_VALUE);
         when(fieldWrapper.getValueProviderParameters()).thenReturn(parameters);
         Object value = coveoDocumentIdSnIndexerValueProvider.getFieldValue(null, fieldWrapper, null, null);
@@ -51,7 +51,7 @@ public class CoveoDocumentIdSnIndexerValueProviderTest {
     }
 
     @Test
-    public void getFieldValue_NoPrefix() throws SnIndexerException {
+    void getFieldValue_NoPrefix() throws SnIndexerException {
         Object value = coveoDocumentIdSnIndexerValueProvider.getFieldValue(null, fieldWrapper, null, null);
         assertEquals(URI_ELEMENT + CODE, value);
     }

@@ -12,7 +12,6 @@ class DocumentUploadQueue {
   protected final UploadStrategy uploader;
   protected final int maxQueueSize = 50 * 1024 * 1024;
   protected ArrayList<DocumentBuilder> documentToAddList;
-  protected ArrayList<DeleteDocument> documentToDeleteList;
   protected int size;
 
   /**
@@ -22,7 +21,6 @@ class DocumentUploadQueue {
    */
   public DocumentUploadQueue(UploadStrategy uploader) {
     this.documentToAddList = new ArrayList<>();
-    this.documentToDeleteList = new ArrayList<>();
     this.uploader = uploader;
   }
 
@@ -44,7 +42,6 @@ class DocumentUploadQueue {
 
     this.size = 0;
     this.documentToAddList.clear();
-    this.documentToDeleteList.clear();
   }
 
   /**
@@ -71,38 +68,14 @@ class DocumentUploadQueue {
     this.size += sizeOfDoc;
   }
 
-  /**
-   * Adds the {@link DeleteDocument} to the upload queue and flushes the queue if it exceeds the
-   * maximum content length. See {@link DocumentUploadQueue#flush}.
-   *
-   * @param document The document to be deleted from the index.
-   * @throws IOException If an I/O error occurs during the upload.
-   * @throws InterruptedException If the upload process is interrupted.
-   */
-  public void add(DeleteDocument document) throws IOException, InterruptedException {
-    if (document == null) {
-      return;
-    }
-
-    final int sizeOfDoc = document.marshalJsonObject().toString().getBytes().length;
-    if (this.size + sizeOfDoc >= this.maxQueueSize) {
-      this.flush();
-    }
-    documentToDeleteList.add(document);
-    if (logger.isDebugEnabled()) {
-      logger.debug("Adding document to batch: " + document.documentId);
-    }
-    this.size += sizeOfDoc;
-  }
-
   public BatchUpdate getBatch() {
     return new BatchUpdate(
-        new ArrayList<DocumentBuilder>(this.documentToAddList),
-        new ArrayList<DeleteDocument>(this.documentToDeleteList));
+        new ArrayList<DocumentBuilder>(this.documentToAddList)
+    );
   }
 
   public boolean isEmpty() {
     // TODO: LENS-843: include partial document updates
-    return documentToAddList.isEmpty() && documentToDeleteList.isEmpty();
+    return documentToAddList.isEmpty();
   }
 }

@@ -3,11 +3,11 @@ Integrate your SAP Commerce Cloud project with the Coveo Platform using the SAP 
 The connector is a set of extensions tailored specifically for SAP Commerce 2211.
 This repository houses 3 versions. v3 of the connector can be found on the main branch. Support for earlier SAP Commerce versions can be found in the branches v1 and v2
 
-|Branch|SAP Commerce|
-|------|------------|
-|main  |2211        |
-|v2    |2205 & 2105 |
-|v1    |2011        |
+| Branch | SAP Commerce Cloud support | Status |
+|--------|-----------------------------|--------|
+| `main` | 2211 | Active development |
+| `v2` | 2105, 2205 | Maintained, with no new features.<br><br>This is because the SAP Commerce Cloud versions [2105](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2105&locale=en-US) and [2205](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2205&locale=en-US) are out of maintenance. |
+| `v1` | 2011 | Deprecated.<br><br>This is because the SAP Commerce Cloud version [2011](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2011) is out of maintenance. |
 
 ## Available extensions
 Each extension offers unique functionalities to enhance your integration experience. This repository includes

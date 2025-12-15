@@ -20,10 +20,6 @@ class UpdateStreamServiceInternal {
     queue.add(document);
   }
 
-  public void delete(DeleteDocument document) throws IOException, InterruptedException {
-    queue.add(document);
-  }
-
   public void close()
       throws IOException, InterruptedException {
     queue.flush();

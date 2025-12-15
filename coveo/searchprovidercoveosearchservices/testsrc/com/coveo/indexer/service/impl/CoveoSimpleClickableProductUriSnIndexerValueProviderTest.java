@@ -8,20 +8,20 @@ import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.configuration.Configuration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoSimpleClickableProductUriSnIndexerValueProviderTest {
 
@@ -46,16 +46,15 @@ public class CoveoSimpleClickableProductUriSnIndexerValueProviderTest {
     @InjectMocks
     private CoveoSimpleClickableProductUriSnIndexerValueProvider coveoSimpleClickableProductUriSnIndexerValueProvider;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() {
         when(urlResolver.resolve(any())).thenReturn(PRODUCT_URL);
-        when(configurationService.getConfiguration()).thenReturn(configuration);
-        when(configuration.getString("website." + STORE_ID + ".https", "")).thenReturn(BASE_URL);
-        when(configuration.getString("website." + WRONG_STORE_ID + ".https", "")).thenReturn("");
     }
 
     @Test
-    public void getFieldValue() throws SnIndexerException {
+    void getFieldValue() throws SnIndexerException {
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getString("website." + STORE_ID + ".https", "")).thenReturn(BASE_URL);
         Map<String, String> parameters = Map.of(SITE_ID_PARAM, STORE_ID);
         when(fieldWrapper.getValueProviderParameters()).thenReturn(parameters);
         Object value = coveoSimpleClickableProductUriSnIndexerValueProvider.getFieldValue(null, fieldWrapper, null, null);
@@ -63,7 +62,9 @@ public class CoveoSimpleClickableProductUriSnIndexerValueProviderTest {
     }
 
     @Test
-    public void getFieldValue_ForIncorrectStore() throws SnIndexerException {
+    void getFieldValue_ForIncorrectStore() throws SnIndexerException {
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getString("website." + WRONG_STORE_ID + ".https", "")).thenReturn("");
         Map<String, String> parameters = Map.of(SITE_ID_PARAM, WRONG_STORE_ID);
         when(fieldWrapper.getValueProviderParameters()).thenReturn(parameters);
         Object value = coveoSimpleClickableProductUriSnIndexerValueProvider.getFieldValue(null, fieldWrapper, null, null);
@@ -71,7 +72,7 @@ public class CoveoSimpleClickableProductUriSnIndexerValueProviderTest {
     }
 
     @Test
-    public void getFieldValue_ForInvalidValueParameter() throws SnIndexerException {
+    void getFieldValue_ForInvalidValueParameter() throws SnIndexerException {
         Map<String, String> parameters = MapUtils.EMPTY_MAP;
         when(fieldWrapper.getValueProviderParameters()).thenReturn(parameters);
         Object value = coveoSimpleClickableProductUriSnIndexerValueProvider.getFieldValue(null, fieldWrapper, null, null);

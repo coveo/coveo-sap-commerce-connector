@@ -7,11 +7,11 @@
 
 Depending on your SAP Commerce version, download the extension from the appropriate branch:
 
-* For SAP Commerce Cloud 2011, use the `v1` branch.
-
-* For SAP Commerce Cloud 2105 and 2205, use the `v2` branch.
-
-* For SAP Commerce Cloud 2211, use the `main` branch.
+| Branch | SAP Commerce Cloud support | Status |
+|--------|-----------------------------|--------|
+| `main` | 2211 | Active development |
+| `v2` | 2105, 2205 | Maintained, with no new features.<br><br>This is because the SAP Commerce Cloud versions [2105](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2105&locale=en-US) and [2205](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2205&locale=en-US) are out of maintenance. |
+| `v1` | 2011 | Deprecated.<br><br>This is because the SAP Commerce Cloud version [2011](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2011) is out of maintenance. |
 
 In the `main` branch, you can find that the extension has different versions.
 For detailed changes between versions, see the [Change Log](https://github.com/coveo/coveo-sap-commerce-connector/blob/main/CHANGELOG.md). 

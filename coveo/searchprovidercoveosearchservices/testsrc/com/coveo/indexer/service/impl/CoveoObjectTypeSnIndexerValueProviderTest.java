@@ -9,18 +9,17 @@ import de.hybris.platform.searchservices.indexer.SnIndexerException;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 import de.hybris.platform.variants.model.VariantProductModel;
 import org.apache.commons.configuration.Configuration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoObjectTypeSnIndexerValueProviderTest {
 
@@ -36,38 +35,45 @@ public class CoveoObjectTypeSnIndexerValueProviderTest {
     @InjectMocks
     CoveoObjectTypeSnIndexerValueProvider coveoObjectTypeSnIndexerValueProvider = new CoveoObjectTypeSnIndexerValueProvider();
 
-    @Before
-    public void setUp() {
-        when(configurationService.getConfiguration()).thenReturn(configuration);
-
-        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_PRODUCT_TYPES_CODE)).thenReturn("Product,CoveoMockProduct");
-        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_VARIANT_TYPES_CODE)).thenReturn("VariantProduct");
-        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn("Warehouse");
-    }
-
     @Test
-    public void testGetFieldValue_ForProduct() throws SnIndexerException {
+    void testGetFieldValue_ForProduct() throws SnIndexerException {
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_PRODUCT_TYPES_CODE)).thenReturn("Product,CoveoMockProduct");
         assertEquals(CoveoObjectTypeSnIndexerValueProvider.PRODUCT_OBJECT_TYPE, coveoObjectTypeSnIndexerValueProvider.getFieldValue(null, null, new ProductModel(), null));
     }
 
     @Test
-    public void testGetFieldValue_ForCoveoMockProduct() throws SnIndexerException {
+    void testGetFieldValue_ForCoveoMockProduct() throws SnIndexerException {
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_PRODUCT_TYPES_CODE)).thenReturn("Product,CoveoMockProduct");
         when(coveoMockProduct.getItemtype()).thenReturn("CoveoMockProduct");
         assertEquals(CoveoObjectTypeSnIndexerValueProvider.PRODUCT_OBJECT_TYPE, coveoObjectTypeSnIndexerValueProvider.getFieldValue(null, null, coveoMockProduct, null));
     }
 
     @Test
-    public void testGetFieldValue_ForVariantProduct() throws SnIndexerException {
+    void testGetFieldValue_ForVariantProduct() throws SnIndexerException {
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_PRODUCT_TYPES_CODE)).thenReturn("Product,CoveoMockProduct");
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_VARIANT_TYPES_CODE)).thenReturn("VariantProduct");
         assertEquals(CoveoObjectTypeSnIndexerValueProvider.PRODUCT_VARIANT_TYPE, coveoObjectTypeSnIndexerValueProvider.getFieldValue(null, null, new VariantProductModel(), null));
     }
 
     @Test
-    public void testGetFieldValue_ForWarehouse() throws SnIndexerException {
+    void testGetFieldValue_ForWarehouse() throws SnIndexerException {
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_PRODUCT_TYPES_CODE)).thenReturn("Product,CoveoMockProduct");
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_VARIANT_TYPES_CODE)).thenReturn("VariantProduct");
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn("Warehouse");
         assertEquals(CoveoObjectTypeSnIndexerValueProvider.PRODUCT_AVAILABILITY_TYPE, coveoObjectTypeSnIndexerValueProvider.getFieldValue(null, null, new WarehouseModel(), null));
     }
 
     @Test
-    public void testGetFieldValue_ForUnknownItem() throws SnIndexerException {
+    void testGetFieldValue_ForUnknownItem() throws SnIndexerException {
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_PRODUCT_TYPES_CODE)).thenReturn("Product,CoveoMockProduct");
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_VARIANT_TYPES_CODE)).thenReturn("VariantProduct");
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn("Warehouse");
         assertNull(coveoObjectTypeSnIndexerValueProvider.getFieldValue(null, null, new CategoryModel(), null));
     }
 }

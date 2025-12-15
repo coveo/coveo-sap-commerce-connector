@@ -4,21 +4,21 @@ import com.coveo.searchservices.admin.data.CoveoSnCountry;
 import de.hybris.bootstrap.annotations.UnitTest;
 import de.hybris.platform.core.model.c2l.CountryModel;
 import de.hybris.platform.servicelayer.i18n.I18NService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoSnCountryPopulatorTest {
 
@@ -29,8 +29,8 @@ public class CoveoSnCountryPopulatorTest {
     @InjectMocks
     CoveoSnCountryPopulator coveoSnCountryPopulator = new CoveoSnCountryPopulator();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         Set<Locale> locals = new HashSet<Locale>();
         locals.add(Locale.ENGLISH);
         locals.add(Locale.FRENCH);
@@ -43,7 +43,7 @@ public class CoveoSnCountryPopulatorTest {
     }
 
     @Test
-    public void testPopulate() {
+    void testPopulate() {
         CoveoSnCountry coveoSnCountry = new CoveoSnCountry();
         coveoSnCountryPopulator.populate(countryModel, coveoSnCountry);
         assertEquals("CA", coveoSnCountry.getId());

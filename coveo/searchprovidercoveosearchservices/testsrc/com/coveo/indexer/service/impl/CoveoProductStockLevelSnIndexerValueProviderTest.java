@@ -8,22 +8,22 @@ import de.hybris.platform.searchservices.core.service.SnQualifier;
 import de.hybris.platform.searchservices.core.service.SnSessionService;
 import de.hybris.platform.searchservices.indexer.SnIndexerException;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoProductStockLevelSnIndexerValueProviderTest {
 
@@ -62,7 +62,7 @@ public class CoveoProductStockLevelSnIndexerValueProviderTest {
     @InjectMocks
     CoveoProductStockLevelSnIndexerValueProvider coveoProductStockLevelSnIndexerValueProvider;
 
-    public void setUpLoadData() {
+    private void setUpLoadData() {
         Set<StockLevelModel> stockLevels = new HashSet<>();
         stockLevels.add(stockLevelA);
         stockLevels.add(stockLevelB);
@@ -90,7 +90,7 @@ public class CoveoProductStockLevelSnIndexerValueProviderTest {
     }
 
     @Test
-    public void getFieldValue() throws SnIndexerException {
+    void getFieldValue() throws SnIndexerException {
         setUpLoadData();
         when(fieldWrapper.isQualified()).thenReturn(true);
         Map<String, Integer> qualifiedStockLevelsData = coveoProductStockLevelSnIndexerValueProvider.loadData(null, List.of(fieldWrapper), productModel);
@@ -110,7 +110,7 @@ public class CoveoProductStockLevelSnIndexerValueProviderTest {
     }
 
     @Test
-    public void loadData() throws SnIndexerException {
+    void loadData() throws SnIndexerException {
         setUpLoadData();
         when(fieldWrapper.isQualified()).thenReturn(true);
         Map<String, Integer> qualifiedStockLevels = coveoProductStockLevelSnIndexerValueProvider.loadData(null, List.of(fieldWrapper), productModel);
@@ -127,7 +127,7 @@ public class CoveoProductStockLevelSnIndexerValueProviderTest {
     }
 
     @Test
-    public void getSupportedQualifierClasses() throws SnIndexerException {
+    void getSupportedQualifierClasses() throws SnIndexerException {
         Set<Class<?>> supportedQualifiers = coveoProductStockLevelSnIndexerValueProvider.getSupportedQualifierClasses();
         assertEquals(1, supportedQualifiers.size());
         assertTrue(supportedQualifiers.contains(WarehouseModel.class));

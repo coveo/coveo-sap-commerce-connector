@@ -10,19 +10,13 @@ import java.util.Arrays;
 public class BatchUpdateRecord {
 
   private final JsonObject[] addOrUpdate;
-  private final JsonObject[] delete;
 
-  public BatchUpdateRecord(JsonObject[] addOrUpdate, JsonObject[] delete) {
+  public BatchUpdateRecord(JsonObject[] addOrUpdate) {
     this.addOrUpdate = addOrUpdate;
-    this.delete = delete;
   }
 
   public JsonObject[] getAddOrUpdate() {
     return addOrUpdate;
-  }
-
-  public JsonObject[] getDelete() {
-    return delete;
   }
 
   @Override
@@ -30,8 +24,6 @@ public class BatchUpdateRecord {
     return "BatchUpdateRecord["
         + "addOrUpdate="
         + Arrays.toString(addOrUpdate)
-        + ", delete="
-        + Arrays.toString(delete)
         + ']';
   }
 
@@ -40,13 +32,11 @@ public class BatchUpdateRecord {
     if (this == obj) return true;
     if (obj == null || getClass() != obj.getClass()) return false;
     BatchUpdateRecord that = (BatchUpdateRecord) obj;
-    return Arrays.equals(addOrUpdate, that.addOrUpdate) && Arrays.equals(delete, that.delete);
+    return Arrays.equals(addOrUpdate, that.addOrUpdate);
   }
 
   @Override
   public int hashCode() {
-    int result = Arrays.hashCode(addOrUpdate);
-    result = 31 * result + Arrays.hashCode(delete);
-    return result;
+    return 31 * Arrays.hashCode(addOrUpdate);
   }
 }

@@ -29,16 +29,6 @@ class ApiUrl {
     this.platformUrl = this.extractPlatformUrl(sourceUrl);
   }
 
-  public ApiUrl(String organizationId, String sourceId, PlatformUrl platformUrl) {
-    this.organizationId = organizationId;
-    this.sourceId = sourceId;
-    this.platformUrl = platformUrl;
-    this.sourceUrl =
-        String.format(
-            "https://api.cloud.coveo.com/push/v1/organizations/%s/sources/%s",
-            this.organizationId, this.sourceId);
-  }
-
   public String getUrl() {
     return this.sourceUrl;
   }
@@ -81,10 +71,7 @@ class ApiUrl {
       String extractedEnvironment = matcher.group(1);
       String extractedRegion = matcher.group(2).replace("-", "");
 
-      Environment urlEnvironment =
-          extractedEnvironment.isEmpty()
-              ? PlatformUrl.DEFAULT_ENVIRONMENT
-              : EnumSet.allOf(Environment.class).stream()
+      Environment urlEnvironment = EnumSet.allOf(Environment.class).stream()
                   .filter(e -> e.getValue().equalsIgnoreCase(extractedEnvironment))
                   .findFirst()
                   .orElseThrow(
@@ -93,10 +80,7 @@ class ApiUrl {
                               String.format(
                                   "Invalid platform environment '%s'", extractedEnvironment)));
 
-      Region urlRegion =
-          extractedRegion.isEmpty()
-              ? PlatformUrl.DEFAULT_REGION
-              : EnumSet.allOf(Region.class).stream()
+      Region urlRegion = EnumSet.allOf(Region.class).stream()
                   .filter(r -> r.getValue().equalsIgnoreCase(extractedRegion))
                   .findFirst()
                   .orElseThrow(
@@ -112,17 +96,13 @@ class ApiUrl {
   }
 
   private String getErrorMessage(String reason) {
-    String newLine = System.getProperty("line.separator");
-    String message = "The provided API URL is invalid";
+    String newLine = System.lineSeparator();
 
-    message.concat(newLine).concat(reason);
-
-    message
-        .concat(newLine)
-        .concat("For a Push Source, visit: https://docs.coveo.com/en/1546")
-        .concat(newLine)
-        .concat("For a Catalog Source, visit:https://docs.coveo.com/en/3295");
-
-    return message;
+    return String.join(newLine,
+            "The provided API URL is invalid",
+            reason,
+            "For a Push Source, visit: https://docs.coveo.com/en/1546",
+            "For a Catalog Source, visit:https://docs.coveo.com/en/3295"
+    );
   }
 }

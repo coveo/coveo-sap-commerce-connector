@@ -5,18 +5,15 @@ import de.hybris.platform.core.model.c2l.CurrencyModel;
 import de.hybris.platform.core.model.product.ProductModel;
 import de.hybris.platform.europe1.enums.UserPriceGroup;
 import de.hybris.platform.europe1.model.PriceRowModel;
-import de.hybris.platform.order.strategies.calculation.pdt.criteria.PriceValueInfoCriteria;
-import de.hybris.platform.order.strategies.calculation.pdt.matcher.PDTModelMatcher;
 import de.hybris.platform.searchservices.core.service.SnQualifier;
 import de.hybris.platform.searchservices.core.service.SnSessionService;
 import de.hybris.platform.searchservices.indexer.SnIndexerException;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
-import de.hybris.platform.servicelayer.user.UserService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -25,11 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoProductPriceToUserPriceGroupSnIndexerValueProviderTest {
 
@@ -45,7 +43,6 @@ public class CoveoProductPriceToUserPriceGroupSnIndexerValueProviderTest {
 
     private static final String UGA_CODE = "UGA";
     private static final String UGB_CODE = "UGB";
-    private static final String UGC_CODE = "UGC";
 
     private static final String JPA_ISO = "JPA";
     private static final String USD_ISO = "USD";
@@ -79,8 +76,6 @@ public class CoveoProductPriceToUserPriceGroupSnIndexerValueProviderTest {
     UserPriceGroup userPriceGroupA;
     @Mock
     UserPriceGroup userPriceGroupB;
-    @Mock
-    UserPriceGroup userPriceGroupC;
 
     @Mock
     SnIndexerFieldWrapper fieldWrapper;
@@ -94,15 +89,82 @@ public class CoveoProductPriceToUserPriceGroupSnIndexerValueProviderTest {
     CurrencyModel currencyModelUsd;
     @Mock
     CurrencyModel currencyModelEur;
-
     @Mock
     SnSessionService snSessionService;
 
     @InjectMocks
     CoveoProductPriceToUserPriceGroupSnIndexerValueProvider coveoProductPriceToUserPriceGroupSnIndexerValueProvider;
 
-    public void setUpLoadData() {
+    private void setupUnqualifiedLoadData() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -10);
+        Date past = calendar.getTime();
+        calendar.add(Calendar.DAY_OF_MONTH, 20);
+        Date future = calendar.getTime();
 
+        List<PriceRowModel> prices = new ArrayList<>();
+
+        when(userPriceGroupA.getCode()).thenReturn(UGA_CODE);
+        when(userPriceGroupB.getCode()).thenReturn(UGB_CODE);
+
+        when(priceRowModelJpy.getUg()).thenReturn(null);
+        when(priceRowModelJpy.getPrice()).thenReturn(JPY_PRICE);
+        when(priceRowModelJpy.getCurrency()).thenReturn(currencyModelJpy);
+        when(priceRowModelJpy.getStartTime()).thenReturn(past);
+        prices.add(priceRowModelJpy);
+        when(priceRowModelJpyUgA.getUg()).thenReturn(userPriceGroupA);
+        when(priceRowModelJpyUgA.getPrice()).thenReturn(JPY_UGA_PRICE);
+        when(priceRowModelJpyUgA.getCurrency()).thenReturn(currencyModelJpy);
+        when(priceRowModelJpyUgA.getEndTime()).thenReturn(future);
+        prices.add(priceRowModelJpyUgA);
+        when(priceRowModelJpyUgB.getUg()).thenReturn(userPriceGroupB);
+        when(priceRowModelJpyUgB.getPrice()).thenReturn(JPY_UGB_PRICE);
+        when(priceRowModelJpyUgB.getCurrency()).thenReturn(currencyModelJpy);
+        when(priceRowModelJpyUgB.getStartTime()).thenReturn(past);
+        when(priceRowModelJpyUgB.getEndTime()).thenReturn(future);
+        prices.add(priceRowModelJpyUgB);
+        // invalid date
+        when(priceRowModelJpyUgC.getStartTime()).thenReturn(future);
+        prices.add(priceRowModelJpyUgC);
+
+        when(priceRowModelUsd.getUg()).thenReturn(null);
+        when(priceRowModelUsd.getPrice()).thenReturn(USD_PRICE);
+        when(priceRowModelUsd.getCurrency()).thenReturn(currencyModelUsd);
+        prices.add(priceRowModelUsd);
+        when(priceRowModelUsdUgA.getUg()).thenReturn(userPriceGroupA);
+        when(priceRowModelUsdUgA.getPrice()).thenReturn(USD_UGA_PRICE);
+        when(priceRowModelUsdUgA.getCurrency()).thenReturn(currencyModelUsd);
+        prices.add(priceRowModelUsdUgA);
+        when(priceRowModelUsdUgB.getUg()).thenReturn(userPriceGroupB);
+        when(priceRowModelUsdUgB.getPrice()).thenReturn(USD_UGB_PRICE);
+        when(priceRowModelUsdUgB.getCurrency()).thenReturn(currencyModelUsd);
+        prices.add(priceRowModelUsdUgB);
+        // invalid date
+        when(priceRowModelUsdUgC.getStartTime()).thenReturn(past);
+        when(priceRowModelUsdUgC.getEndTime()).thenReturn(past);
+        prices.add(priceRowModelUsdUgC);
+
+        when(priceRowModelEur.getUg()).thenReturn(null);
+        when(priceRowModelEur.getPrice()).thenReturn(EUR_PRICE);
+        when(priceRowModelEur.getCurrency()).thenReturn(currencyModelEur);
+        prices.add(priceRowModelEur);
+        when(priceRowModelEurUgA.getUg()).thenReturn(userPriceGroupA);
+        when(priceRowModelEurUgA.getPrice()).thenReturn(EUR_UGA_PRICE);
+        when(priceRowModelEurUgA.getCurrency()).thenReturn(currencyModelEur);
+        prices.add(priceRowModelEurUgA);
+        when(priceRowModelEurUgB.getUg()).thenReturn(userPriceGroupB);
+        when(priceRowModelEurUgB.getPrice()).thenReturn(EUR_UGB_PRICE);
+        when(priceRowModelEurUgB.getCurrency()).thenReturn(currencyModelEur);
+        prices.add(priceRowModelEurUgB);
+
+        when(productModel.getEurope1Prices()).thenReturn(prices);
+
+        when(currencyModelJpy.getIsocode()).thenReturn(JPA_ISO);
+        when(currencyModelUsd.getIsocode()).thenReturn(USD_ISO);
+        when(currencyModelEur.getIsocode()).thenReturn(EUR_ISO);
+    }
+
+    private void setupQualifiedLoadData() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, -10);
         Date past = calendar.getTime();
@@ -153,24 +215,14 @@ public class CoveoProductPriceToUserPriceGroupSnIndexerValueProviderTest {
         when(priceRowModelUsdUgC.getEndTime()).thenReturn(past);
         prices.add(priceRowModelUsdUgC);
 
-        when(priceRowModelEur.getUg()).thenReturn(null);
-        when(priceRowModelEur.getPrice()).thenReturn(EUR_PRICE);
         when(priceRowModelEur.getCurrency()).thenReturn(currencyModelEur);
         prices.add(priceRowModelEur);
-        when(priceRowModelEurUgA.getUg()).thenReturn(userPriceGroupA);
-        when(priceRowModelEurUgA.getPrice()).thenReturn(EUR_UGA_PRICE);
         when(priceRowModelEurUgA.getCurrency()).thenReturn(currencyModelEur);
         prices.add(priceRowModelEurUgA);
-        when(priceRowModelEurUgB.getUg()).thenReturn(userPriceGroupB);
-        when(priceRowModelEurUgB.getPrice()).thenReturn(EUR_UGB_PRICE);
         when(priceRowModelEurUgB.getCurrency()).thenReturn(currencyModelEur);
         prices.add(priceRowModelEurUgB);
 
         when(productModel.getEurope1Prices()).thenReturn(prices);
-
-        when(currencyModelJpy.getIsocode()).thenReturn(JPA_ISO);
-        when(currencyModelUsd.getIsocode()).thenReturn(USD_ISO);
-        when(currencyModelEur.getIsocode()).thenReturn(EUR_ISO);
 
         List<SnQualifier> currencyQualifiers = List.of(jpaQualifier, usdQualifier);
         when(fieldWrapper.getQualifiers()).thenReturn(currencyQualifiers);
@@ -178,21 +230,18 @@ public class CoveoProductPriceToUserPriceGroupSnIndexerValueProviderTest {
         when(jpaQualifier.getAs(CurrencyModel.class)).thenReturn(currencyModelJpy);
         when(usdQualifier.getId()).thenReturn(USD_ISO);
         when(usdQualifier.getAs(CurrencyModel.class)).thenReturn(currencyModelUsd);
-
-
     }
 
-
     @Test
-    public void getSupportedQualifierClasses() throws SnIndexerException {
+    void getSupportedQualifierClasses() throws SnIndexerException {
         Set<Class<?>> supportedQualifiers = coveoProductPriceToUserPriceGroupSnIndexerValueProvider.getSupportedQualifierClasses();
         assertEquals(1, supportedQualifiers.size());
         assertTrue(supportedQualifiers.contains(CurrencyModel.class));
     }
 
     @Test
-    public void getQualifiedFieldValue() throws SnIndexerException {
-        setUpLoadData();
+    void getQualifiedFieldValue() throws SnIndexerException {
+        setupQualifiedLoadData();
         when(fieldWrapper.isQualified()).thenReturn(true);
         CoveoProductPriceToUserPriceGroupSnIndexerValueProvider.CurrencyToUserPriceGroupAndPriceMapping data = coveoProductPriceToUserPriceGroupSnIndexerValueProvider.loadData(null, List.of(fieldWrapper), productModel);
         Object qualifiedValues = coveoProductPriceToUserPriceGroupSnIndexerValueProvider.getFieldValue(null, fieldWrapper, productModel, data);
@@ -206,8 +255,8 @@ public class CoveoProductPriceToUserPriceGroupSnIndexerValueProviderTest {
     }
 
     @Test
-    public void getUnqualifiedFieldValue() throws SnIndexerException {
-        setUpLoadData();
+    void getUnqualifiedFieldValue() throws SnIndexerException {
+        setupUnqualifiedLoadData();
         CoveoProductPriceToUserPriceGroupSnIndexerValueProvider.CurrencyToUserPriceGroupAndPriceMapping data = coveoProductPriceToUserPriceGroupSnIndexerValueProvider.loadData(null, List.of(fieldWrapper), productModel);
         Object qualifiedValues = coveoProductPriceToUserPriceGroupSnIndexerValueProvider.getFieldValue(null, fieldWrapper, productModel, data);
         assertNotNull(qualifiedValues);
@@ -254,9 +303,8 @@ public class CoveoProductPriceToUserPriceGroupSnIndexerValueProviderTest {
     }
 
     @Test
-    public void loadQualifiedData() throws SnIndexerException {
-
-        setUpLoadData();
+    void loadQualifiedData() throws SnIndexerException {
+        setupQualifiedLoadData();
         when(fieldWrapper.isQualified()).thenReturn(true);
         CoveoProductPriceToUserPriceGroupSnIndexerValueProvider.CurrencyToUserPriceGroupAndPriceMapping currencyToUserPriceGroupAndPriceMapping =
                 coveoProductPriceToUserPriceGroupSnIndexerValueProvider.loadData(null, List.of(fieldWrapper), productModel);
@@ -269,8 +317,8 @@ public class CoveoProductPriceToUserPriceGroupSnIndexerValueProviderTest {
 
 
     @Test
-    public void loadUnqualifiedData() throws SnIndexerException {
-        setUpLoadData();
+    void loadUnqualifiedData() throws SnIndexerException {
+        setupUnqualifiedLoadData();
         CoveoProductPriceToUserPriceGroupSnIndexerValueProvider.CurrencyToUserPriceGroupAndPriceMapping currencyToUserPriceGroupAndPriceMapping =
                 coveoProductPriceToUserPriceGroupSnIndexerValueProvider.loadData(null, List.of(fieldWrapper), productModel);
         assertNotNull(currencyToUserPriceGroupAndPriceMapping);

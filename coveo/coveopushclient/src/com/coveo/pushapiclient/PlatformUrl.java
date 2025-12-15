@@ -1,10 +1,6 @@
 package com.coveo.pushapiclient;
 
 public class PlatformUrl {
-
-  public static final Environment DEFAULT_ENVIRONMENT = Environment.PRODUCTION;
-  public static final Region DEFAULT_REGION = Region.US;
-
   private final Environment environment;
   private final Region region;
 
@@ -29,11 +25,11 @@ public class PlatformUrl {
   }
 
   private String getUrlEnvironment() {
-    return this.environment == PlatformUrl.DEFAULT_ENVIRONMENT ? "" : this.environment.getValue();
+    return this.environment.getValue();
   }
 
   private String getUrlRegion() {
-    return this.region == PlatformUrl.DEFAULT_REGION
+    return this.region == Region.US
         ? ""
         : String.format("-%s", this.region.getValue());
   }

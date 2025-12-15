@@ -39,9 +39,10 @@ public class UpdateStreamService {
         LOG.debug("Initializing UpdateStreamService with backoff options: " + backoffOptions);
     }
 
+    ApiCore api = new ApiCore(backoffOptions);
     this.platformClient =
             new PlatformClient(
-                    source.getApiKey(), source.getOrganizationId(), source.getPlatformUrl(), backoffOptions);
+                    source.getApiKey(), source.getOrganizationId(), source.getPlatformUrl(), api);
     this.platformClient.setUserAgents(userAgents);
     this.updateStreamServiceInternal =
             new UpdateStreamServiceInternal(
@@ -131,47 +132,6 @@ public class UpdateStreamService {
           updateStreamServiceInternal.addPartialUpdate(document);
       } catch (Exception e) {
         LOG.error("Error adding partial document", e);
-        throw e;
-      }
-  }
-
-  /**
-   * Adds documents to an open file container be deleted. If there is no file container open to
-   * receive the documents, this function will open a file container before uploading documents into
-   * it.
-   *
-   * <p>If called several times, the service will automatically batch documents and create new
-   * stream chunks whenever the data payload exceeds the <a
-   * href="https://docs.coveo.com/en/lb4a0344#stream-api-limits">batch size limit</a> set for the
-   * Stream API.
-   *
-   * <p>Once there are no more documents to add, it is important to call the {@link
-   * UpdateStreamService#close} function in order to send any buffered documents and push the file
-   * container. Otherwise, changes will not be reflected in the index.
-   *
-   * <p>
-   *
-   * <pre>{@code
-   * //...
-   * UpdateStreamService service = new UpdateStreamService(source));
-   * for (DeleteDocument document : fictionalDocumentList) {
-   *     service.delete(document);
-   * }
-   * service.close(document);
-   * }</pre>
-   *
-   * <p>For more code samples, @see `samples/UpdateStreamDocuments.java`
-   *
-   * @param document The deleteDocument to push to your file container
-   * @throws InterruptedException If the creation of the file container or adding the document is
-   *     interrupted.
-   * @throws IOException If the creation of the file container or adding the document fails.
-   */
-  public void delete(DeleteDocument document) throws IOException, InterruptedException {
-      try {
-          updateStreamServiceInternal.delete(document);
-      }  catch (Exception e) {
-        LOG.error("Error deleting document", e);
         throw e;
       }
   }

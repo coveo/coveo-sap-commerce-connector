@@ -35,7 +35,6 @@ public class StreamDocumentUploadQueue extends DocumentUploadQueue {
 
     this.size = 0;
     this.documentToAddList.clear();
-    this.documentToDeleteList.clear();
     this.documentToPartiallyUpdateList.clear();
   }
 
@@ -66,7 +65,6 @@ public class StreamDocumentUploadQueue extends DocumentUploadQueue {
   public StreamUpdate getStream() {
     return new StreamUpdate(
         new ArrayList<>(this.documentToAddList),
-        new ArrayList<>(this.documentToDeleteList),
         new ArrayList<>(this.documentToPartiallyUpdateList));
   }
 

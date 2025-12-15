@@ -12,12 +12,12 @@ import de.hybris.platform.searchservices.core.SnException;
 import de.hybris.platform.searchservices.core.service.SnExpressionEvaluator;
 import de.hybris.platform.searchservices.core.service.SnQualifier;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,15 +28,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
 
@@ -60,7 +58,6 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
 
     @Mock
     CategoryModel fineRootCategory;
-    private static final String FINE_ROOT_CATEGORY_CODE = "fineRootCategory";
 
     @Mock
     CategoryModel branchCategoryAB;
@@ -109,8 +106,8 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
     @InjectMocks
     CoveoProductCategoryHierarchyAttributeSnIndexValueProvider coveoProductCategoryHierarchyAttributeSnIndexValueProvider = new CoveoProductCategoryHierarchyAttributeSnIndexValueProvider();
 
-    @Before
-    public void setUp() throws SnException {
+    @BeforeEach
+    void setUp() {
 
         when(productModel.getPk()).thenReturn(PRODUCT_PK);
 
@@ -128,7 +125,7 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
         when(fieldWrapper.getValueProviderParameters()).thenReturn(valueProviderParameters);
     }
 
-    private void setUpPathEvaluation() throws SnException {
+    private void setUpPathEvaluation(boolean localizedField) throws SnException {
         /*
          * Category hierarchy set up as follows:
          *
@@ -155,8 +152,11 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
         Collection<String> frCatANames = List.of(BRANCH_CATEGORY_AB_NAME_FR);
         branchCatAName.put(localeEn, enCatANames);
         branchCatAName.put(localeFr, frCatANames);
-        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB)), any(), any())).thenReturn(branchCatAName);
-        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB)), any())).thenReturn(enCatANames);
+        if (localizedField) {
+            when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB)), any(), any())).thenReturn(branchCatAName);
+        } else {
+            when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB)), any())).thenReturn(enCatANames);
+        }
         when(categoryService.getPathsForCategory(branchCategoryAB)).thenReturn(List.of(path2));
 
         List<CategoryModel> path3 = new LinkedList<>(List.of(rootCategory, branchCategoryAB, twigCategoryA));
@@ -167,8 +167,11 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
                 TWIG_CATEGORY_A_NAME_FR);
         twigCatAName.put(localeEn, enTwigANames);
         twigCatAName.put(localeFr, frTwigANames);
-        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryA)), any(), any())).thenReturn(twigCatAName);
-        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryA)), any())).thenReturn(enTwigANames);
+        if (localizedField) {
+            when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB, twigCategoryA)), any(), any())).thenReturn(twigCatAName);
+        } else {
+            when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB, twigCategoryA)), any())).thenReturn(enTwigANames);
+        }
         when(categoryService.getPathsForCategory(twigCategoryA)).thenReturn(List.of(path3));
 
         List<CategoryModel> path4 = new LinkedList<>(List.of(rootCategory, branchCategoryAB, twigCategoryB));
@@ -179,8 +182,11 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
                 TWIG_CATEGORY_B_NAME_FR);
         twigCatBName.put(localeEn, enTwigBNames);
         twigCatBName.put(localeFr, frTwigBNames);
-        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryB)), any(), any())).thenReturn(twigCatBName);
-        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryB)), any())).thenReturn(enTwigBNames);
+        if (localizedField) {
+            when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryB)), any(), any())).thenReturn(twigCatBName);
+        } else {
+            when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryB)), any())).thenReturn(enTwigBNames);
+        }
         when(categoryService.getPathsForCategory(twigCategoryB)).thenReturn(List.of(path4));
 
         List<CategoryModel> path5 = new LinkedList<>(List.of(rootCategory, branchCategoryAB, twigCategoryA,
@@ -192,8 +198,11 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
                 TWIG_CATEGORY_A_NAME_FR, LEAF_CATEGORY_A_NAME_FR);
         leafCatA1Name.put(localeEn, enLeafA1Names);
         leafCatA1Name.put(localeFr, frLeafA1Names);
-        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryA,leafCategoryA)), any(), any())).thenReturn(leafCatA1Name);
-        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryA,leafCategoryA)), any())).thenReturn(enLeafA1Names);
+        if (localizedField) {
+            when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryA,leafCategoryA)), any(), any())).thenReturn(leafCatA1Name);
+        } else {
+            when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryA,leafCategoryA)), any())).thenReturn(enLeafA1Names);
+        }
 
         List<CategoryModel> path6 = new LinkedList<>(List.of(rootCategory, branchCategoryAB, twigCategoryB,
                 leafCategoryA));
@@ -204,8 +213,11 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
                 TWIG_CATEGORY_B_NAME_FR, LEAF_CATEGORY_A_NAME_FR);
         leafCatA2Name.put(localeEn, enLeafA2Names);
         leafCatA2Name.put(localeFr, frLeafA2Names);
-        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryB,leafCategoryA)), any(), any())).thenReturn(leafCatA2Name);
-        when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryB,leafCategoryA)), any())).thenReturn(enLeafA2Names);
+        if (localizedField) {
+            when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryB,leafCategoryA)), any(), any())).thenReturn(leafCatA2Name);
+        } else {
+            when(snExpressionEvaluator.evaluate(eq(List.of(branchCategoryAB,twigCategoryB,leafCategoryA)), any())).thenReturn(enLeafA2Names);
+        }
         when(categoryService.getPathsForCategory(leafCategoryA)).thenReturn(List.of(path5, path6));
 
     }
@@ -264,21 +276,21 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
 
     }
 
-    public void setUpLocalization() throws SnException {
+    public void setUpLocalization() {
         when(fieldWrapper.isLocalized()).thenReturn(true);
         when(fieldWrapper.getQualifiers()).thenReturn(List.of(qualifierEn, qualifierFr));
         when(qualifierEn.getAs(Locale.class)).thenReturn(localeEn);
         when(qualifierFr.getAs(Locale.class)).thenReturn(localeFr);
     }
 
-    public void setUpNonLocalization() throws SnException {
+    public void setUpNonLocalization() {
         when(fieldWrapper.isLocalized()).thenReturn(false);
     }
 
     @Test
-    public void getNonLocalisedFieldValue() throws SnException {
+    void getNonLocalisedFieldValue() throws SnException {
         setUpNonLocalization();
-        setUpPathEvaluation();
+        setUpPathEvaluation(false);
         String value = (String) coveoProductCategoryHierarchyAttributeSnIndexValueProvider.getFieldValue(null,
                 fieldWrapper, productModel, productCategoryData);
         String[] paths = value.split(";");
@@ -286,9 +298,9 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
     }
 
     @Test
-    public void getLocalisedFieldValue() throws SnException {
+    void getLocalisedFieldValue() throws SnException {
         setUpLocalization();
-        setUpPathEvaluation();
+        setUpPathEvaluation(true);
 
         Map<Locale, String> value =
                 (Map<Locale, String>) coveoProductCategoryHierarchyAttributeSnIndexValueProvider.getFieldValue(null,
@@ -305,7 +317,7 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
     }
 
     @Test
-    public void testCategoryFilteringForNonLocalizedPath() throws SnException {
+    void testCategoryFilteringForNonLocalizedPath() throws SnException {
         setUpPathEvaluationWithFineRoot();
         String value =
                 (String) coveoProductCategoryHierarchyAttributeSnIndexValueProvider.getFieldValue(null,
@@ -316,20 +328,20 @@ public class CoveoProductCategoryHierarchyAttributeSnIndexValueProviderTest {
 
     private void validateFrPaths(String[] pathsFr) {
         List<String> pathsAsList = Arrays.asList(pathsFr);
-        assertThat(pathsAsList, hasItem(EXPECTED_BRANCH_AB_PATH_FR));
-        assertThat(pathsAsList, hasItem(EXPECTED_TWIG_A_PATH_FR));
-        assertThat(pathsAsList, hasItem(EXPECTED_TWIG_B_PATH_FR));
-        assertThat(pathsAsList, hasItem(EXPECTED_LEAF_A_PATH_1_FR));
-        assertThat(pathsAsList, hasItem(EXPECTED_LEAF_A_PATH_2_FR));
+        assertTrue(pathsAsList.contains(EXPECTED_BRANCH_AB_PATH_FR));
+        assertTrue(pathsAsList.contains(EXPECTED_TWIG_A_PATH_FR));
+        assertTrue(pathsAsList.contains(EXPECTED_TWIG_B_PATH_FR));
+        assertTrue(pathsAsList.contains(EXPECTED_LEAF_A_PATH_1_FR));
+        assertTrue(pathsAsList.contains(EXPECTED_LEAF_A_PATH_2_FR));
     }
 
     private static void validateEnPaths(String[] paths) {
         List<String> pathsAsList = Arrays.asList(paths);
-        assertThat(pathsAsList, hasItem(EXPECTED_BRANCH_AB_PATH_EN));
-        assertThat(pathsAsList, hasItem(EXPECTED_TWIG_A_PATH_EN));
-        assertThat(pathsAsList, hasItem(EXPECTED_TWIG_B_PATH_EN));
-        assertThat(pathsAsList, hasItem(EXPECTED_LEAF_A_PATH_1_EN));
-        assertThat(pathsAsList, hasItem(EXPECTED_LEAF_A_PATH_2_EN));
+        assertTrue(pathsAsList.contains(EXPECTED_BRANCH_AB_PATH_EN));
+        assertTrue(pathsAsList.contains(EXPECTED_TWIG_A_PATH_EN));
+        assertTrue(pathsAsList.contains(EXPECTED_TWIG_B_PATH_EN));
+        assertTrue(pathsAsList.contains(EXPECTED_LEAF_A_PATH_1_EN));
+        assertTrue(pathsAsList.contains(EXPECTED_LEAF_A_PATH_2_EN));
     }
 
     private static String generateEvaluatedPath(String... categories) {

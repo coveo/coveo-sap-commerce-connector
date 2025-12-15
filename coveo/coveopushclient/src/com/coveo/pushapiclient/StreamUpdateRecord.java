@@ -9,8 +9,8 @@ public class StreamUpdateRecord extends BatchUpdateRecord {
   private final JsonObject[] partialUpdate;
 
   public StreamUpdateRecord(
-      JsonObject[] addOrUpdate, JsonObject[] delete, JsonObject[] partialUpdate) {
-    super(addOrUpdate, delete);
+      JsonObject[] addOrUpdate, JsonObject[] partialUpdate) {
+    super(addOrUpdate);
     this.partialUpdate = partialUpdate;
   }
 
@@ -23,8 +23,6 @@ public class StreamUpdateRecord extends BatchUpdateRecord {
     return "StreamUpdateRecord["
         + "addOrUpdate="
         + Arrays.toString(this.getAddOrUpdate())
-        + ", delete="
-        + Arrays.toString(this.getDelete())
         + ", partialUpdate="
         + Arrays.toString(partialUpdate)
         + ']';
@@ -36,7 +34,6 @@ public class StreamUpdateRecord extends BatchUpdateRecord {
     if (obj == null || getClass() != obj.getClass()) return false;
     StreamUpdateRecord that = (StreamUpdateRecord) obj;
     return Arrays.equals(this.getAddOrUpdate(), that.getAddOrUpdate())
-        && Arrays.equals(this.getDelete(), that.getDelete())
         && Arrays.equals(partialUpdate, that.partialUpdate);
   }
 

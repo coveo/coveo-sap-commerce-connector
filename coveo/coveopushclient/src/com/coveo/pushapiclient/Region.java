@@ -2,7 +2,7 @@ package com.coveo.pushapiclient;
 
 /** Available Platform regions to connect to */
 public enum Region {
-  US("us"),
+  US(""),
   EU("eu"),
   AU("au"),
   CA("ca");

@@ -14,8 +14,6 @@ import static com.coveo.pushapiclient.BackoffOptionsBuilder.DEFAULT_RETRY_AFTER;
 
 public class StreamService {
   private static final Logger LOG = Logger.getLogger(StreamService.class);
-
-
   private StreamEnabledSource source;
   private PlatformClient platformClient;
   private StreamServiceInternal service;
@@ -48,7 +46,8 @@ public class StreamService {
 
     this.source = source;
     this.queue = new DocumentUploadQueue(uploader);
-    this.platformClient = new PlatformClient(apiKey, organizationId, platformUrl, backoffOptions);
+    ApiCore api = new ApiCore(backoffOptions);
+    this.platformClient = new PlatformClient(apiKey, organizationId, platformUrl, api);
     platformClient.setUserAgents(userAgents);
     this.service = new StreamServiceInternal(this.source, this.queue, this.platformClient, logger);
   }

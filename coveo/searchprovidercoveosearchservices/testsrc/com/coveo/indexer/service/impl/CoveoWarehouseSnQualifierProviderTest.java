@@ -3,18 +3,16 @@ package com.coveo.indexer.service.impl;
 import de.hybris.bootstrap.annotations.UnitTest;
 import de.hybris.platform.commerceservices.search.searchservices.strategies.SnStoreSelectionStrategy;
 import de.hybris.platform.ordersplitting.model.WarehouseModel;
-import de.hybris.platform.searchservices.core.service.SnContext;
 import de.hybris.platform.searchservices.admin.data.SnIndexType;
+import de.hybris.platform.searchservices.core.service.SnContext;
 import de.hybris.platform.searchservices.core.service.SnQualifier;
 import de.hybris.platform.store.BaseStoreModel;
 import de.hybris.platform.store.services.BaseStoreService;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,11 +22,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoWarehouseSnQualifierProviderTest {
 
@@ -62,14 +62,14 @@ public class CoveoWarehouseSnQualifierProviderTest {
     CoveoWarehouseSnQualifierProvider coveoWarehouseSnQualifierProvider;
 
     @Test
-    public void getSupportedQualifierClasses() {
+    void getSupportedQualifierClasses() {
         Set<Class<?>> supportedQualifiers = coveoWarehouseSnQualifierProvider.getSupportedQualifierClasses();
         assertEquals(1, supportedQualifiers.size());
         assertTrue(supportedQualifiers.contains(WarehouseModel.class));
     }
 
     @Test
-    public void getAvailableQualifiers() {
+    void getAvailableQualifiers() {
         Map<String, Object> contextMap = new HashMap<>();
 
         when(snContext.getAttributes()).thenReturn(contextMap);
@@ -94,7 +94,7 @@ public class CoveoWarehouseSnQualifierProviderTest {
     }
 
     @Test
-    public void getCurrentQualifiers() {
+    void getCurrentQualifiers() {
         when(baseStoreService.getCurrentBaseStore()).thenReturn(storeA);
         when(storeA.getWarehouses()).thenReturn(List.of(warehouseA, warehouseB));
 
@@ -106,7 +106,7 @@ public class CoveoWarehouseSnQualifierProviderTest {
     }
 
     @Test
-    public void testWarehouseSnQualifier() {
+    void testWarehouseSnQualifier() {
         when(baseStoreService.getCurrentBaseStore()).thenReturn(storeA);
         when(storeA.getWarehouses()).thenReturn(List.of(warehouseA));
 
@@ -119,7 +119,7 @@ public class CoveoWarehouseSnQualifierProviderTest {
         List<SnQualifier> additionalQualifiers  = coveoWarehouseSnQualifierProvider.getCurrentQualifiers(snContext);
         assertEquals(1, additionalQualifiers.size());
         SnQualifier additionalQualifier = additionalQualifiers.get(0);
-        assertTrue(qualifier.equals(additionalQualifier));
+        assertEquals(qualifier, additionalQualifier);
 
         assertEquals(warehouseA, qualifier.getAs(WarehouseModel.class));
         assertThrows(IllegalArgumentException.class, () -> qualifier.getAs(BaseStoreModel.class));

@@ -1,10 +1,10 @@
 package com.coveo.stream.service.utils;
 
 import de.hybris.bootstrap.annotations.UnitTest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Currency;
 import java.util.HashMap;
@@ -12,10 +12,10 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoFieldValueResolverUtilsTest {
 
@@ -47,7 +47,7 @@ public class CoveoFieldValueResolverUtilsTest {
 
     private final Map<String, Double> currencyValues = new LinkedHashMap<>();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         localisedValues.put(LOCALE_ENGLISH, LOCALE_ENGLISH_VALUE);
         localisedValues.put(LOCALE_FRENCH, LOCALE_FRENCH_VALUE);

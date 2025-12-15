@@ -15,11 +15,11 @@ import de.hybris.platform.searchservices.document.data.SnDocument;
 import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationRequest;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 import org.apache.commons.configuration.Configuration;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoAvailabilityStreamServiceStrategyTest {
     private static final String LANG_EN = "en";
@@ -81,7 +81,7 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
 
     CoveoAvailabilityStreamServiceStrategy<CoveoAbstractStreamService<Object>> coveoAvailabilityStreamServiceStrategy;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(coveoSourceUS.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
         when(coveoSourceFR.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
@@ -111,13 +111,14 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
         streamServices.add(coveoAbstractStreamServiceDE);
         streamServices.add(coveoAbstractStreamServiceAvailability);
 
-        when(configurationService.getConfiguration()).thenReturn(configuration);
-        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(0);
         coveoAvailabilityStreamServiceStrategy = new CoveoAvailabilityStreamServiceStrategy<>(streamServices, configurationService);
     }
 
     @Test
     public void testPushDocuments_MissingOneName() throws IOException, InterruptedException {
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(0);
+
         List<SnDocumentBatchOperationRequest> documents = new ArrayList<>();
         SnDocumentBatchOperationRequest documentA = new SnDocumentBatchOperationRequest();
         documentA.setDocument(createDocumentFields("nameA", "codeA"));
@@ -134,6 +135,9 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
 
     @Test
     public void testPushDocuments_MissingOneCode() throws IOException, InterruptedException {
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(0);
+
         List<SnDocumentBatchOperationRequest> documents = new ArrayList<>();
         SnDocumentBatchOperationRequest documentA = new SnDocumentBatchOperationRequest();
         documentA.setDocument(createDocumentFields("nameA", "codeA"));
@@ -150,6 +154,9 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
 
     @Test
     public void testPushDocuments() throws IOException, InterruptedException {
+        when(configurationService.getConfiguration()).thenReturn(configuration);
+        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(0);
+
         List<SnDocumentBatchOperationRequest> documents = new ArrayList<>();
         SnDocumentBatchOperationRequest documentA = new SnDocumentBatchOperationRequest();
         documentA.setDocument(createDocumentFields("nameA", "codeA"));

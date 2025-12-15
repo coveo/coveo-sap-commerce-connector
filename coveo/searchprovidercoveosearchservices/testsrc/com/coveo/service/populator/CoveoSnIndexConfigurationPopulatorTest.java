@@ -5,23 +5,22 @@ import com.coveo.searchservices.admin.data.CoveoSnCountry;
 import com.coveo.searchservices.admin.data.CoveoSnIndexConfiguration;
 import de.hybris.bootstrap.annotations.UnitTest;
 import de.hybris.platform.core.model.c2l.CountryModel;
-import de.hybris.platform.searchservices.model.SnIndexConfigurationModel;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @UnitTest
 public class CoveoSnIndexConfigurationPopulatorTest {
 
@@ -40,8 +39,8 @@ public class CoveoSnIndexConfigurationPopulatorTest {
     @InjectMocks
     CoveoSnIndexConfigurationPopulator coveoSnIndexConfigurationPopulator = new CoveoSnIndexConfigurationPopulator();
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         coveoSnCountryCa.setId(COUNTRY_CA);
         coveoSnCountryUs.setId(COUNTRY_US);
         List<CoveoSnCountry> coveoSnCountries = new ArrayList<>();
@@ -51,7 +50,7 @@ public class CoveoSnIndexConfigurationPopulatorTest {
     }
 
     @Test
-    public void testPopulate() {
+    void testPopulate() {
         CoveoSnIndexConfiguration coveoSnIndexConfiguration = new CoveoSnIndexConfiguration();
         coveoSnIndexConfigurationPopulator.populate(coveoSnIndexConfigurationModel, coveoSnIndexConfiguration);
         assertEquals(2, coveoSnIndexConfiguration.getCountries().size());

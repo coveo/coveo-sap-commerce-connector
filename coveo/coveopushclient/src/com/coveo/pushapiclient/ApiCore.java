@@ -20,16 +20,8 @@ class ApiCore {
   private final HttpClient httpClient;
   private final BackoffOptions options;
 
-  public ApiCore() {
-    this(HttpClient.newHttpClient());
-  }
-
   public ApiCore(BackoffOptions options) {
     this(HttpClient.newHttpClient(), options);
-  }
-
-  public ApiCore(HttpClient httpClient) {
-    this(httpClient, new BackoffOptionsBuilder().build());
   }
 
   public ApiCore(HttpClient httpClient, BackoffOptions options) {
@@ -77,7 +69,7 @@ class ApiCore {
     return retryRequestFn.apply(request);
   }
 
-  public HttpResponse<String> sendRequest(HttpRequest request) {
+  private HttpResponse<String> sendRequest(HttpRequest request) {
     String uri = request.uri().toString();
     String reqMethod = request.method();
     if(LOGGER.isDebugEnabled()) this.LOGGER.debug(reqMethod + " " + uri);
@@ -108,25 +100,6 @@ class ApiCore {
       throws IOException, InterruptedException {
     if(LOGGER.isDebugEnabled()) LOGGER.debug("PUT " + uri);
     HttpRequest request = HttpRequest.newBuilder().headers(headers).uri(uri).PUT(body).build();
-    HttpResponse<String> response = this.callApiWithRetries(request);
-    this.logResponse(response);
-    return response;
-  }
-
-  public HttpResponse<String> delete(URI uri, String[] headers)
-      throws IOException, InterruptedException {
-    if(LOGGER.isDebugEnabled()) LOGGER.debug("DELETE " + uri);
-    HttpRequest request = HttpRequest.newBuilder().headers(headers).uri(uri).DELETE().build();
-    HttpResponse<String> response = this.callApiWithRetries(request);
-    this.logResponse(response);
-    return response;
-  }
-
-  public HttpResponse<String> delete(URI uri, String[] headers, BodyPublisher body)
-      throws IOException, InterruptedException {
-    if(LOGGER.isDebugEnabled()) LOGGER.debug("DELETE " + uri);
-    HttpRequest request =
-        HttpRequest.newBuilder().headers(headers).uri(uri).method("DELETE", body).build();
     HttpResponse<String> response = this.callApiWithRetries(request);
     this.logResponse(response);
     return response;

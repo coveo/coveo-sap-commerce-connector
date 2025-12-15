@@ -2,7 +2,7 @@ package com.coveo.pushapiclient;
 
 /** Available environments to use as the host for the PushAPI. */
 public enum Environment {
-  PRODUCTION("prod"),
+  PRODUCTION(""),
   HIPAA("hipaa"),
   DEVELOPMENT("dev"),
   STAGING("stg");

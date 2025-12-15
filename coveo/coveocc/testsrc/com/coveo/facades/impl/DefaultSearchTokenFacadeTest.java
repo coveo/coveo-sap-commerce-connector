@@ -10,8 +10,8 @@ import de.hybris.platform.core.model.user.UserModel;
 import de.hybris.platform.europe1.enums.UserPriceGroup;
 import de.hybris.platform.servicelayer.user.UserService;
 import de.hybris.platform.site.BaseSiteService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -77,7 +77,7 @@ public class DefaultSearchTokenFacadeTest {
     @Captor
     private ArgumentCaptor<Class<SearchTokenWsDTO>> classCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ReflectionTestUtils.setField(searchTokenFacade, "searchTokenPath", "/rest/search/v2/token");
         MockitoAnnotations.initMocks(this);
