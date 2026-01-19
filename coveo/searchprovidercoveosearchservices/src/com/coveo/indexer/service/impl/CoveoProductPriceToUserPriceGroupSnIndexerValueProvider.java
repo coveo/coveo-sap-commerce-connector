@@ -11,7 +11,7 @@ import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
 import de.hybris.platform.searchservices.indexer.service.impl.AbstractSnIndexerValueProvider;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -150,7 +150,7 @@ public class CoveoProductPriceToUserPriceGroupSnIndexerValueProvider
         return snSessionService;
     }
 
-    @Required
+    @Autowired
     public void setSnSessionService(final SnSessionService snSessionService) {
         this.snSessionService = snSessionService;
     }

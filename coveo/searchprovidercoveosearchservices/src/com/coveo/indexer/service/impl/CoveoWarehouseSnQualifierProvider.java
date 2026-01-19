@@ -10,7 +10,7 @@ import de.hybris.platform.store.services.BaseStoreService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,7 +89,7 @@ public class CoveoWarehouseSnQualifierProvider implements SnQualifierProvider {
         return baseStoreService;
     }
 
-    @Required
+    @Autowired
     public void setBaseStoreService(final BaseStoreService baseStoreService) {
         this.baseStoreService = baseStoreService;
     }
@@ -98,7 +98,7 @@ public class CoveoWarehouseSnQualifierProvider implements SnQualifierProvider {
         return snStoreSelectionStrategy;
     }
 
-    @Required
+    @Autowired
     public void setSnStoreSelectionStrategy(final SnStoreSelectionStrategy snStoreSelectionStrategy) {
         this.snStoreSelectionStrategy = snStoreSelectionStrategy;
     }

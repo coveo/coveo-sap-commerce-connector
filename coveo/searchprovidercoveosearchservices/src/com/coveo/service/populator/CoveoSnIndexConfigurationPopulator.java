@@ -5,11 +5,9 @@ import com.coveo.searchservices.admin.data.CoveoSnCountry;
 import com.coveo.searchservices.admin.data.CoveoSnIndexConfiguration;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.core.model.c2l.CountryModel;
-import de.hybris.platform.searchservices.model.SnIndexConfigurationModel;
-import de.hybris.platform.searchservices.util.ConverterUtils;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class CoveoSnIndexConfigurationPopulator implements Populator<CoveoSnIndexConfigurationModel, CoveoSnIndexConfiguration> {
 
@@ -20,7 +18,7 @@ public class CoveoSnIndexConfigurationPopulator implements Populator<CoveoSnInde
         coveoSnIndexConfiguration.setCountries(coveoSnCountryConverter.convertAll(coveoSnIndexConfigurationModel.getCountries()));
     }
 
-    @Required
+    @Autowired
     public void setCoveoSnCountryConverter(Converter<CountryModel, CoveoSnCountry> coveoSnCountryConverter) {
         this.coveoSnCountryConverter = coveoSnCountryConverter;
     }

@@ -17,7 +17,7 @@ import de.hybris.platform.searchservices.enums.SnIndexerOperationType;
 import de.hybris.platform.searchservices.index.data.SnIndex;
 import de.hybris.platform.searchservices.indexer.data.SnIndexerOperation;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

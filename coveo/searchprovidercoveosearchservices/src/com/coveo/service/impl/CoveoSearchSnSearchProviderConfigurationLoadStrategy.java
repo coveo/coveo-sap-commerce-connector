@@ -8,7 +8,7 @@ import com.coveo.model.CoveoSearchSnSearchProviderConfigurationModel;
 import de.hybris.platform.searchservices.spi.service.SnSearchProviderConfigurationLoadStrategy;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -35,7 +35,7 @@ public class CoveoSearchSnSearchProviderConfigurationLoadStrategy implements
 	}
 
 
-	@Required
+	@Autowired
 	public void setCoveoSearchSnSearchProviderConfigurationConverter(Converter<CoveoSearchSnSearchProviderConfigurationModel, CoveoSearchSnSearchProviderConfiguration> coveoSearchSnSearchProviderConfigurationConverter) {
 		this.coveoSearchSnSearchProviderConfigurationConverter = coveoSearchSnSearchProviderConfigurationConverter;
 	}

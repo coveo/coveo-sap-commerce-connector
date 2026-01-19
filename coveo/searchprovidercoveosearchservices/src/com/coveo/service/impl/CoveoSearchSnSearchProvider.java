@@ -24,7 +24,7 @@ import de.hybris.platform.searchservices.suggest.data.SnSuggestResult;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -218,7 +218,7 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
         }
     }
 
-    @Required
+    @Autowired
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }

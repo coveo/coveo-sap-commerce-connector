@@ -33,8 +33,8 @@ import java.util.Set;
 import static com.coveo.constants.CoveoccConstants.USER_AGENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -101,7 +101,7 @@ public class DefaultSearchTokenFacadeTest {
         token.setToken(TEST_TOKEN);
         final ResponseEntity<SearchTokenWsDTO> responseEntity = new ResponseEntity<>(token, HttpStatus.OK);
 
-        when(searchTokenRestTemplate.exchange(anyObject(), eq(HttpMethod.POST), anyObject(), eq(SearchTokenWsDTO.class))).thenReturn(responseEntity);
+        when(searchTokenRestTemplate.exchange(any(), eq(HttpMethod.POST), any(), eq(SearchTokenWsDTO.class))).thenReturn(responseEntity);
     }
 
     @Test

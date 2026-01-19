@@ -21,8 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 
-import javax.annotation.Resource;
-import javax.ws.rs.QueryParam;
+import jakarta.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 import static com.coveo.constants.CoveoccConstants.COVEOCC_USER_AGENT;

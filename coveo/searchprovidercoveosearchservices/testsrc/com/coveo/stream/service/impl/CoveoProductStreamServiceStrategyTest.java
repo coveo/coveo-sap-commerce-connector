@@ -19,7 +19,7 @@ import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationR
 import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationResponse;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

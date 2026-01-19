@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class CoveoObjectTypeSnIndexerValueProvider extends AbstractSnIndexerValueProvider<ItemModel, Void> {
 
@@ -48,7 +48,7 @@ public class CoveoObjectTypeSnIndexerValueProvider extends AbstractSnIndexerValu
         return objectType;
     }
 
-    @Required
+    @Autowired
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }

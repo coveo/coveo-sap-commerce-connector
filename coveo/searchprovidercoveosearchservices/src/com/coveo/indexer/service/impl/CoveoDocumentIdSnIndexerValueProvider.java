@@ -5,7 +5,7 @@ import de.hybris.platform.searchservices.indexer.SnIndexerException;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerContext;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
 import de.hybris.platform.searchservices.indexer.service.impl.ModelAttributeSnIndexerValueProvider;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.util.Set;

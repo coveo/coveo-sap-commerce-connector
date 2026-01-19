@@ -7,7 +7,7 @@ import de.hybris.platform.core.model.c2l.CountryModel;
 import de.hybris.platform.searchservices.util.ModelUtils;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.i18n.I18NService;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Locale;
 import java.util.Set;
@@ -28,7 +28,7 @@ public class CoveoSnCountryPopulator implements Populator<CountryModel, CoveoSnC
         return i18NService;
     }
 
-    @Required
+    @Autowired
     public void setI18NService(final I18NService i18nService)
     {
         i18NService = i18nService;

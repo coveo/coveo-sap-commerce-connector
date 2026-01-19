@@ -14,7 +14,7 @@ import de.hybris.platform.searchservices.admin.data.SnCurrency;
 import de.hybris.platform.searchservices.admin.data.SnLanguage;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
@@ -51,17 +51,17 @@ public class CoveoSourcePopulator implements Populator<CoveoSourceModel, CoveoSo
                 .ifPresent(coveoSource::setObjectType);
     }
 
-    @Required
+    @Autowired
     public void setLanguageConverter(Converter<LanguageModel, SnLanguage> languageConverter) {
         this.languageConverter = languageConverter;
     }
 
-    @Required
+    @Autowired
     public void setCountryConverter(Converter<CountryModel, CoveoSnCountry> countryConverter) {
         this.countryConverter = countryConverter;
     }
 
-    @Required
+    @Autowired
     public void setCurrencyConverter(Converter<CurrencyModel, SnCurrency> currencyConverter) {
         this.currencyConverter = currencyConverter;
     }

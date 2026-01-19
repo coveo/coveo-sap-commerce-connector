@@ -6,8 +6,7 @@ import de.hybris.platform.core.model.product.ProductModel;
 import de.hybris.platform.searchservices.indexer.SnIndexerException;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -72,8 +72,8 @@ public class CoveoSimpleClickableProductUriSnIndexerValueProviderTest {
     }
 
     @Test
-    void getFieldValue_ForInvalidValueParameter() throws SnIndexerException {
-        Map<String, String> parameters = MapUtils.EMPTY_MAP;
+    public void getFieldValue_ForInvalidValueParameter() throws SnIndexerException {
+        Map<String, String> parameters = Collections.emptyMap();
         when(fieldWrapper.getValueProviderParameters()).thenReturn(parameters);
         Object value = coveoSimpleClickableProductUriSnIndexerValueProvider.getFieldValue(null, fieldWrapper, null, null);
         assertEquals(PRODUCT_URL, value);

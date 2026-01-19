@@ -6,9 +6,9 @@ import de.hybris.platform.searchservices.indexer.SnIndexerException;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerContext;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 
@@ -60,7 +60,7 @@ public class CoveoSimpleClickableProductUriSnIndexerValueProvider extends Produc
         return clickableUri;
     }
 
-    @Required
+    @Autowired
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }

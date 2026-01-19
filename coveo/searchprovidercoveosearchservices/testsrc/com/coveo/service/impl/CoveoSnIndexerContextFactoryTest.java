@@ -17,7 +17,7 @@ import de.hybris.platform.searchservices.admin.data.SnLanguage;
 import de.hybris.platform.searchservices.indexer.service.SnIndexerRequest;
 import de.hybris.platform.searchservices.indexer.service.impl.DefaultSnIndexerContext;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

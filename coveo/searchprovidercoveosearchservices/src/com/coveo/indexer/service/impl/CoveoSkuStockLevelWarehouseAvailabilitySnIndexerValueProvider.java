@@ -8,7 +8,7 @@ import de.hybris.platform.searchservices.indexer.service.SnIndexerFieldWrapper;
 import de.hybris.platform.searchservices.indexer.service.impl.AbstractSnIndexerValueProvider;
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public class CoveoSkuStockLevelWarehouseAvailabilitySnIndexerValueProvider exten
         return SUPPORTED_QUALIFIER_CLASSES;
     }
 
-    @Required
+    @Autowired
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }

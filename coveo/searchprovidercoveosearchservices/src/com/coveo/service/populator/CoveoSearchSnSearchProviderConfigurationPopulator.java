@@ -9,7 +9,7 @@ import com.coveo.model.CoveoSourceModel;
 import com.coveo.searchservices.data.CoveoSource;
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.servicelayer.dto.converter.Converter;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Populates {@link CoveoSearchSnSearchProviderConfiguration} from {@link CoveoSearchSnSearchProviderConfigurationModel}.
@@ -25,7 +25,7 @@ public class CoveoSearchSnSearchProviderConfigurationPopulator
 		target.setSources(sourceConverter.convertAll(source.getCoveoSource()));
 	}
 
-	@Required
+	@Autowired
 	public void setSourceConverter(Converter<CoveoSourceModel, CoveoSource> sourceConverter) {
 		this.sourceConverter = sourceConverter;
 	}
