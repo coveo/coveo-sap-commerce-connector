@@ -5,8 +5,8 @@ This repository houses 3 versions. v3 of the connector can be found on the main 
 
 | Branch | SAP Commerce Cloud support | Status |
 |--------|-----------------------------|--------|
-| `main` | 2211-jdk21 | Active development |
-| `v3` | 2211 | Active development |
+| `main` | 2211-jdk21 | Active development - SAP Commerce Cloud version [2211-jdk21.1](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/75d4c3895cb346008545900bffe851ce/bcb7ba6cf2f84ab89b136d496b188f17.html?locale=en-US)|
+| `v3` | 2211 | Active development - SAP Commerce Cloud version [2211](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2211&locale=en-US)|
 | `v2` | 2105, 2205 | Maintained, with no new features.<br><br>This is because the SAP Commerce Cloud versions [2105](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2105&locale=en-US) and [2205](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2205&locale=en-US) are out of maintenance. |
 | `v1` | 2011 | Deprecated.<br><br>This is because the SAP Commerce Cloud version [2011](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2011) is out of maintenance. |
 
