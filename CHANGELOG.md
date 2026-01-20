@@ -14,7 +14,7 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
-## v4.0.0 (2026-01-19) <sub>$${\color{red}required only for upgrade to SAP Commerce 2211-jdk21}$$</sub>
+## v4.0.0 (2026-01-19) <sub>$${\color{red}required\ only\ for\ upgrade\ to\ SAP\ Commerce\ 2211-jdk21}$$</sub>
 
 - Implemented changes required for the upgrade to Java 21 and Spring 6
 
