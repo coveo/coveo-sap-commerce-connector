@@ -14,6 +14,11 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v4.0.1 (2026-01-22) <sub>$${\color{red}required}$$</sub>
+
+- Resolved an issue where missing mandatory data in an item can abort the entire index job. Now the item will be skipped and the remaining items will be indexed correctly.
+
+
 ## v4.0.0 (2026-01-19) <sub>$${\color{red}required\ only\ for\ upgrade\ to\ SAP\ Commerce\ 2211-jdk21}$$</sub>
 
 - Implemented changes required for the upgrade to Java 21 and Spring 6
