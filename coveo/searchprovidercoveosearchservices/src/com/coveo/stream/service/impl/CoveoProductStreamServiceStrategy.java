@@ -87,8 +87,10 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
                     SnDocumentBatchOperationRequest request = documents.get(documentIndex - 1);
                     SnDocumentBatchOperationResponse documentBatchOperationResponse = new SnDocumentBatchOperationResponse();
                     documentBatchOperationResponse.setId(request.getDocument().getId());
-                    documentBatchOperationResponse.setStatus(streamDocument(request, source.getLanguage(), source.getCurrency(), source.getCountry(), streamService) ? SnDocumentOperationStatus.UPDATED : SnDocumentOperationStatus.FAILED);
-                    if (!responseMap.containsKey(documentBatchOperationResponse.getId()) || documentBatchOperationResponse.getStatus() == SnDocumentOperationStatus.FAILED) {
+                    streamDocument(request, source.getLanguage(), source.getCurrency(), source.getCountry(),
+                                   streamService);
+                    documentBatchOperationResponse.setStatus(SnDocumentOperationStatus.UPDATED);
+                    if (!responseMap.containsKey(documentBatchOperationResponse.getId())) {
                         responseMap.put(documentBatchOperationResponse.getId(), documentBatchOperationResponse);
                     }
                     if (logInterval != 0 && documentIndex % logInterval == 0) {
@@ -105,8 +107,8 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         return languages.contains(source.getLanguage()) && currencies.contains(source.getCurrency()) && countries.contains(source.getCountry());
     }
 
-    private boolean streamDocument(SnDocumentBatchOperationRequest request, SnLanguage language, SnCurrency currency, CoveoSnCountry country, T streamService) {
-        boolean success = true;
+    private void streamDocument(SnDocumentBatchOperationRequest request, SnLanguage language, SnCurrency currency,
+                             CoveoSnCountry country, T streamService) {
         if (isApplicableForCountry(request, language, currency, country)) {
             synchronized (streamService) {
                 DocumentBuilder coveoDocument = createCoveoDocument(request.getDocument(), language.getId(), currency.getId());
@@ -118,16 +120,13 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
                         }
                         streamService.pushDocument(coveoDocument);
                     } catch (IOException | InterruptedException exception) {
-                        success = false;
                         LOG.error("Failed to index " + request.getDocument().getId(), exception);
                     }
                 } else {
                     LOG.error("Failed to index " + request.getDocument().getId());
-                    success = false;
                 }
             }
         }
-        return success;
     }
 
     protected boolean isApplicableForCountry(SnDocumentBatchOperationRequest request, SnLanguage language,

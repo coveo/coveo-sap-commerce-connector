@@ -76,6 +76,7 @@ public class CoveoAvailabilityStreamServiceStrategy<T extends CoveoStreamService
         documentBatchOperationResponse.setId(request.getDocument().getId());
         synchronized (availabilityStreamService) {
             DocumentBuilder coveoDocument = createCoveoDocument(request.getDocument());
+            documentBatchOperationResponse.setStatus(SnDocumentOperationStatus.UPDATED);
             if (coveoDocument != null) {
                 try {
                     if (LOG.isDebugEnabled()) {
@@ -83,13 +84,9 @@ public class CoveoAvailabilityStreamServiceStrategy<T extends CoveoStreamService
                         LOG.debug("Pushing document: " + jsonDocument.toString());
                     }
                     availabilityStreamService.pushDocument(coveoDocument);
-                    documentBatchOperationResponse.setStatus(SnDocumentOperationStatus.UPDATED);
                 } catch (IOException | InterruptedException exception) {
-                    documentBatchOperationResponse.setStatus(SnDocumentOperationStatus.FAILED);
                     LOG.error("failed to index " + request.getDocument().getId(), exception);
                 }
-            } else {
-                documentBatchOperationResponse.setStatus(SnDocumentOperationStatus.FAILED);
             }
         }
 
