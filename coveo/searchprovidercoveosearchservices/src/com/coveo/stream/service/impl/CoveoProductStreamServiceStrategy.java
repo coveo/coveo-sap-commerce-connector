@@ -71,8 +71,9 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
                 documents.forEach(request -> { 
                     SnDocumentBatchOperationResponse documentBatchOperationResponse = new SnDocumentBatchOperationResponse();
                     documentBatchOperationResponse.setId(request.getDocument().getId());
-                    documentBatchOperationResponse.setStatus(streamDocument(request, source.getLanguage(), source.getCurrency(), source.getCountry(), streamService) ? SnDocumentOperationStatus.UPDATED : SnDocumentOperationStatus.FAILED);
-                    if (!responseMap.containsKey(documentBatchOperationResponse.getId()) || documentBatchOperationResponse.getStatus() == SnDocumentOperationStatus.FAILED) {
+                    streamDocument(request, source.getLanguage(), source.getCurrency(), source.getCountry(), streamService);
+                    documentBatchOperationResponse.setStatus(SnDocumentOperationStatus.UPDATED);
+                    if (!responseMap.containsKey(documentBatchOperationResponse.getId())) {
                         responseMap.put(documentBatchOperationResponse.getId(), documentBatchOperationResponse);
                     }
                 });
@@ -85,8 +86,7 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         return languages.contains(source.getLanguage()) && currencies.contains(source.getCurrency()) && countries.contains(source.getCountry());
     }
 
-    private boolean streamDocument(SnDocumentBatchOperationRequest request, SnLanguage language, SnCurrency currency, CoveoSnCountry country, T streamService) {
-        boolean success = true;
+    private void streamDocument(SnDocumentBatchOperationRequest request, SnLanguage language, SnCurrency currency, CoveoSnCountry country, T streamService) {
         if (LOG.isDebugEnabled()) {
             JsonObject jsonDocument = (new Gson()).toJsonTree(request.getDocument()).getAsJsonObject();
             LOG.debug("Adding SnDocument " + jsonDocument.toString());
@@ -98,17 +98,13 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
                     try {
                         streamService.pushDocument(coveoDocument);
                     } catch (IOException | InterruptedException exception) {
-                        success = false;
                         LOG.error("failed to index " + request.getDocument().getId(), exception);
                     }
                 } else {
                     LOG.error("failed to index " + request.getDocument().getId());
-                    success = false;
                 }
             }
         }
-
-        return success;
     }
 
     protected boolean isApplicableForCountry(SnDocumentBatchOperationRequest request, SnLanguage language,
