@@ -1,14 +1,14 @@
 # Coveo SAP Commerce Connector
 Integrate your SAP Commerce Cloud project with the Coveo Platform using the SAP Commerce Connector. 
 The connector is a set of extensions tailored specifically for SAP Commerce 2211.
-This repository houses 3 versions. v3 of the connector can be found on the main branch. Support for earlier SAP Commerce versions can be found in the branches v1 and v2
+This repository houses 4 versions. The latest release of each version of the connector and its CHANGELOG can be found in its respective branch detailed in the table below. Specific versions can be downloaded using the appropriate tag.
 
 | Branch | SAP Commerce Cloud support | Status |
 |--------|-----------------------------|--------|
-| `main` | 2211-jdk21 | Active development - SAP Commerce Cloud version [2211-jdk21.1](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/75d4c3895cb346008545900bffe851ce/bcb7ba6cf2f84ab89b136d496b188f17.html?locale=en-US)|
-| `v3` | 2211 | Active development - SAP Commerce Cloud version [2211](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2211&locale=en-US)|
-| `v2` | 2105, 2205 | Maintained, with no new features.<br><br>This is because the SAP Commerce Cloud versions [2105](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2105&locale=en-US) and [2205](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2205&locale=en-US) are out of maintenance. |
-| `v1` | 2011 | Deprecated.<br><br>This is because the SAP Commerce Cloud version [2011](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2011) is out of maintenance. |
+| [`v4`](https://github.com/coveo/coveo-sap-commerce-connector/tree/v4) | 2211-jdk21 | Active development - SAP Commerce Cloud version [2211-jdk21.1](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/75d4c3895cb346008545900bffe851ce/bcb7ba6cf2f84ab89b136d496b188f17.html?locale=en-US)|
+| [`v3`](https://github.com/coveo/coveo-sap-commerce-connector/tree/v3) | 2211 | Active development - SAP Commerce Cloud version [2211](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2211&locale=en-US)|
+| [`v2`](https://github.com/coveo/coveo-sap-commerce-connector/tree/v2) | 2105, 2205 | Maintained, with no new features.<br><br>This is because the SAP Commerce Cloud versions [2105](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2105&locale=en-US) and [2205](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2205&locale=en-US) are out of maintenance. |
+| [`v1`](https://github.com/coveo/coveo-sap-commerce-connector/tree/v1) | 2011 | Deprecated.<br><br>This is because the SAP Commerce Cloud version [2011](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD?version=v2011) is out of maintenance. |
 
 ## Available extensions
 Each extension offers unique functionalities to enhance your integration experience. This repository includes
