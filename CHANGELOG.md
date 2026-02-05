@@ -80,6 +80,6 @@ Next to each version number, you can see if the version is required or recommend
 
 ## 2.0.0 (2024-03-08) <sub>$${\color{red}required}$$</sub>
 
-- Add support for SAP Commerce Cloud 2211 and later.
+- Add support for SAP Commerce Cloud 2105 and 2205.
 
 - Add a single source push capability.
