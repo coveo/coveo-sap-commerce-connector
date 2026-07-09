@@ -51,7 +51,7 @@ public class CoveoAvailabilityStreamServiceStrategy<T extends CoveoStreamService
     }
 
     @Override
-    public List<SnDocumentBatchOperationResponse> pushDocuments(List<SnDocumentBatchOperationRequest> documents) {
+    public List<SnDocumentBatchOperationResponse> pushDocuments(List<SnDocumentBatchOperationRequest> documents, Boolean singleSourceEnabled) {
         List<SnDocumentBatchOperationResponse> responses = new ArrayList<>();
         int totalDocumentsCount = documents.size();
         int logIntervalPercentage = configurationService.getConfiguration().getInt(COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE);
@@ -84,8 +84,11 @@ public class CoveoAvailabilityStreamServiceStrategy<T extends CoveoStreamService
                         LOG.debug("Pushing document: " + jsonDocument.toString());
                     }
                     availabilityStreamService.pushDocument(coveoDocument);
-                } catch (IOException | InterruptedException exception) {
+                } catch (IOException exception) {
                     LOG.error("failed to index " + request.getDocument().getId(), exception);
+                } catch (InterruptedException  exception) {
+                    LOG.error("failed to index " + request.getDocument().getId(), exception);
+                    Thread.currentThread().interrupt();
                 }
             }
         }

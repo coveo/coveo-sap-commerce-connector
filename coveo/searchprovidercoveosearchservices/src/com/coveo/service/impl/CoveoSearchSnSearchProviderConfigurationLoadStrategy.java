@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class CoveoSearchSnSearchProviderConfigurationLoadStrategy implements
 		SnSearchProviderConfigurationLoadStrategy<CoveoSearchSnSearchProviderConfigurationModel, CoveoSearchSnSearchProviderConfiguration>
 {
-	private final static Logger LOG = Logger.getLogger(CoveoSearchSnSearchProviderConfigurationLoadStrategy.class);
+	private static final Logger LOG = Logger.getLogger(CoveoSearchSnSearchProviderConfigurationLoadStrategy.class);
 	private Converter<CoveoSearchSnSearchProviderConfigurationModel, CoveoSearchSnSearchProviderConfiguration> coveoSearchSnSearchProviderConfigurationConverter;
 
 	@Override

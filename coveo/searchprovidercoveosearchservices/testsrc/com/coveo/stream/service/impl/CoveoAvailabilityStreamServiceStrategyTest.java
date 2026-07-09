@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @UnitTest
-public class CoveoAvailabilityStreamServiceStrategyTest {
+class CoveoAvailabilityStreamServiceStrategyTest {
     private static final String LANG_EN = "en";
     private static final String LANG_FR = "fr";
     private static final String LANG_DE = "de";
@@ -82,7 +82,7 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
     CoveoAvailabilityStreamServiceStrategy<CoveoAbstractStreamService<Object>> coveoAvailabilityStreamServiceStrategy;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(coveoSourceUS.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
         when(coveoSourceFR.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
         when(coveoSourceDE.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
@@ -115,7 +115,7 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
     }
 
     @Test
-    public void testPushDocuments_MissingOneName() throws IOException, InterruptedException {
+    void testPushDocuments_MissingOneName() throws IOException, InterruptedException {
         when(configurationService.getConfiguration()).thenReturn(configuration);
         when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(0);
 
@@ -126,7 +126,7 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
         documentB.setDocument(createDocumentFields("", "codeB"));
         documents.add(documentA);
         documents.add(documentB);
-        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents);
+        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
         verify(coveoAbstractStreamServiceUS, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceFR, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceDE, times(0)).pushDocument(any());
@@ -134,7 +134,7 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
     }
 
     @Test
-    public void testPushDocuments_MissingOneCode() throws IOException, InterruptedException {
+    void testPushDocuments_MissingOneCode() throws IOException, InterruptedException {
         when(configurationService.getConfiguration()).thenReturn(configuration);
         when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(0);
 
@@ -145,7 +145,7 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
         documentB.setDocument(createDocumentFields("nameB", ""));
         documents.add(documentA);
         documents.add(documentB);
-        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents);
+        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
         verify(coveoAbstractStreamServiceUS, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceFR, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceDE, times(0)).pushDocument(any());
@@ -153,7 +153,7 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
     }
 
     @Test
-    public void testPushDocuments() throws IOException, InterruptedException {
+    void testPushDocuments() throws IOException, InterruptedException {
         when(configurationService.getConfiguration()).thenReturn(configuration);
         when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(0);
 
@@ -165,7 +165,7 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
         documentB.setDocument(createDocumentFields("nameB", "codeB"));
         documents.add(documentA);
         documents.add(documentB);
-        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents);
+        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
         verify(coveoAbstractStreamServiceUS, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceFR, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceDE, times(0)).pushDocument(any());
@@ -173,7 +173,7 @@ public class CoveoAvailabilityStreamServiceStrategyTest {
     }
 
     @Test
-    public void testCloseServices() throws NoOpenStreamException, IOException, NoOpenFileContainerException, InterruptedException {
+    void testCloseServices() throws NoOpenStreamException, IOException, NoOpenFileContainerException, InterruptedException {
         coveoAvailabilityStreamServiceStrategy.closeServices();
         verify(coveoAbstractStreamServiceUS, times(0)).closeStream();
         verify(coveoAbstractStreamServiceFR, times(0)).closeStream();
