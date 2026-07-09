@@ -34,13 +34,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @UnitTest
-public class CoveoSearchSnSearchProviderTest {
+class CoveoSearchSnSearchProviderTest {
 
     private static final String INDEX_TYPE_ID = "indexTypeId";
     private static final int DOCS_TO_INDEX = 2;
@@ -68,23 +69,30 @@ public class CoveoSearchSnSearchProviderTest {
     @InjectMocks
     private final CoveoSearchSnSearchProvider coveoSearchSnSearchProvider = new CoveoSearchSnSearchProvider();
 
-    public void setUp() throws Exception {
+    void setUpTestContext(Boolean singalSourceEnabled) {
         when(configurationService.getConfiguration()).thenReturn(configuration);
-        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn(SUPPORTED_AVAILABILITY_TYPES_CODE);
+        when(configuration.getString(SearchprovidercoveosearchservicesConstants.SUPPORTED_AVAILABILITY_TYPES_CODE)).thenReturn(
+                SUPPORTED_AVAILABILITY_TYPES_CODE);
 
         when(snIndexType.getId()).thenReturn(INDEX_TYPE_ID);
         when(snContext.getIndexType()).thenReturn(snIndexType);
 
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_REBUILD_STREAM_SERVICES_KEY, coveoProductRebuildStreamServiceStrategy);
-        attributes.put(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_UPDATE_STREAM_SERVICES_KEY, coveoProductUpdateStreamServiceStrategy);
-        attributes.put(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_REBUILD_STREAM_SERVICES_KEY, coveoAvailabilityRebuildStreamServiceStrategy);
-        attributes.put(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_UPDATE_STREAM_SERVICES_KEY, coveoAvailabilityUpdateStreamServiceStrategy);
+        attributes.put(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_REBUILD_STREAM_SERVICES_KEY,
+                       coveoProductRebuildStreamServiceStrategy);
+        attributes.put(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_UPDATE_STREAM_SERVICES_KEY,
+                       coveoProductUpdateStreamServiceStrategy);
+        attributes.put(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_REBUILD_STREAM_SERVICES_KEY,
+                       coveoAvailabilityRebuildStreamServiceStrategy);
+        attributes.put(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_UPDATE_STREAM_SERVICES_KEY,
+                       coveoAvailabilityUpdateStreamServiceStrategy);
+        attributes.put(SearchprovidercoveosearchservicesConstants.COVEO_SINGLE_SOURCE_ENABLED_KEY,
+                       singalSourceEnabled);
         when(snContext.getAttributes()).thenReturn(attributes);
     }
 
     @Test
-    public void testCreateIndex() throws SnException {
+    void testCreateIndex() throws SnException {
         when(snIndexType.getId()).thenReturn(INDEX_TYPE_ID);
         when(snContext.getIndexType()).thenReturn(snIndexType);
         final SnIndex index = coveoSearchSnSearchProvider.createIndex(snContext);
@@ -95,36 +103,36 @@ public class CoveoSearchSnSearchProviderTest {
     }
 
     @Test
-    public void testExecuteDocumentBatch_AvailabilityFullIndexOperation() throws Exception {
-        setUp();
+    void testExecuteDocumentBatch_AvailabilityFullIndexOperation() throws Exception {
+        setUpTestContext(Boolean.FALSE);
         when(snIndexType.getItemComposedType()).thenReturn("Warehouse");
         List<SnDocumentBatchOperationResponse> responses = new ArrayList<>();
-        when(coveoAvailabilityRebuildStreamServiceStrategy.pushDocuments(anyList())).thenReturn(responses);
+        when(coveoAvailabilityRebuildStreamServiceStrategy.pushDocuments(anyList(), eq(Boolean.FALSE))).thenReturn(responses);
         coveoSearchSnSearchProvider.createIndexerOperation(snContext, SnIndexerOperationType.FULL, DOCS_TO_INDEX);
         SnDocumentBatchRequest request = new SnDocumentBatchRequest();
         request.setRequests(new ArrayList<>());
         coveoSearchSnSearchProvider.executeDocumentBatch(snContext, INDEX_TYPE_ID + SnIndexerOperationType.FULL, request, INDEX_TYPE_ID + SnIndexerOperationType.FULL);
-        verify(coveoAvailabilityRebuildStreamServiceStrategy, times(1)).pushDocuments(Collections.emptyList());
-        verify(coveoAvailabilityUpdateStreamServiceStrategy, times(0)).pushDocuments(Collections.emptyList());
+        verify(coveoAvailabilityRebuildStreamServiceStrategy, times(1)).pushDocuments(Collections.emptyList(), Boolean.FALSE);
+        verify(coveoAvailabilityUpdateStreamServiceStrategy, times(0)).pushDocuments(Collections.emptyList(), Boolean.FALSE);
     }
 
     @Test
-    public void testExecuteDocumentBatch_AvailabilityIncrementalIndexOperation() throws Exception {
-        setUp();
+    void testExecuteDocumentBatch_AvailabilityIncrementalIndexOperation() throws Exception {
+        setUpTestContext(Boolean.TRUE);
         when(snIndexType.getItemComposedType()).thenReturn("Warehouse");
         List<SnDocumentBatchOperationResponse> responses = new ArrayList<>();
-        when(coveoAvailabilityUpdateStreamServiceStrategy.pushDocuments(anyList())).thenReturn(responses);
+        when(coveoAvailabilityUpdateStreamServiceStrategy.pushDocuments(anyList(), eq(Boolean.TRUE))).thenReturn(responses);
         coveoSearchSnSearchProvider.createIndexerOperation(snContext, SnIndexerOperationType.INCREMENTAL, DOCS_TO_INDEX);
         SnDocumentBatchRequest request = new SnDocumentBatchRequest();
         request.setRequests(new ArrayList<>());
         coveoSearchSnSearchProvider.executeDocumentBatch(snContext, INDEX_TYPE_ID + SnIndexerOperationType.INCREMENTAL, request, INDEX_TYPE_ID + SnIndexerOperationType.INCREMENTAL);
-        verify(coveoAvailabilityRebuildStreamServiceStrategy, times(0)).pushDocuments(Collections.emptyList());
-        verify(coveoAvailabilityUpdateStreamServiceStrategy, times(1)).pushDocuments(Collections.emptyList());
+        verify(coveoAvailabilityRebuildStreamServiceStrategy, times(0)).pushDocuments(Collections.emptyList(), Boolean.TRUE);
+        verify(coveoAvailabilityUpdateStreamServiceStrategy, times(1)).pushDocuments(Collections.emptyList(), Boolean.TRUE);
     }
 
     @Test
-    public void testCommit_AvailabilityFullIndexOperation() throws Exception {
-        setUp();
+    void testCommit_AvailabilityFullIndexOperation() throws Exception {
+        setUpTestContext(Boolean.FALSE);
         when(snIndexType.getItemComposedType()).thenReturn("Warehouse");
         coveoSearchSnSearchProvider.createIndexerOperation(snContext, SnIndexerOperationType.FULL, DOCS_TO_INDEX);
         coveoSearchSnSearchProvider.commit(snContext, INDEX_TYPE_ID + SnIndexerOperationType.FULL);
@@ -133,8 +141,8 @@ public class CoveoSearchSnSearchProviderTest {
     }
 
     @Test
-    public void testCommit_AvailabilityIncrementalIndexOperation() throws Exception {
-        setUp();
+    void testCommit_AvailabilityIncrementalIndexOperation() throws Exception {
+        setUpTestContext(Boolean.FALSE);
         when(snIndexType.getItemComposedType()).thenReturn("Warehouse");
         coveoSearchSnSearchProvider.createIndexerOperation(snContext, SnIndexerOperationType.INCREMENTAL, DOCS_TO_INDEX);
         coveoSearchSnSearchProvider.commit(snContext, INDEX_TYPE_ID + SnIndexerOperationType.INCREMENTAL);
@@ -143,8 +151,8 @@ public class CoveoSearchSnSearchProviderTest {
     }
 
     @Test
-    public void testCreateIndexerOperation() throws Exception {
-        setUp();
+    void testCreateIndexerOperation() throws Exception {
+        setUpTestContext(Boolean.FALSE);
         when(snIndexType.getItemComposedType()).thenReturn("Product");
         final SnIndexerOperation operation = coveoSearchSnSearchProvider.createIndexerOperation(snContext, SnIndexerOperationType.FULL, DOCS_TO_INDEX);
         assertEquals(INDEX_TYPE_ID, operation.getIndexTypeId());
@@ -155,36 +163,36 @@ public class CoveoSearchSnSearchProviderTest {
     }
 
     @Test
-    public void testExecuteDocumentBatch_ProductFullIndexOperation() throws Exception {
-        setUp();
+    void testExecuteDocumentBatch_ProductFullIndexOperation() throws Exception {
+        setUpTestContext(Boolean.FALSE);
         when(snIndexType.getItemComposedType()).thenReturn("Product");
         List<SnDocumentBatchOperationResponse> responses = new ArrayList<>();
-        when(coveoProductRebuildStreamServiceStrategy.pushDocuments(anyList())).thenReturn(responses);
+        when(coveoProductRebuildStreamServiceStrategy.pushDocuments(anyList(), eq(Boolean.FALSE))).thenReturn(responses);
         coveoSearchSnSearchProvider.createIndexerOperation(snContext, SnIndexerOperationType.FULL, DOCS_TO_INDEX);
         SnDocumentBatchRequest request = new SnDocumentBatchRequest();
         request.setRequests(new ArrayList<>());
         coveoSearchSnSearchProvider.executeDocumentBatch(snContext, INDEX_TYPE_ID + SnIndexerOperationType.FULL, request, INDEX_TYPE_ID + SnIndexerOperationType.FULL);
-        verify(coveoProductRebuildStreamServiceStrategy, times(1)).pushDocuments(Collections.emptyList());
-        verify(coveoProductUpdateStreamServiceStrategy, times(0)).pushDocuments(Collections.emptyList());
+        verify(coveoProductRebuildStreamServiceStrategy, times(1)).pushDocuments(Collections.emptyList(), Boolean.FALSE);
+        verify(coveoProductUpdateStreamServiceStrategy, times(0)).pushDocuments(Collections.emptyList(), Boolean.FALSE);
     }
 
     @Test
-    public void testExecuteDocumentBatch_ProductIncrementalIndexOperation() throws Exception {
-        setUp();
+    void testExecuteDocumentBatch_ProductIncrementalIndexOperation() throws Exception {
+        setUpTestContext(Boolean.FALSE);
         when(snIndexType.getItemComposedType()).thenReturn("Product");
         List<SnDocumentBatchOperationResponse> responses = new ArrayList<>();
-        when(coveoProductUpdateStreamServiceStrategy.pushDocuments(anyList())).thenReturn(responses);
+        when(coveoProductUpdateStreamServiceStrategy.pushDocuments(anyList(), eq(Boolean.FALSE))).thenReturn(responses);
         coveoSearchSnSearchProvider.createIndexerOperation(snContext, SnIndexerOperationType.INCREMENTAL, DOCS_TO_INDEX);
         SnDocumentBatchRequest request = new SnDocumentBatchRequest();
         request.setRequests(new ArrayList<>());
         coveoSearchSnSearchProvider.executeDocumentBatch(snContext, INDEX_TYPE_ID + SnIndexerOperationType.INCREMENTAL, request, INDEX_TYPE_ID + SnIndexerOperationType.INCREMENTAL);
-        verify(coveoProductRebuildStreamServiceStrategy, times(0)).pushDocuments(Collections.emptyList());
-        verify(coveoProductUpdateStreamServiceStrategy, times(1)).pushDocuments(Collections.emptyList());
+        verify(coveoProductRebuildStreamServiceStrategy, times(0)).pushDocuments(Collections.emptyList(), Boolean.FALSE);
+        verify(coveoProductUpdateStreamServiceStrategy, times(1)).pushDocuments(Collections.emptyList(), Boolean.FALSE);
     }
 
     @Test
-    public void testCommit_ProductFullIndexOperation() throws Exception {
-        setUp();
+    void testCommit_ProductFullIndexOperation() throws Exception {
+        setUpTestContext(Boolean.FALSE);
         when(snIndexType.getItemComposedType()).thenReturn("Product");
         coveoSearchSnSearchProvider.createIndexerOperation(snContext, SnIndexerOperationType.FULL, DOCS_TO_INDEX);
         coveoSearchSnSearchProvider.commit(snContext, INDEX_TYPE_ID + SnIndexerOperationType.FULL);
@@ -193,8 +201,8 @@ public class CoveoSearchSnSearchProviderTest {
     }
 
     @Test
-    public void testCommit_ProductIncrementalIndexOperation() throws Exception {
-        setUp();
+    void testCommit_ProductIncrementalIndexOperation() throws Exception {
+        setUpTestContext(Boolean.FALSE);
         when(snIndexType.getItemComposedType()).thenReturn("Product");
         coveoSearchSnSearchProvider.createIndexerOperation(snContext, SnIndexerOperationType.INCREMENTAL, DOCS_TO_INDEX);
         coveoSearchSnSearchProvider.commit(snContext, INDEX_TYPE_ID + SnIndexerOperationType.INCREMENTAL);

@@ -22,6 +22,8 @@ public final class SearchprovidercoveosearchservicesConstants extends GeneratedS
 	public static final String COVEO_AVAILABILITY_REBUILD_STREAM_SERVICES_KEY = "CoveoAvailabilityRebuildStreamService";
 	public static final String COVEO_AVAILABILITY_UPDATE_STREAM_SERVICES_KEY = "CoveoAvailabilityUpdateStreamsService";
 
+	public static final String COVEO_SINGLE_SOURCE_ENABLED_KEY = "CoveoSingleSourceEnabled";
+
 	public static final String SUPPORTED_AVAILABILITY_TYPES_CODE = "coveo.availability.typecodes";
 	public static final String SUPPORTED_PRODUCT_TYPES_CODE = "coveo.product.typecodes";
 	public static final String SUPPORTED_VARIANT_TYPES_CODE = "coveo.variant.typecodes";

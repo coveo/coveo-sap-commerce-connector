@@ -2,7 +2,6 @@ package com.coveo.service.impl;
 
 import com.coveo.constants.SearchprovidercoveosearchservicesConstants;
 
-import com.coveo.pushapiclient.UpdateStreamService;
 import com.coveo.searchservices.admin.data.CoveoSnCountry;
 import com.coveo.searchservices.admin.data.CoveoSnIndexConfiguration;
 import com.coveo.searchservices.data.CoveoSearchSnSearchProviderConfiguration;
@@ -20,11 +19,13 @@ import de.hybris.platform.searchservices.indexer.service.impl.DefaultSnIndexerCo
 import de.hybris.platform.servicelayer.config.ConfigurationService;
 import de.hybris.platform.servicelayer.i18n.CommonI18NService;
 import org.apache.log4j.Logger;
+import org.springframework.context.ApplicationContext;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COSAP_CONNECTOR_USER_AGENT;
 import static com.coveo.constants.SearchprovidercoveosearchservicesConstants.COSAP_CONNECTOR_USER_AGENT_PROPERTY;
@@ -35,12 +36,16 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
 
     private ConfigurationService configurationService;
     private CommonI18NService commonI18NService;
+    private Boolean singleSourceEnabled;
 
+    @Override
     protected void populateIndexerContext(final DefaultSnIndexerContext context, final SnIndexerRequest indexerRequest) {
         if (LOG.isDebugEnabled()) LOG.debug("Populating indexer context for Coveo search provider");
         super.populateIndexerContext(context,indexerRequest);
+        ApplicationContext applicationContext = Registry.getApplicationContext();
         CoveoSearchSnSearchProviderConfiguration coveoSearchProviderConfiguration = (CoveoSearchSnSearchProviderConfiguration) context.getIndexConfiguration().getSearchProviderConfiguration();
-        String userAgent = configurationService.getConfiguration().getString(COSAP_CONNECTOR_USER_AGENT_PROPERTY, COSAP_CONNECTOR_USER_AGENT);
+        String[] userAgent =
+                new String[]{configurationService.getConfiguration().getString(COSAP_CONNECTOR_USER_AGENT_PROPERTY, COSAP_CONNECTOR_USER_AGENT)};
         List<CoveoUpdateStreamService> updateStreamServices = new ArrayList<>();
         List<CoveoRebuildStreamService> rebuildStreamServices = new ArrayList<>();
         coveoSearchProviderConfiguration.getSources().forEach(source -> {
@@ -48,19 +53,21 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
                 LOG.trace("Populating Source with name: " + source.getName());
                 LOG.trace("Source target URL: " + source.getDestinationTargetUrl());
             }
-            CoveoUpdateStreamService coveoUpdateStreamService = Registry.getApplicationContext().getBean(CoveoUpdateStreamService.class);
-            coveoUpdateStreamService.init(source, new String[]{userAgent});
+            CoveoUpdateStreamService coveoUpdateStreamService = applicationContext.getBean(CoveoUpdateStreamService.class);
+            coveoUpdateStreamService.init(source, userAgent);
             updateStreamServices.add(coveoUpdateStreamService);
 
-            CoveoRebuildStreamService coveoRebuildStreamService = Registry.getApplicationContext().getBean(CoveoRebuildStreamService.class);
-            coveoRebuildStreamService.init(source, new String[]{userAgent});
+            CoveoRebuildStreamService coveoRebuildStreamService = applicationContext.getBean(CoveoRebuildStreamService.class);
+            coveoRebuildStreamService.init(source, userAgent);
             rebuildStreamServices.add(coveoRebuildStreamService);
         });
 
-        String[] availabilityTypes = configurationService.getConfiguration().getString(SUPPORTED_AVAILABILITY_TYPES_CODE).split(",");
+        String[] availabilityTypes = Arrays.stream(
+                configurationService.getConfiguration().getString(SUPPORTED_AVAILABILITY_TYPES_CODE).split(","))
+                                           .map(String::trim).toArray(String[]::new);
         String composedType = context.getIndexType().getItemComposedType();
         if(LOG.isDebugEnabled()) LOG.debug(String.format("Availability types are %s and composed type is %s", Arrays.toString(availabilityTypes), composedType));
-        if (availabilityTypes != null && Arrays.asList(availabilityTypes).contains(composedType)) {
+        if (Arrays.asList(availabilityTypes).contains(composedType)) {
             context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_REBUILD_STREAM_SERVICES_KEY,new CoveoAvailabilityStreamServiceStrategy<>(rebuildStreamServices, configurationService));
             context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_UPDATE_STREAM_SERVICES_KEY,new CoveoAvailabilityStreamServiceStrategy<>(updateStreamServices, configurationService));
         } else {
@@ -75,10 +82,14 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
             }
 
             context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_REBUILD_STREAM_SERVICES_KEY,
-                    new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, rebuildStreamServices, configurationService, commonI18NService));
+                    new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, rebuildStreamServices,
+                                                            configurationService, commonI18NService, singleSourceEnabled));
             context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_UPDATE_STREAM_SERVICES_KEY,
-                    new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, updateStreamServices, configurationService, commonI18NService));
+                    new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, updateStreamServices,
+                                                            configurationService, commonI18NService, singleSourceEnabled));
         }
+        context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_SINGLE_SOURCE_ENABLED_KEY,
+                                    Objects.requireNonNullElse(singleSourceEnabled, Boolean.FALSE));
     }
 
     private List<SnLanguage> getLanguages(SnContext context) {
@@ -111,5 +122,9 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
 
     public void setCommonI18NService(CommonI18NService commonI18NService) {
         this.commonI18NService = commonI18NService;
+    }
+
+    public void setSingleSourceEnabled(Boolean singleSourceEnabled)  {
+        this.singleSourceEnabled = singleSourceEnabled;
     }
 }

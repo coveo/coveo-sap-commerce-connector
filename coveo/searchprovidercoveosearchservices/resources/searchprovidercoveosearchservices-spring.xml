@@ -18,6 +18,7 @@
         <property name="snIndexConfigurationService" ref="coveoSnIndexConfigurationService" />
         <property name="configurationService" ref="configurationService"/>
         <property name="commonI18NService" ref="commonI18NService"/>
+        <property name="singleSourceEnabled" value="${coveo.multimarket.singlesource:false}" />
     </bean>
 
     <alias name="coveoSnIndexConfigurationService" alias="coveoSnIndexConfigurationService" />
@@ -178,6 +179,12 @@
            parent="modelAttributeSnIndexerValueProvider">
     </bean>
 
+    <alias name="coveoMultiMarketSingleSourceDocumentTitleSnIndexerValueProvider" alias="coveoMultiMarketSingleSourceDocumentTitleSnIndexerValueProvider" />
+    <bean id="coveoMultiMarketSingleSourceDocumentTitleSnIndexerValueProvider"
+          class="com.coveo.indexer.service.impl.CoveoMultiMarketSingleSourceDocumentTitleSnIndexerValueProvider"
+          parent="modelAttributeSnIndexerValueProvider">
+    </bean>
+
     <alias name="coveoProductCategoryHierarchyAttributeSnIndexValueProvider" alias="coveoProductCategoryHierarchyAttributeSnIndexValueProvider" />
     <bean id="coveoProductCategoryHierarchyAttributeSnIndexValueProvider"
           class="com.coveo.indexer.service.impl.CoveoProductCategoryHierarchyAttributeSnIndexValueProvider"
@@ -186,8 +193,7 @@
 
     <alias name="coveoWarehouseAvailableSkusSnIndexerProvider" alias="coveoWarehouseAvailableSkusSnIndexerProvider" />
     <bean id="coveoWarehouseAvailableSkusSnIndexerProvider"
-          class="com.coveo.indexer.service.impl.CoveoWarehouseAvailableSkusSnIndexerProvider"
-          parent="abstractSnIndexerValueProvider">
+          class="com.coveo.indexer.service.impl.CoveoWarehouseAvailableSkusSnIndexerProvider">
     </bean>
 
     <alias name="coveoProductPriceToUserPriceGroupSnIndexerValueProvider" alias="coveoProductPriceToUserPriceGroupSnIndexerValueProvider" />

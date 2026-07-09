@@ -52,7 +52,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @UnitTest
-public class CoveoProductStreamServiceStrategyTest {
+class CoveoProductStreamServiceStrategyTest {
 
     private static final String LANG_EN = "en";
     private static final String LANG_FR = "fr";
@@ -134,13 +134,13 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     private void mockLocales() {
-        when(commonI18NService.getLocaleForIsoCode(LANG_EN)).thenReturn(new Locale(LANG_EN));
-        when(commonI18NService.getLocaleForIsoCode(LANG_FR)).thenReturn(new Locale(LANG_FR));
-        when(commonI18NService.getLocaleForIsoCode(LANG_DE)).thenReturn(new Locale(LANG_DE));
+        when(commonI18NService.getLocaleForIsoCode(LANG_EN)).thenReturn(Locale.forLanguageTag(LANG_EN));
+        when(commonI18NService.getLocaleForIsoCode(LANG_FR)).thenReturn(Locale.forLanguageTag(LANG_FR));
+        when(commonI18NService.getLocaleForIsoCode(LANG_DE)).thenReturn(Locale.forLanguageTag(LANG_DE));
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(coveoSourceUS.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
         when(coveoSourceFR.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
         when(coveoSourceDE.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
@@ -169,11 +169,11 @@ public class CoveoProductStreamServiceStrategyTest {
         streamServices.add(coveoAbstractStreamServiceDE);
         streamServices.add(coveoAbstractStreamServiceAvailability);
 
-        coveoProductStreamServiceStrategy = new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, streamServices, configurationService, commonI18NService);
+        coveoProductStreamServiceStrategy = new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, streamServices, configurationService, commonI18NService, Boolean.FALSE);
     }
 
     @Test
-    public void testPushDocuments() throws IOException, InterruptedException {
+    void testPushDocuments() throws IOException, InterruptedException {
         mockCountries();
         mockSources();
         mockCurrencies();
@@ -181,7 +181,7 @@ public class CoveoProductStreamServiceStrategyTest {
         mockLocales();
 
         when(configurationService.getConfiguration()).thenReturn(configuration);
-        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(50);
+        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE, SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE_DEFAULT)).thenReturn(50);
 
         List<SnDocumentBatchOperationRequest> documents = new ArrayList<>();
         SnDocumentBatchOperationRequest documentA = new SnDocumentBatchOperationRequest();
@@ -213,7 +213,7 @@ public class CoveoProductStreamServiceStrategyTest {
             mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("code"), anyMap(),
                     any(Locale.class), any(Currency.class))).thenReturn("dummyDocumentId");
 
-            List<SnDocumentBatchOperationResponse> responses = coveoProductStreamServiceStrategy.pushDocuments(documents);
+            List<SnDocumentBatchOperationResponse> responses = coveoProductStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
             verify(coveoAbstractStreamServiceUS, times(3)).pushDocument(any());
             verify(coveoAbstractStreamServiceFR, times(2)).pushDocument(any());
             verify(coveoAbstractStreamServiceDE, times(2)).pushDocument(any());
@@ -223,14 +223,14 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testPushDocuments_MissingOneName() throws IOException, InterruptedException {
+    void testPushDocuments_MissingOneName() throws IOException, InterruptedException {
         mockSources();
         mockCurrencies();
         mockLanguages();
         mockLocales();
 
         when(configurationService.getConfiguration()).thenReturn(configuration);
-        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(50);
+        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE, SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE_DEFAULT)).thenReturn(50);
 
         List<SnDocumentBatchOperationRequest> documents = new ArrayList<>();
         SnDocumentBatchOperationRequest documentA = new SnDocumentBatchOperationRequest();
@@ -241,7 +241,7 @@ public class CoveoProductStreamServiceStrategyTest {
                 CoveoObjectTypeSnIndexerValueProvider.PRODUCT_OBJECT_TYPE));
         documents.add(documentA);
         documents.add(documentB);
-        coveoProductStreamServiceStrategy.pushDocuments(documents);
+        coveoProductStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
         verify(coveoAbstractStreamServiceUS, times(1)).pushDocument(any());
         verify(coveoAbstractStreamServiceFR, times(1)).pushDocument(any());
         verify(coveoAbstractStreamServiceDE, times(1)).pushDocument(any());
@@ -249,14 +249,14 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testPushDocuments_MissingOneCode() throws IOException, InterruptedException {
+    void testPushDocuments_MissingOneCode() throws IOException, InterruptedException {
         mockSources();
         mockCurrencies();
         mockLanguages();
         mockLocales();
 
         when(configurationService.getConfiguration()).thenReturn(configuration);
-        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE)).thenReturn(50);
+        when(configuration.getInt(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE, SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE_DEFAULT)).thenReturn(50);
 
         List<SnDocumentBatchOperationRequest> documents = new ArrayList<>();
         SnDocumentBatchOperationRequest documentA = new SnDocumentBatchOperationRequest();
@@ -267,7 +267,7 @@ public class CoveoProductStreamServiceStrategyTest {
                 CoveoObjectTypeSnIndexerValueProvider.PRODUCT_OBJECT_TYPE));
         documents.add(documentA);
         documents.add(documentB);
-        coveoProductStreamServiceStrategy.pushDocuments(documents);
+        coveoProductStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
         verify(coveoAbstractStreamServiceUS, times(1)).pushDocument(any());
         verify(coveoAbstractStreamServiceFR, times(1)).pushDocument(any());
         verify(coveoAbstractStreamServiceDE, times(1)).pushDocument(any());
@@ -275,7 +275,7 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testCloseServices() throws NoOpenStreamException, IOException, NoOpenFileContainerException,
+    void testCloseServices() throws NoOpenStreamException, IOException, NoOpenFileContainerException,
             InterruptedException {
         coveoProductStreamServiceStrategy.closeServices();
         verify(coveoAbstractStreamServiceUS, times(1)).closeStream();
@@ -287,9 +287,9 @@ public class CoveoProductStreamServiceStrategyTest {
     private SnDocument createDocumentFields(String name, String code, String objectType) {
         Map<Locale, Object> localizedName = new HashMap<>();
         SnDocument snDocument = new SnDocument();
-        localizedName.put(new Locale(LANG_EN), name);
-        localizedName.put(new Locale(LANG_FR), name);
-        localizedName.put(new Locale(LANG_DE), name);
+        localizedName.put(Locale.forLanguageTag(LANG_EN), name);
+        localizedName.put(Locale.forLanguageTag(LANG_FR), name);
+        localizedName.put(Locale.forLanguageTag(LANG_DE), name);
         SnField nameField = new SnField();
         nameField.setId("name");
         nameField.setLocalized(true);
@@ -311,7 +311,7 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testAuthorizedCountries_WhenDataNull() {
+    void testAuthorizedCountries_WhenDataNull() {
 
         try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
             mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(anyString(), anyMap(),
@@ -336,7 +336,7 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testAuthorizedCountries_WhenDataNotCollection() {
+    void testAuthorizedCountries_WhenDataNotCollection() {
 
         try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
             mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(anyString(), anyMap(),
@@ -361,7 +361,7 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testAuthorizedCountries_WhenDataEmptyCollection() {
+    void testAuthorizedCountries_WhenDataEmptyCollection() {
 
         try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
             mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(anyString(), anyMap(),
@@ -386,11 +386,11 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testAuthorizedCountries_WhenDataCollection_HasInvalidObjects() {
+    void testAuthorizedCountries_WhenDataCollection_HasInvalidObjects() {
 
         try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
 
-            Collection countryData = new ArrayList();
+            Collection<Object> countryData = new ArrayList<>();
             countryData.add(new Object());
             mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(anyString(), anyMap(),
                     any(Locale.class), any(Currency.class))).thenReturn(countryData);
@@ -414,7 +414,7 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testAuthorizedCountries_WhenDataCollection_DoesntMatch_RequiredCountry() {
+    void testAuthorizedCountries_WhenDataCollection_DoesntMatch_RequiredCountry() {
 
         try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
 
@@ -450,7 +450,7 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testAuthorizedCountries_WhenDataCollection_Matches_RequiredCountry() {
+    void testAuthorizedCountries_WhenDataCollection_Matches_RequiredCountry() {
 
         try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
 
@@ -486,7 +486,7 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testAddEcProductIdToValues_WithValidCode() {
+    void testAddEcProductIdToValues_WithValidCode() {
         SnDocument document = new SnDocument();
         document.setId("doc1");
         Map<String, Object> documentFields = new HashMap<>();
@@ -504,7 +504,7 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testAddEcProductIdToValues_WithBlankCode() {
+    void testAddEcProductIdToValues_WithBlankCode() {
         SnDocument document = new SnDocument();
         document.setId("doc2");
         Map<String, Object> documentFields = new HashMap<>();
@@ -522,7 +522,7 @@ public class CoveoProductStreamServiceStrategyTest {
     }
 
     @Test
-    public void testAddEcProductIdToValues_WithNullCode() {
+    void testAddEcProductIdToValues_WithNullCode() {
         SnDocument document = new SnDocument();
         document.setId("doc3");
         Map<String, Object> documentFields = new HashMap<>();

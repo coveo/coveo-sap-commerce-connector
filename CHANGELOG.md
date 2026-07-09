@@ -14,6 +14,11 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.4.10 (2025-7-16) <sub>$${\color{green}recommended}$$</sub>
+
+- Added support for single-source/multi-market approach
+- Minor changes to improve readability and maintainability
+
 ## v3.4.9 (2026-1-22) <sub>$${\color{red}required}$$</sub>
 
 - Resolved an issue where missing mandatory data in an item can abort the entire index job. Now the item will be skipped and the remaining items will be indexed correctly

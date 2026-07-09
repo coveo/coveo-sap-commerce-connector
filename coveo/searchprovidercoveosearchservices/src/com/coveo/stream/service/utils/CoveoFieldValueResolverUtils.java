@@ -12,6 +12,10 @@ public class CoveoFieldValueResolverUtils {
 
     private static final Logger LOG = Logger.getLogger(CoveoFieldValueResolverUtils.class);
 
+    private CoveoFieldValueResolverUtils() {
+        // Private constructor to prevent instantiation
+    }
+
     public static Object resolveFieldValue(String fieldName, Map<String, Object> documentFields) {
         Object fieldValue = documentFields.getOrDefault(fieldName, null);
         if (LOG.isTraceEnabled()) LOG.trace("FieldName = " + fieldName + "; FieldValue = " + fieldValue);
@@ -32,7 +36,10 @@ public class CoveoFieldValueResolverUtils {
     }
 
     public static Object resolveFieldValue(Object fieldValue, Locale locale, Currency currency) {
-        if (LOG.isTraceEnabled()) LOG.trace("FieldValue = " + fieldValue + "; Locale = " + locale.toString() + "; Currency = " + currency.toString());
+        if (LOG.isTraceEnabled()) LOG.trace("FieldValue = " + fieldValue +
+                                                    "; Locale = " + (locale != null ? locale.toString() : "null") +
+                                                    "; Currency = " + (currency != null ? currency.toString() : "null"));
+
         if (fieldValue instanceof HashMap<?, ?> map) {
             if (locale != null && map.containsKey(locale)) {
                 return map.get(locale);
