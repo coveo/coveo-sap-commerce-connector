@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +58,16 @@ public class SearchTokenController {
 
     private String getUserId() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getPrincipal().toString();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "anonymous";
+        }
+
+        if (authentication.getPrincipal() instanceof Jwt jwt) {
+            // choose the claim that actually contains the commerce user id
+            return jwt.getClaimAsString("sub");
+        } else {
+            return authentication.getPrincipal().toString();
+        }
     }
 }
