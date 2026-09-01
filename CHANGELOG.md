@@ -14,7 +14,12 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
-## v4.0.2 (2025-12-16) <sub>$${\color{green}recommended}$$</sub>
+## v4.0.3 (2026-08-27) <sub>$${\color{red}required}$$</sub>
+
+- Resolved an edge case where a rerun after manual abort could overlap with lingering threads from the previous job and corrupt index updates.
+- Updated Coveo search token retrieval to support JWT-based authentication while preserving legacy principal fallback.
+
+## v4.0.2 (2026-07-06) <sub>$${\color{green}recommended}$$</sub>
 
 - Added support for single-source/multi-market approach
 - Minor changes to improve readability and maintainability
