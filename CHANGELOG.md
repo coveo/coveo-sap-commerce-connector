@@ -14,7 +14,11 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
-## v3.4.10 (2025-7-16) <sub>$${\color{green}recommended}$$</sub>
+## v3.4.11 (2026-8-27) <sub>$${\color{red}required}$$</sub>
+
+- Resolved an edge case where a rerun after manual abort could overlap with lingering threads from the previous job and corrupt index updates.
+
+## v3.4.10 (2026-7-09) <sub>$${\color{green}recommended}$$</sub>
 
 - Added support for single-source/multi-market approach
 - Minor changes to improve readability and maintainability

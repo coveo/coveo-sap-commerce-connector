@@ -27,21 +27,22 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoSearchSnSearchProviderConfiguration> implements InitializingBean {
 
     private static final Logger LOG = Logger.getLogger(CoveoSearchSnSearchProvider.class);
 
-    private final Map<String, CoveoStreamServiceStrategy> streamServiceStrategyMap = new HashMap<>();
+    private final Map<String, CoveoStreamServiceStrategy> streamServiceStrategyMap = new ConcurrentHashMap<>();
 
-    private final List<SnIndexerOperation> snIndexerOperations = new ArrayList<>();
+    private final List<SnIndexerOperation> snIndexerOperations = new CopyOnWriteArrayList<>();
 
     private Boolean singleSourceEnabled;
 
@@ -80,8 +81,8 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
             LOG.debug("Getting Indexer Operation with id " + indexerOperationId);
         }
         return snIndexerOperations.stream()
-                .filter(op -> op.getId().equals(indexerOperationId))
-                .findFirst();
+                                  .filter(op -> op.getId().equals(indexerOperationId))
+                                  .findFirst();
     }
 
     @Override
@@ -107,7 +108,7 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
             }
         }
 
-        if (streamServiceStrategyMap.isEmpty()) {
+        if (streamServiceStrategyMap.get(indexerOperation.getIndexId()) == null) {
             LOG.error("No stream service found for the index operation");
             throw new SnException("error creating client service");
         }
@@ -125,9 +126,9 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
 
     private static SnIndexerOperation createSnIndexerOperation(SnContext context, SnIndexerOperationType indexerOperationType) {
         SnIndexerOperation indexerOperation = new SnIndexerOperation();
-        // Here we are using the combination of the index type id and the operation type code to create a unique index id
-        // This will then be used to identify the stream service to use for the operation within a map
-        indexerOperation.setId(context.getIndexType().getId() + indexerOperationType.getCode());
+        // A UUID suffix ensures each run gets its own unique key in the streamServiceStrategyMap,
+        // preventing concurrent runs of the same index type from overwriting each other's entries.
+        indexerOperation.setId(context.getIndexType().getId() + indexerOperationType.getCode() + UUID.randomUUID());
         // We need to set this the same as the ID because this is the value passed into the commit method
         indexerOperation.setIndexId(indexerOperation.getId());
         indexerOperation.setIndexTypeId(context.getIndexType().getId());
@@ -146,6 +147,7 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
     @Override
     public void completeIndexerOperation(SnContext context, String indexerOperationId) throws SnException {
         LOG.info(String.format("The indexer operation %s has been completed", indexerOperationId));
+        cleanupIndexerOperation(indexerOperationId);
     }
 
     @Override
@@ -157,6 +159,7 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
             }
         }
         LOG.warn("No items have been updated in the index");
+        cleanupIndexerOperation(indexerOperationId);
     }
 
     @Override
@@ -168,6 +171,12 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
             }
         }
         LOG.warn("No items have been updated in the index");
+        cleanupIndexerOperation(indexerOperationId);
+    }
+
+    private void cleanupIndexerOperation(String indexerOperationId) {
+        streamServiceStrategyMap.remove(indexerOperationId);
+        snIndexerOperations.removeIf(op -> op.getId().equals(indexerOperationId));
     }
 
     @Override
@@ -215,9 +224,16 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
         if (LOG.isDebugEnabled()) LOG.debug("Closing Service");
         try {
             CoveoStreamServiceStrategy streamServiceStrategy = streamServiceStrategyMap.get(indexId);
-            streamServiceStrategy.closeServices();
-        } catch (IOException | InterruptedException| NoOpenStreamException | NoOpenFileContainerException exception) {
-            LOG.error("There was an issue closing one of the streams. We will continue to close the remaining streams", exception);
+            if (streamServiceStrategy != null) {
+                streamServiceStrategy.closeServices();
+            } else {
+                LOG.warn("No stream service strategy found for indexId: " + indexId);
+            }
+        } catch (InterruptedException exception) {
+            LOG.error("Stream closing was interrupted. Aborting close operation.", exception);
+            Thread.currentThread().interrupt();
+        } catch (IOException | NoOpenStreamException | NoOpenFileContainerException exception) {
+            LOG.error("There was an issue closing one of the streams.", exception);
         }
     }
 
