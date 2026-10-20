@@ -36,8 +36,8 @@ INSERT_UPDATE CoveoSource; &sourceId; id[unique = true]               ; name[uni
                          ; source2  ; electronics-product-source      ; Electronics Chinese Doller USA Source ;                  ;                  ;                 ; PRODUCTANDVARIANT ; electronics-product-dest
 
 # Create the configuration for the indexes you wish to push
-INSERT_UPDATE CoveoSearchSnSearchProviderConfiguration; id[unique = true]                 ; name                                ; coveoSource(&sourceId)
-                                                      ; $coveoSearchProviderConfiguration ; Coveo Search Provider Configuration ; source1,source2
+INSERT_UPDATE CoveoSearchSnSearchProviderConfiguration; id[unique = true]                 ; name                                ; coveoSource(&sourceId); isSingleSourceMultiMarket
+                                                      ; $coveoSearchProviderConfiguration ; Coveo Search Provider Configuration ; source1,source2       ; true
 
 INSERT_UPDATE CoveoSnIndexConfiguration; id[unique = true]        ; name              ; user(uid) ; languages(isocode); currencies(isocode); countries(isocode); searchProviderConfiguration(id)
                                        ; $coveoIndexConfiguration ; Coveo Electronics ; anonymous ; ja,en,de,zh       ; JPY,USD            ; JP,US             ; $coveoSearchProviderConfiguration

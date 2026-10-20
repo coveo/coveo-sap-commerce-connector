@@ -50,34 +50,45 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
     List<SnCurrency> currencies;
     List<CoveoSnCountry> countries;
     List<T> streamServices;
+    boolean singleSourceMultiMarketEnabled;
 
     private final ConfigurationService configurationService;
     private final CommonI18NService commonI18NService;
 
     public CoveoProductStreamServiceStrategy(List<SnLanguage> languages, List<SnCurrency> currencies,
                                              List<CoveoSnCountry> countries, List<T> incomingStreamServices,
-                                             ConfigurationService configurationService, CommonI18NService commonI18NService, Boolean singleSourceEnabled) {
+                                             ConfigurationService configurationService, CommonI18NService commonI18NService, Boolean singleSourceMultiMarketEnabled) {
         this.languages = languages;
         this.currencies = currencies;
         this.countries = countries;
         this.streamServices = new ArrayList<>();
+        this.singleSourceMultiMarketEnabled = Boolean.TRUE.equals(singleSourceMultiMarketEnabled);
+        List<String> invalidSourceIds = new ArrayList<>();
         incomingStreamServices.forEach(streamService -> {
             CoveoSource coveoSource = streamService.getCoveoSource();
             if (coveoSource.getObjectType().equals(CoveoCatalogObjectType.PRODUCTANDVARIANT)) {
+                boolean sourceIsValid = isSingleSourceMultiMarketEnabled()
+                        ? isUnqualifiedSource(coveoSource)
+                        : isSourceApplicableForConfiguredMarket(coveoSource);
+                if (!sourceIsValid) {
+                    invalidSourceIds.add(coveoSource.getId());
+                }
+
                 if (LOG.isDebugEnabled()) LOG.debug("Adding stream service based on source " + coveoSource.getId());
                 streamServices.add(streamService);
             }
         });
-        if (Boolean.TRUE.equals(singleSourceEnabled) && streamServices.size() > 1) {
+        if (isSingleSourceMultiMarketEnabled() && streamServices.size() > 1) {
             throw new SnRuntimeException("Single source mode is enabled but multiple sources have been configured");
+        } else if (!invalidSourceIds.isEmpty()) {
+            throw new SnRuntimeException("The following sources are not configured for the job: " + invalidSourceIds);
         }
         this.configurationService = configurationService;
         this.commonI18NService = commonI18NService;
     }
 
     @Override
-    public List<SnDocumentBatchOperationResponse> pushDocuments(List<SnDocumentBatchOperationRequest> documents,
-                                                                Boolean singleSourceEnabled) {
+    public List<SnDocumentBatchOperationResponse> pushDocuments(List<SnDocumentBatchOperationRequest> documents) {
         Map<String, SnDocumentBatchOperationResponse> responseMap = new HashMap<>();
         if (LOG.isDebugEnabled()) {
             LOG.debug("Streaming Documents");
@@ -89,13 +100,13 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         }
         for (T streamService : streamServices) {
             CoveoSource source = streamService.getCoveoSource();
-            if (Boolean.FALSE.equals(singleSourceEnabled) && !isSourceConfiguredForJob(source)) {
+            if (!isSingleSourceMultiMarketEnabled() && !isSourceApplicableForConfiguredMarket(source)) {
                 continue;
             }
             int totalDocumentsCount = documents.size();
             int logInterval = (int) Math.ceil(totalDocumentsCount * (logIntervalPercentage / 100.0));
             LOG.info(String.format("Streaming %s documents for source %s", totalDocumentsCount, source.getId()));
-            processDocumentsForSource(documents, responseMap, streamService, source, singleSourceEnabled, logInterval, totalDocumentsCount);
+            processDocumentsForSource(documents, responseMap, streamService, source, logInterval, totalDocumentsCount);
         }
         LOG.info(String.format("Finished streaming %s documents", responseMap.size()));
         return new ArrayList<>(responseMap.values());
@@ -104,13 +115,13 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
 
     private void processDocumentsForSource(List<SnDocumentBatchOperationRequest> documents,
                                            Map<String, SnDocumentBatchOperationResponse> responseMap,
-                                           T streamService, CoveoSource source, Boolean singleSourceEnabled,
+                                           T streamService, CoveoSource source,
                                            int logInterval, int totalDocumentsCount) {
         for (int documentIndex = 1; documentIndex <= totalDocumentsCount; documentIndex++) {
             SnDocumentBatchOperationRequest request = documents.get(documentIndex - 1);
             SnDocumentBatchOperationResponse documentBatchOperationResponse = new SnDocumentBatchOperationResponse();
             documentBatchOperationResponse.setId(request.getDocument().getId());
-            streamDocument(request, source.getLanguage(), source.getCurrency(), source.getCountry(), streamService, singleSourceEnabled);
+            streamDocument(request, source.getLanguage(), source.getCurrency(), source.getCountry(), streamService);
             documentBatchOperationResponse.setStatus(SnDocumentOperationStatus.UPDATED);
             responseMap.putIfAbsent(documentBatchOperationResponse.getId(), documentBatchOperationResponse);
             if (logInterval != 0 && documentIndex % logInterval == 0) {
@@ -119,15 +130,21 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         }
     }
 
-    private boolean isSourceConfiguredForJob(CoveoSource source) {
+    private boolean isSourceApplicableForConfiguredMarket(CoveoSource source) {
         return languages.contains(source.getLanguage()) && currencies.contains(source.getCurrency()) && countries.contains(source.getCountry());
     }
 
-    private void streamDocument(SnDocumentBatchOperationRequest request, SnLanguage language, SnCurrency currency,
-                            CoveoSnCountry country, T streamService, Boolean singleSourceEnabled) {
+    private boolean isUnqualifiedSource(CoveoSource source) {
+        return source.getLanguage() == null
+                && source.getCurrency() == null
+                && source.getCountry() == null;
+    }
 
-        if (Boolean.FALSE.equals(singleSourceEnabled) && !isApplicableForCountry(request, language, currency,
-                                                                                 country)) {
+    private void streamDocument(SnDocumentBatchOperationRequest request, SnLanguage language, SnCurrency currency,
+                            CoveoSnCountry country, T streamService) {
+
+        if (!isSingleSourceMultiMarketEnabled() && !isApplicableForCountry(request, language, currency,
+                                                                           country)) {
             return;
         }
 
@@ -135,7 +152,7 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         Object lock = streamService.getClass();
         Gson gson = new Gson();
         synchronized (lock) {
-            DocumentBuilder coveoDocument = createCoveoDocument(request.getDocument(), language, currency, singleSourceEnabled);
+            DocumentBuilder coveoDocument = createCoveoDocument(request.getDocument(), language, currency);
             if (coveoDocument != null) {
                 try {
                     if (LOG.isDebugEnabled()) {
@@ -191,8 +208,7 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         return false;
     }
 
-    private DocumentBuilder createCoveoDocument(SnDocument document, SnLanguage snLanguage, SnCurrency snCurrency,
-                                                Boolean singleSourceEnabled) {
+    private DocumentBuilder createCoveoDocument(SnDocument document, SnLanguage snLanguage, SnCurrency snCurrency) {
 
         Locale locale = (snLanguage != null) ? commonI18NService.getLocaleForIsoCode(snLanguage.getId()) : null;
         Currency currency = (snCurrency != null) ? Currency.getInstance(snCurrency.getId()) : null;
@@ -225,7 +241,6 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         }
 
         Map<String, Object> values = getDocumentValues(document,
-                                                       singleSourceEnabled,
                                                        locale,
                                                        currency,
                                                        documentId,
@@ -240,8 +255,7 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
     }
 
     @NonNull
-    private static Map<String, Object> getDocumentValues(SnDocument document,
-                                                         Boolean singleSourceEnabled,
+    private Map<String, Object> getDocumentValues(SnDocument document,
                                                          Locale locale,
                                                          Currency currency,
                                                          String documentId,
@@ -251,7 +265,7 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         Map<String, Object> values = new HashMap<>();
         for (Map.Entry<String, Object> field : fields.entrySet()) {
             Object fieldValue;
-            if (Boolean.TRUE.equals(singleSourceEnabled)) {
+            if (isSingleSourceMultiMarketEnabled()) {
                 fieldValue = field.getValue();
             } else {
                 fieldValue = CoveoFieldValueResolverUtils.resolveFieldValue(field.getValue(), locale, currency);
@@ -266,7 +280,7 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         return values;
     }
 
-    protected static void addEcProductIdToValues(SnDocument document, Map<String, Object> documentFields, Locale locale, Currency currency, Map<String, Object> values) {
+    protected void addEcProductIdToValues(SnDocument document, Map<String, Object> documentFields, Locale locale, Currency currency, Map<String, Object> values) {
         String documentCode = (String) CoveoFieldValueResolverUtils.resolveFieldValue("code", documentFields, locale, currency);
         if (StringUtils.isNotBlank(documentCode)) {
             values.put("ec_product_id", documentCode);
@@ -281,5 +295,8 @@ public class CoveoProductStreamServiceStrategy<T extends CoveoStreamService> imp
         for (T streamService : streamServices) {
             streamService.closeStream();
         }
+    }
+    public boolean isSingleSourceMultiMarketEnabled() {
+        return singleSourceMultiMarketEnabled;
     }
 }
