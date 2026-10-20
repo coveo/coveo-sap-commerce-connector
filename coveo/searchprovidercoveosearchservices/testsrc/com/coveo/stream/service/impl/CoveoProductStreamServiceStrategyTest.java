@@ -14,6 +14,7 @@ import de.hybris.platform.core.model.c2l.CountryModel;
 import de.hybris.platform.searchservices.admin.data.SnCurrency;
 import de.hybris.platform.searchservices.admin.data.SnField;
 import de.hybris.platform.searchservices.admin.data.SnLanguage;
+import de.hybris.platform.searchservices.core.SnRuntimeException;
 import de.hybris.platform.searchservices.document.data.SnDocument;
 import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationRequest;
 import de.hybris.platform.searchservices.document.data.SnDocumentBatchOperationResponse;
@@ -39,6 +40,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -169,6 +171,7 @@ class CoveoProductStreamServiceStrategyTest {
         streamServices.add(coveoAbstractStreamServiceDE);
         streamServices.add(coveoAbstractStreamServiceAvailability);
 
+        mockSources();
         coveoProductStreamServiceStrategy = new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, streamServices, configurationService, commonI18NService, Boolean.FALSE);
     }
 
@@ -213,7 +216,7 @@ class CoveoProductStreamServiceStrategyTest {
             mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("code"), anyMap(),
                     any(Locale.class), any(Currency.class))).thenReturn("dummyDocumentId");
 
-            List<SnDocumentBatchOperationResponse> responses = coveoProductStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
+            List<SnDocumentBatchOperationResponse> responses = coveoProductStreamServiceStrategy.pushDocuments(documents);
             verify(coveoAbstractStreamServiceUS, times(3)).pushDocument(any());
             verify(coveoAbstractStreamServiceFR, times(2)).pushDocument(any());
             verify(coveoAbstractStreamServiceDE, times(2)).pushDocument(any());
@@ -241,7 +244,7 @@ class CoveoProductStreamServiceStrategyTest {
                 CoveoObjectTypeSnIndexerValueProvider.PRODUCT_OBJECT_TYPE));
         documents.add(documentA);
         documents.add(documentB);
-        coveoProductStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
+        coveoProductStreamServiceStrategy.pushDocuments(documents);
         verify(coveoAbstractStreamServiceUS, times(1)).pushDocument(any());
         verify(coveoAbstractStreamServiceFR, times(1)).pushDocument(any());
         verify(coveoAbstractStreamServiceDE, times(1)).pushDocument(any());
@@ -267,7 +270,7 @@ class CoveoProductStreamServiceStrategyTest {
                 CoveoObjectTypeSnIndexerValueProvider.PRODUCT_OBJECT_TYPE));
         documents.add(documentA);
         documents.add(documentB);
-        coveoProductStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
+        coveoProductStreamServiceStrategy.pushDocuments(documents);
         verify(coveoAbstractStreamServiceUS, times(1)).pushDocument(any());
         verify(coveoAbstractStreamServiceFR, times(1)).pushDocument(any());
         verify(coveoAbstractStreamServiceDE, times(1)).pushDocument(any());
@@ -495,12 +498,8 @@ class CoveoProductStreamServiceStrategyTest {
         Currency currency = Currency.getInstance("USD");
         Map<String, Object> values = new HashMap<>();
 
-        try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
-            mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("code"), eq(documentFields), eq(locale), eq(currency)))
-                    .thenReturn("CODE123");
-            CoveoProductStreamServiceStrategy.addEcProductIdToValues(document, documentFields, locale, currency, values);
-            assertEquals("CODE123", values.get("ec_product_id"));
-        }
+        coveoProductStreamServiceStrategy.addEcProductIdToValues(document, documentFields, locale, currency, values);
+        assertEquals("CODE123", values.get("ec_product_id"));
     }
 
     @Test
@@ -513,12 +512,8 @@ class CoveoProductStreamServiceStrategyTest {
         Currency currency = Currency.getInstance("USD");
         Map<String, Object> values = new HashMap<>();
 
-        try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
-            mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("code"), eq(documentFields), eq(locale), eq(currency)))
-                    .thenReturn("");
-            CoveoProductStreamServiceStrategy.addEcProductIdToValues(document, documentFields, locale, currency, values);
-            assertFalse(values.containsKey("ec_product_id"));
-        }
+        coveoProductStreamServiceStrategy.addEcProductIdToValues(document, documentFields, locale, currency, values);
+        assertFalse(values.containsKey("ec_product_id"));
     }
 
     @Test
@@ -530,11 +525,62 @@ class CoveoProductStreamServiceStrategyTest {
         Currency currency = Currency.getInstance("USD");
         Map<String, Object> values = new HashMap<>();
 
-        try (MockedStatic<CoveoFieldValueResolverUtils> mockedStatic = mockStatic(CoveoFieldValueResolverUtils.class)) {
-            mockedStatic.when(() -> CoveoFieldValueResolverUtils.resolveFieldValue(eq("code"), eq(documentFields), eq(locale), eq(currency)))
-                    .thenReturn(null);
-            CoveoProductStreamServiceStrategy.addEcProductIdToValues(document, documentFields, locale, currency, values);
-            assertFalse(values.containsKey("ec_product_id"));
-        }
+        coveoProductStreamServiceStrategy.addEcProductIdToValues(document, documentFields, locale, currency, values);
+        assertFalse(values.containsKey("ec_product_id"));
+    }
+
+    @Test
+    void constructor_WhenMultiSourceProductSourceHasNoQualifiers_ThrowsSnRuntimeException() {
+        CoveoAbstractStreamService<Object> invalidStreamService = mock(CoveoAbstractStreamService.class);
+        CoveoSource coveoSourceInvalid = mock(CoveoSource.class);
+        when(invalidStreamService.getCoveoSource()).thenReturn(coveoSourceInvalid);
+        when(coveoSourceInvalid.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
+        when(coveoSourceInvalid.getId()).thenReturn("invalidSource");
+
+        SnRuntimeException exception = assertThrows(
+                SnRuntimeException.class,
+                () -> new CoveoProductStreamServiceStrategy<>(
+                        Collections.singletonList(snLanguageEn),
+                        Collections.singletonList(snCurrencyUsd),
+                        Collections.singletonList(coveoSnCountryUs),
+                        Collections.singletonList(invalidStreamService),
+                        configurationService,
+                        commonI18NService,
+                        Boolean.FALSE
+                )
+        );
+
+        assertEquals(
+                "The following sources are not configured for the job: [invalidSource]",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    void constructor_WhenSingleSourceMultiMarketProductSourceHasQualifiers_ThrowsSnRuntimeException() {
+        CoveoAbstractStreamService<Object> invalidStreamService = mock(CoveoAbstractStreamService.class);
+        CoveoSource coveoSourceInvalid = mock(CoveoSource.class);
+        when(invalidStreamService.getCoveoSource()).thenReturn(coveoSourceInvalid);
+        when(coveoSourceInvalid.getObjectType()).thenReturn(CoveoCatalogObjectType.PRODUCTANDVARIANT);
+        when(coveoSourceInvalid.getId()).thenReturn("invalidSource");
+        when(coveoSourceInvalid.getLanguage()).thenReturn(snLanguageEn);
+
+        SnRuntimeException exception = assertThrows(
+                SnRuntimeException.class,
+                () -> new CoveoProductStreamServiceStrategy<>(
+                        Collections.emptyList(),
+                        Collections.emptyList(),
+                        Collections.emptyList(),
+                        Collections.singletonList(invalidStreamService),
+                        configurationService,
+                        commonI18NService,
+                        Boolean.TRUE
+                )
+        );
+
+        assertEquals(
+                "The following sources are not configured for the job: [invalidSource]",
+                exception.getMessage()
+        );
     }
 }

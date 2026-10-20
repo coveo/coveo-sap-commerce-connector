@@ -3,7 +3,7 @@
  Copyright (c) 2021 SAP SE or an SAP affiliate company. All rights reserved.
 -->
 
-<items 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<items 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:noNamespaceSchemaLocation="items.xsd">
 
 	<enumtypes>
@@ -79,6 +79,17 @@
 
 		<itemtype code="CoveoSearchSnSearchProviderConfiguration" extends="AbstractSnSearchProviderConfiguration"
 				  autocreate="true" generate="true">
+			<attributes>
+				<attribute qualifier="isSingleSourceMultiMarket" type="boolean">
+					<persistence type="property" />
+					<modifiers optional="true" />
+					<defaultvalue>java.lang.Boolean.FALSE</defaultvalue>
+                    <description>Indicates if the indexer configuration is set up for single source multi market mode.
+                        If true, the indexer will push documents to a single source for all markets. If false, the
+                        indexer will push documents to a source per market.
+                    </description>
+                </attribute>
+			</attributes>
 		</itemtype>
 
 		<itemtype code="Product" autocreate="false" generate="false">

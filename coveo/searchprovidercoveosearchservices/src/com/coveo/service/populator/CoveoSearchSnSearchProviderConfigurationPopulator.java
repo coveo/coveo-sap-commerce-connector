@@ -23,6 +23,7 @@ public class CoveoSearchSnSearchProviderConfigurationPopulator
 			final CoveoSearchSnSearchProviderConfiguration target)
 	{
 		target.setSources(sourceConverter.convertAll(source.getCoveoSource()));
+		target.setIsSingleSourceMultiMarket(source.isIsSingleSourceMultiMarket());
 	}
 
 	@Autowired

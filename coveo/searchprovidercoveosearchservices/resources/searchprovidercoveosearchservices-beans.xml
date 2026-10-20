@@ -33,6 +33,7 @@
     <bean class="com.coveo.searchservices.data.CoveoSearchSnSearchProviderConfiguration"
           extends="de.hybris.platform.searchservices.spi.data.AbstractSnSearchProviderConfiguration">
         <property name="sources" type="java.util.List&lt;com.coveo.searchservices.data.CoveoSource&gt;" />
+        <property name="isSingleSourceMultiMarket" type="boolean"/>
     </bean>
 
     <bean class="com.coveo.searchservices.admin.data.CoveoSnIndexConfiguration"

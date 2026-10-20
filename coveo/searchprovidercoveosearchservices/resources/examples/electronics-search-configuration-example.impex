@@ -33,8 +33,8 @@ INSERT_UPDATE CoveoSource; &sourceId; id[unique = true]               ; name[uni
                          ; source5  ; electronics-ja-JPY-JP-source    ; Electronics Japanese Yen Japan Source ; ja               ; JPY              ; JP              ; PRODUCTANDVARIANT ; electronics-ja-JPY-JP-dest
 
 # Create the configuration for the indexes you wish to push
-INSERT_UPDATE CoveoSearchSnSearchProviderConfiguration; id[unique = true]                 ; name                                ; coveoSource(&sourceId)
-                                                      ; $coveoSearchProviderConfiguration ; Coveo Search Provider Configuration ; source1,source2,source3,source4,source5
+INSERT_UPDATE CoveoSearchSnSearchProviderConfiguration; id[unique = true]                 ; name                                ; coveoSource(&sourceId)                  ; isSingleSourceMultiMarket
+                                                      ; $coveoSearchProviderConfiguration ; Coveo Search Provider Configuration ; source1,source2,source3,source4,source5 ; false
 
 INSERT_UPDATE CoveoSnIndexConfiguration; id[unique = true]        ; name              ; user(uid) ; languages(isocode); currencies(isocode); countries(isocode); searchProviderConfiguration(id)
                                        ; $coveoIndexConfiguration ; Coveo Electronics ; anonymous ; ja,en,de,zh       ; JPY,USD            ; JP,US             ; $coveoSearchProviderConfiguration
@@ -43,8 +43,8 @@ INSERT_UPDATE CoveoSnIndexConfiguration; id[unique = true]        ; name        
 INSERT_UPDATE SnRetryConfiguration; id[unique = true]         ; maxAttempts; timeout; initialDelay; interval; maxInterval; multiplier
                                   ; coveo-retry-configuration ; 5          ; 30000  ; 500         ; 1000    ; 600000     ; 2
 
-INSERT_UPDATE SnIndexerConfiguration; &indexerConfig            ; id[unique = true]         ; name                                    ; concurrency; batchSize ; retryConfiguration(id)
-                                    ; coveoIndexerConfiguration ; coveoIndexerConfiguration ; Coveo Electronics Indexer Configuration ; 5          ; 10 ; coveo-retry-configuration
+INSERT_UPDATE SnIndexerConfiguration; &indexerConfig            ; id[unique = true]         ; name                                    ; concurrency; batchSize; retryConfiguration(id)
+                                    ; coveoIndexerConfiguration ; coveoIndexerConfiguration ; Coveo Electronics Indexer Configuration ; 5          ; 10       ; coveo-retry-configuration
 
 INSERT_UPDATE SnIndexType; indexConfiguration(id)   ; id[unique = true]           ; name                          ; itemComposedType(code); identityProvider   ; listeners                            ; catalogs(id)              ; stores(uid) ; indexerConfiguration(&indexerConfig)
                          ; $coveoIndexConfiguration ; $coveoProductIndexType      ; CoveoElectronics Product      ; Product               ; snIdentityProvider ; catalogVersionFilterSnSearchListener ; electronicsProductCatalog ; electronics ; coveoIndexerConfiguration

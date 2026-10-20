@@ -44,8 +44,6 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
 
     private final List<SnIndexerOperation> snIndexerOperations = new CopyOnWriteArrayList<>();
 
-    private Boolean singleSourceEnabled;
-
     private ConfigurationService configurationService;
 
     @Override
@@ -119,7 +117,6 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
             LOG.trace("Index ID: " + indexerOperation.getIndexId());
             LOG.trace("Index Type ID: " + indexerOperation.getIndexTypeId());
         }
-        singleSourceEnabled = Optional.ofNullable((Boolean) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_SINGLE_SOURCE_ENABLED_KEY)).orElse(false);
         snIndexerOperations.add(indexerOperation);
         return indexerOperation;
     }
@@ -187,7 +184,7 @@ public class CoveoSearchSnSearchProvider extends AbstractSnSearchProvider<CoveoS
             LOG.debug("Have indexerOperationId " + indexerOperationId);
         }
         CoveoStreamServiceStrategy streamServiceStrategy = streamServiceStrategyMap.get(indexerOperationId);
-        List<SnDocumentBatchOperationResponse> responses = streamServiceStrategy.pushDocuments(requests, singleSourceEnabled);
+        List<SnDocumentBatchOperationResponse> responses = streamServiceStrategy.pushDocuments(requests);
         SnDocumentBatchResponse documentBatchResponse = new SnDocumentBatchResponse();
         documentBatchResponse.setResponses(responses);
 
