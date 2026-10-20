@@ -17,15 +17,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @UnitTest
-public class CoveoSearchSnSearchProviderConfigurationPopulatorTest {
+class CoveoSearchSnSearchProviderConfigurationPopulatorTest {
 
     @Mock
     Converter<CoveoSourceModel, CoveoSource> sourceConverter;
+
+    @Mock
+    CoveoSearchSnSearchProviderConfigurationModel sourceModel;
 
     @InjectMocks
     CoveoSearchSnSearchProviderConfigurationPopulator populator = new CoveoSearchSnSearchProviderConfigurationPopulator();
@@ -40,8 +45,17 @@ public class CoveoSearchSnSearchProviderConfigurationPopulatorTest {
 
     @Test
     void testPopulate() {
+        when(sourceModel.isIsSingleSourceMultiMarket()).thenReturn(true);
+        CoveoSearchSnSearchProviderConfiguration target = new CoveoSearchSnSearchProviderConfiguration();
+        populator.populate(sourceModel, target);
+        assertEquals(2, target.getSources().size());
+        assertTrue(target.isIsSingleSourceMultiMarket());
+    }
+    @Test
+    void testPopulate_whenSingleSourceFlagNull_TargetFlagIsFalse() {
         CoveoSearchSnSearchProviderConfiguration target = new CoveoSearchSnSearchProviderConfiguration();
         populator.populate(new CoveoSearchSnSearchProviderConfigurationModel(), target);
         assertEquals(2, target.getSources().size());
+        assertFalse(target.isIsSingleSourceMultiMarket());
     }
 }
