@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface CoveoStreamServiceStrategy {
 
-    List<SnDocumentBatchOperationResponse> pushDocuments(List<SnDocumentBatchOperationRequest> documents, Boolean singleSourceEnabled);
+    List<SnDocumentBatchOperationResponse> pushDocuments(List<SnDocumentBatchOperationRequest> documents);
 
     void closeServices() throws NoOpenStreamException, IOException, InterruptedException, NoOpenFileContainerException;
 }

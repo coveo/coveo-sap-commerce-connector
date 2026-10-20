@@ -75,7 +75,6 @@ class CoveoSnIndexerContextFactoryTest {
         context.setIndexConfiguration(indexConfiguration);
         indexType = new SnIndexType();
         context.setIndexType(indexType);
-        coveoSnIndexerContextFactory.setSingleSourceEnabled(Boolean.TRUE);
     }
 
     private static CoveoSearchSnSearchProviderConfiguration getCoveoSearchSnSearchProviderConfiguration() {
@@ -104,17 +103,18 @@ class CoveoSnIndexerContextFactoryTest {
     @Test
     void testPopulateIndexerContextForProduct() {
         context.getIndexType().setItemComposedType(PRODUCT_COMPOSED_TYPE);
+        ((CoveoSearchSnSearchProviderConfiguration) context.getIndexConfiguration().getSearchProviderConfiguration()).setIsSingleSourceMultiMarket(true);
         coveoSnIndexerContextFactory.populateIndexerContext(context, mock(SnIndexerRequest.class));
         CoveoProductStreamServiceStrategy<CoveoUpdateStreamService> updateStreamService = (CoveoProductStreamServiceStrategy<CoveoUpdateStreamService>) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_UPDATE_STREAM_SERVICES_KEY);
         CoveoProductStreamServiceStrategy<CoveoRebuildStreamService> rebuildStreamService = (CoveoProductStreamServiceStrategy<CoveoRebuildStreamService>) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_REBUILD_STREAM_SERVICES_KEY);
         CoveoAvailabilityStreamServiceStrategy<CoveoRebuildStreamService> availabilityStreamServiceStrategy = (CoveoAvailabilityStreamServiceStrategy<CoveoRebuildStreamService>) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_REBUILD_STREAM_SERVICES_KEY);
         CoveoAvailabilityStreamServiceStrategy<CoveoUpdateStreamService> availabilityUpdateStreamServiceStrategy = (CoveoAvailabilityStreamServiceStrategy<CoveoUpdateStreamService>) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_UPDATE_STREAM_SERVICES_KEY);
-        Boolean singleSourceEnabled = (Boolean) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_SINGLE_SOURCE_ENABLED_KEY);
         assertNotNull(updateStreamService);
         assertNotNull(rebuildStreamService);
         assertNull(availabilityStreamServiceStrategy);
         assertNull(availabilityUpdateStreamServiceStrategy);
-        assertTrue(singleSourceEnabled);
+        assertTrue(updateStreamService.isSingleSourceMultiMarketEnabled());
+        assertTrue(rebuildStreamService.isSingleSourceMultiMarketEnabled());
     }
 
     @Test
@@ -125,20 +125,19 @@ class CoveoSnIndexerContextFactoryTest {
         CoveoProductStreamServiceStrategy<CoveoRebuildStreamService> rebuildStreamService = (CoveoProductStreamServiceStrategy<CoveoRebuildStreamService>) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_REBUILD_STREAM_SERVICES_KEY);
         CoveoAvailabilityStreamServiceStrategy<CoveoRebuildStreamService> availabilityStreamServiceStrategy = (CoveoAvailabilityStreamServiceStrategy<CoveoRebuildStreamService>) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_REBUILD_STREAM_SERVICES_KEY);
         CoveoAvailabilityStreamServiceStrategy<CoveoUpdateStreamService> availabilityUpdateStreamServiceStrategy = (CoveoAvailabilityStreamServiceStrategy<CoveoUpdateStreamService>) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_AVAILABILITY_UPDATE_STREAM_SERVICES_KEY);
-        Boolean singleSourceEnabled = (Boolean) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_SINGLE_SOURCE_ENABLED_KEY);
         assertNull(updateStreamService);
         assertNull(rebuildStreamService);
         assertNotNull(availabilityStreamServiceStrategy);
         assertNotNull(availabilityUpdateStreamServiceStrategy);
-        assertTrue(singleSourceEnabled);
     }
 
     @Test
     void testSingleSourceEnabledDefaultsAsFalse() {
-        coveoSnIndexerContextFactory.setSingleSourceEnabled(null);
-        context.getIndexType().setItemComposedType(WAREHOUSE_COMPOSED_TYPE);
+        context.getIndexType().setItemComposedType(PRODUCT_COMPOSED_TYPE);
         coveoSnIndexerContextFactory.populateIndexerContext(context, mock(SnIndexerRequest.class));
-        Boolean singleSourceEnabled = (Boolean) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_SINGLE_SOURCE_ENABLED_KEY);
-        assertFalse(singleSourceEnabled);
+        CoveoProductStreamServiceStrategy<CoveoUpdateStreamService> updateStreamService = (CoveoProductStreamServiceStrategy<CoveoUpdateStreamService>) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_UPDATE_STREAM_SERVICES_KEY);
+        CoveoProductStreamServiceStrategy<CoveoRebuildStreamService> rebuildStreamService = (CoveoProductStreamServiceStrategy<CoveoRebuildStreamService>) context.getAttributes().get(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_REBUILD_STREAM_SERVICES_KEY);
+        assertFalse(updateStreamService.isSingleSourceMultiMarketEnabled());
+        assertFalse(rebuildStreamService.isSingleSourceMultiMarketEnabled());
     }
 }

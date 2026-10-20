@@ -36,7 +36,6 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
 
     private ConfigurationService configurationService;
     private CommonI18NService commonI18NService;
-    private Boolean singleSourceEnabled;
 
     @Override
     protected void populateIndexerContext(final DefaultSnIndexerContext context, final SnIndexerRequest indexerRequest) {
@@ -83,13 +82,11 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
 
             context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_REBUILD_STREAM_SERVICES_KEY,
                     new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, rebuildStreamServices,
-                                                            configurationService, commonI18NService, singleSourceEnabled));
+                                                            configurationService, commonI18NService, coveoSearchProviderConfiguration.isIsSingleSourceMultiMarket()));
             context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_PRODUCT_UPDATE_STREAM_SERVICES_KEY,
                     new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, updateStreamServices,
-                                                            configurationService, commonI18NService, singleSourceEnabled));
+                                                            configurationService, commonI18NService, coveoSearchProviderConfiguration.isIsSingleSourceMultiMarket()));
         }
-        context.getAttributes().put(SearchprovidercoveosearchservicesConstants.COVEO_SINGLE_SOURCE_ENABLED_KEY,
-                                    Objects.requireNonNullElse(singleSourceEnabled, Boolean.FALSE));
     }
 
     private List<SnLanguage> getLanguages(SnContext context) {
@@ -122,9 +119,5 @@ public class CoveoSnIndexerContextFactory extends DefaultSnIndexerContextFactory
 
     public void setCommonI18NService(CommonI18NService commonI18NService) {
         this.commonI18NService = commonI18NService;
-    }
-
-    public void setSingleSourceEnabled(Boolean singleSourceEnabled)  {
-        this.singleSourceEnabled = singleSourceEnabled;
     }
 }

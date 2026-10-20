@@ -106,7 +106,7 @@ class CoveoProductStreamServiceStrategySingleSourceTest {
 
         streamServices.add(firstAbstractStreamService);
 
-        coveoProductStreamServiceStrategy = new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, streamServices, configurationService, commonI18NService, Boolean.FALSE);
+        coveoProductStreamServiceStrategy = new CoveoProductStreamServiceStrategy<>(languages, currencies, countries, streamServices, configurationService, commonI18NService, Boolean.TRUE);
     }
 
     @Test
@@ -154,7 +154,7 @@ class CoveoProductStreamServiceStrategySingleSourceTest {
         documents.add(documentB);
         documents.add(documentC);
 
-        List<SnDocumentBatchOperationResponse> responses = coveoProductStreamServiceStrategy.pushDocuments(documents, Boolean.TRUE);
+        List<SnDocumentBatchOperationResponse> responses = coveoProductStreamServiceStrategy.pushDocuments(documents);
         assertEquals(documents.size(), responses.size());
         verify(firstAbstractStreamService, atLeastOnce()).pushDocument(captor.capture());
         List<DocumentBuilder> allPushedDocs = captor.getAllValues();

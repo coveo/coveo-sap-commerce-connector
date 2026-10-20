@@ -14,6 +14,11 @@ Next to each version number, you can see if the version is required or recommend
 
 # Change log
 
+## v3.5.0 (2026-8-27) <sub>$${\color{green}recommended}$$</sub>
+
+- Added support for configuring both single-source and multi-source multi-market indexing on the same SAP Commerce instance
+- For existing installations, run the SAP Commerce update process as part of deployment, then set the new attribute on the relevant `CoveoSearchSnSearchProviderConfiguration` item. See the upgrade documentation for details.
+
 ## v3.4.11 (2026-8-27) <sub>$${\color{red}required}$$</sub>
 
 - Resolved an edge case where a rerun after manual abort could overlap with lingering threads from the previous job and corrupt index updates.

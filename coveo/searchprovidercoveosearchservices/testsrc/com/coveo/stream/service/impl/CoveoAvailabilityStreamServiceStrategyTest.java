@@ -126,7 +126,7 @@ class CoveoAvailabilityStreamServiceStrategyTest {
         documentB.setDocument(createDocumentFields("", "codeB"));
         documents.add(documentA);
         documents.add(documentB);
-        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
+        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents);
         verify(coveoAbstractStreamServiceUS, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceFR, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceDE, times(0)).pushDocument(any());
@@ -145,7 +145,7 @@ class CoveoAvailabilityStreamServiceStrategyTest {
         documentB.setDocument(createDocumentFields("nameB", ""));
         documents.add(documentA);
         documents.add(documentB);
-        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
+        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents);
         verify(coveoAbstractStreamServiceUS, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceFR, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceDE, times(0)).pushDocument(any());
@@ -165,7 +165,7 @@ class CoveoAvailabilityStreamServiceStrategyTest {
         documentB.setDocument(createDocumentFields("nameB", "codeB"));
         documents.add(documentA);
         documents.add(documentB);
-        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents, Boolean.FALSE);
+        coveoAvailabilityStreamServiceStrategy.pushDocuments(documents);
         verify(coveoAbstractStreamServiceUS, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceFR, times(0)).pushDocument(any());
         verify(coveoAbstractStreamServiceDE, times(0)).pushDocument(any());

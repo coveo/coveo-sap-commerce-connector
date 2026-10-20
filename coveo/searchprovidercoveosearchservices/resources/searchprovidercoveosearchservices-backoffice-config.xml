@@ -118,6 +118,7 @@
 		<editorArea:editorArea>
 			<editorArea:tab name="tab.configuration.snsearchproviderconfiguration.general">
 				<editorArea:section name="sec.configuration.snsearchproviderconfiguration.general.searchprovider">
+					<editorArea:attribute qualifier="isSingleSourceMultiMarket"/>
 					<editorArea:attribute qualifier="coveoSource"/>
 				</editorArea:section>
 			</editorArea:tab>

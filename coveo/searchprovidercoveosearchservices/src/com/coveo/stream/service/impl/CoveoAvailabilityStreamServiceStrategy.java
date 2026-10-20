@@ -51,7 +51,7 @@ public class CoveoAvailabilityStreamServiceStrategy<T extends CoveoStreamService
     }
 
     @Override
-    public List<SnDocumentBatchOperationResponse> pushDocuments(List<SnDocumentBatchOperationRequest> documents, Boolean singleSourceEnabled) {
+    public List<SnDocumentBatchOperationResponse> pushDocuments(List<SnDocumentBatchOperationRequest> documents) {
         List<SnDocumentBatchOperationResponse> responses = new ArrayList<>();
         int totalDocumentsCount = documents.size();
         int logIntervalPercentage = configurationService.getConfiguration().getInt(COVEO_PRODUCT_STREAM_LOG_INTERVAL_PERCENTAGE);
